@@ -8,14 +8,13 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [RouterOutlet, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'front-end';
-  
+
   // Inject service
-  private apiService = inject(TestService);
-  
+  private readonly apiService = inject(TestService);
+
   // Access service signals directly in template
   loading = this.apiService.loading;
   testResult = this.apiService.data;

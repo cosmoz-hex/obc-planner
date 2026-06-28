@@ -12,7 +12,7 @@
     </button>
 
     <div *ngIf="testResult()" style="margin-top: 15px; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
-      <strong>Succès :</strong> {{ testResult() }}
+      <strong>Succès :</strong> {{ testResult()?.attr }}
     </div>
 
     <div *ngIf="error()" style="margin-top: 15px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
