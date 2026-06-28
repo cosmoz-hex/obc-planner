@@ -1,0 +1,16 @@
+package com.example.backend.services.apis;
+
+import java.util.Map;
+
+public interface JWTService {
+
+    String createToken(String username);
+
+    String createToken(String username, Map<String, ?> params);
+
+    String getUsername(String token);
+
+    Map<String, Object> getParams(String token);
+
+    boolean isValid(String token);
+}

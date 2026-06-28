@@ -70,28 +70,21 @@ obc-planner/
 
 Avant de commencer, assurez-vous d'avoir installé les outils suivants :
 
-### 1. **Java Development Kit (JDK) 25**
-- [Télécharger Java 25](https://www.oracle.com/java/technologies/downloads/#jdk25-windows)
-- Vérifier l'installation :
-  ```bash
-  java -version
-  ```
-
-### 2. **Node.js 24.18.0 **
+### 1. **Node.js 24.18.0 **
 - [Télécharger Node.js](https://nodejs.org/dist/v24.18.0/node-v24.18.0-x64.msi)
 - Vérifier l'installation :
   ```bash
   node --version
   ```
 
-### 3. **npm 11.17.0**
+### 2. **npm 11.17.0**
 - Installation :
   ```bash
   npm install -g npm@11.17.0
   npm --version
   ```
 
-### 4. **PostgreSQL 18**
+### 3. **PostgreSQL 18**
 - [Télécharger PostgreSQL](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
 - Après l'installation de PostgreSQL, il est probablement nécessaire d'ajouter le chemin vers `psql` dans la variable d'environnement PATH (ex : C:\Program Files\PostgreSQL\18\bin).
 - Créer une base de données :
@@ -100,7 +93,7 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants :
   CREATE DATABASE obc_planner;
   ```
 
-### 5. **IntelliJ IDEA** (Community ou Ultimate)
+### 4. **IntelliJ IDEA** (Community ou Ultimate)
 - [Télécharger IntelliJ IDEA](https://www.jetbrains.com/fr/idea/)
 - Extensions recommandées :
   - **Lombok**
@@ -109,14 +102,14 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants :
   - **Snyk**
   - **Github Copilot**
 
-### 6. **Git**
+### 5. **Git**
 - [Télécharger Git](https://git-scm.com/install/windows)
 - Vérifier l'installation :
   ```bash
   git --version
   ```
 
-### 7. **Postman**
+### 6. **Postman**
 - [Télécharger Postman](https://www.postman.com/downloads/)
 
 ---
@@ -157,6 +150,12 @@ DB_PORT=5432
 DB_NAME=obc_planner
 DB_USERNAME=postgres
 DB_PASSWORD=root
+
+## SECURITY CONFIGURATION
+ENABLE_AUTH=true
+JWT_SECRET=...
+JWT_ISSUER=...
+JWT_EXPIRE=...
 ```
 
 #### 3. Installer les dépendances Maven

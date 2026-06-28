@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### SPRING ###
-/src/main/resources/secure-application.properties
+src/main/resources/secure-application.properties
 /src/main/resources/datas/
