@@ -6,19 +6,24 @@
     
     <button 
       (click)="callTestApi()" 
-      [disabled]="loading"
+      [disabled]="loading()"
       style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-      {{ loading ? 'Chargement...' : 'Appeler l\'API' }}
+      {{ loading() ? 'Chargement...' : 'Appeler l\'API' }}
     </button>
 
-    <div *ngIf="testResult" style="margin-top: 15px; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
-      <strong>Succès :</strong> {{ testResult }}
+    <div *ngIf="testResult()" style="margin-top: 15px; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+      <strong>Succès :</strong> {{ testResult() }}
     </div>
 
-    <div *ngIf="error" style="margin-top: 15px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
-      <strong>Erreur :</strong> {{ error }}
+    <div *ngIf="error()" style="margin-top: 15px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+      <strong>Erreur :</strong> {{ error() }}
+    </div>
+
+    <div *ngIf="isReady()" style="margin-top: 15px; padding: 10px; background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; color: #004085;">
+      ✓ API prête et données chargées
     </div>
   </section>
 
   <router-outlet></router-outlet>
 </div>
+

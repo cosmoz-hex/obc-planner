@@ -1,38 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TestService } from './services/test.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-root',
-    imports: [RouterOutlet, CommonModule],
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.css'
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, CommonModule],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'front-end';
-  testResult: string | null = null;
-  loading = false;
-  error: string | null = null;
+  
+  // Inject service
+  private apiService = inject(TestService);
+  
+  // Access service signals directly in template
+  loading = this.apiService.loading;
+  testResult = this.apiService.data;
+  error = this.apiService.error;
+  isReady = this.apiService.isReady;
 
-  constructor(private apiService: TestService) {}
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.callTestApi();
   }
 
-  callTestApi() {
-    this.loading = true;
-    this.error = null;
-    this.apiService.test().subscribe({
-      next: (result) => {
-        this.testResult = result;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Erreur lors de l\'appel API: ' + err.message;
-        this.loading = false;
-      }
-    });
+  callTestApi(): void {
+    this.apiService.test();
   }
 }
