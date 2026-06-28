@@ -18,6 +18,8 @@
 - **Angular 20** - Framework TypeScript
 - **Node.js 24.18.0** - Runtime JavaScript
 - **npm 11.17.0** - Gestionnaire de paquets
+- **Tailwind CSS 4.3.1** - Framework CSS
+- **Web Components 3.9.0** - Composants web
 
 ---
 
@@ -75,22 +77,30 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants :
   java -version
   ```
 
-### 2. **Node.js 24.18.0 et npm 11.17.0**
+### 2. **Node.js 24.18.0 **
 - [Télécharger Node.js](https://nodejs.org/dist/v24.18.0/node-v24.18.0-x64.msi)
 - Vérifier l'installation :
   ```bash
   node --version
+  ```
+
+### 3. **npm 11.17.0**
+- Installation :
+  ```bash
+  npm install -g npm@11.17.0
   npm --version
   ```
 
-### 3. **PostgreSQL 18**
+### 4. **PostgreSQL 18**
 - [Télécharger PostgreSQL](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
+- Après l'installation de PostgreSQL, il est probablement nécessaire d'ajouter le chemin vers `psql` dans la variable d'environnement PATH (ex : C:\Program Files\PostgreSQL\18\bin).
 - Créer une base de données :
   ```sql
+  psql -U postgres localhost
   CREATE DATABASE obc_planner;
   ```
 
-### 4. **IntelliJ IDEA** (Community ou Ultimate)
+### 5. **IntelliJ IDEA** (Community ou Ultimate)
 - [Télécharger IntelliJ IDEA](https://www.jetbrains.com/fr/idea/)
 - Extensions recommandées :
   - **Lombok**
@@ -106,7 +116,7 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants :
   git --version
   ```
 
-### 7. **Postman** (optionnel, pour tester l'API)
+### 7. **Postman**
 - [Télécharger Postman](https://www.postman.com/downloads/)
 
 ---
@@ -126,17 +136,27 @@ cd obc-planner
 
 ```bash
 # Dans IntelliJ IDEA:
-File → Open → obc-planner/back-end
+File → Open → obc-planner
 ```
 
 #### 2. Configurer la base de données
 
-Éditer `back-end/src/main/resources/application.properties` :
+Créer un fichier `back-end/src/main/resources/secure-application.properties` :
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/obc_planner
-spring.datasource.username=postgres
-spring.datasource.password=YOUR_PASSWORD
+# DO NOT COMMIT THIS FILE
+# This file is used to store sensitive information such as passwords, API keys, etc.
+# This arguments is used in the application.properties file.
+
+## TOMCAT CONFIGURATION
+TOMCAT_PORT=8080
+
+## DATABASE CONFIGURATION
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=obc_planner
+DB_USERNAME=postgres
+DB_PASSWORD=root
 ```
 
 #### 3. Installer les dépendances Maven

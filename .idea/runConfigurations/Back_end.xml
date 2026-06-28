@@ -3,7 +3,9 @@
     <option name="ALTERNATIVE_JRE_PATH" value="ms-25" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <module name="back-end" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.config.import=optional:classpath:secure-application.properties" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.backend.BackEndApplication" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$/back-end" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

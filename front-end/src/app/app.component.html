@@ -1,41 +1,52 @@
-<div style="padding: 20px; font-family: Arial, sans-serif;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1>{{ 'title' | translate }}</h1>
-    <div>
-      <button 
-        (click)="setLanguage('en')" 
-        [style.font-weight]="currentLanguage() === 'en' ? 'bold' : 'normal'"
-        style="padding: 5px 10px; margin-right: 5px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
+<div class="p-6 font-sans">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ 'title' | translate }}</h1>
+    <div class="flex gap-2">
+      <wa-button
+        variant="text"
+        [attr.appearance]="currentLanguage() === 'en' ? 'filled' : 'outlined'"
+        (click)="setLanguage('en')">
         EN
-      </button>
-      <button 
-        (click)="setLanguage('fr')" 
-        [style.font-weight]="currentLanguage() === 'fr' ? 'bold' : 'normal'"
-        style="padding: 5px 10px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
+      </wa-button>
+      <wa-button
+        variant="text"
+        [attr.appearance]="currentLanguage() === 'fr' ? 'filled' : 'outlined'"
+        (click)="setLanguage('fr')">
         FR
-      </button>
+      </wa-button>
     </div>
   </div>
-  
-  <section style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 4px;">
-    <h2>Test API Backend</h2>
-    
-    <button 
-      (click)="callTestApi()" 
-      [disabled]="loading()"
-      style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-      {{ loading() ? ('api.loading' | translate) : ('api.test_button' | translate) }}
-    </button>
 
-    <div *ngIf="testResult()" style="margin-top: 15px; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
-      <strong>{{ 'api.success' | translate }}:</strong> {{ testResult()?.attr }}
+  <!-- Section Test API -->
+  <section class="mt-6 p-5 border border-gray-200 rounded-lg shadow-sm">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Test API Backend</h2>
+
+    <div class="flex gap-3 items-center">
+      <wa-button
+        variant="brand"
+        [attr.loading]="loading() || null"
+        [attr.disabled]="loading() || null"
+        (click)="callTestApi()">
+        {{ loading() ? ('api.loading' | translate) : ('api.test_button' | translate) }}
+      </wa-button>
     </div>
 
-    <div *ngIf="error()" style="margin-top: 15px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
-      <strong>{{ 'api.error' | translate }}:</strong> {{ error() }}
-    </div>
+    <!-- Succès -->
+    @if (testResult()) {
+      <wa-callout variant="success" class="mt-4 p-4">
+        <strong>{{ 'api.success' | translate }} :</strong> {{ testResult()?.attr }}
+      </wa-callout>
+    }
+
+    <!-- Erreur -->
+    @if (error()) {
+      <wa-callout variant="danger" class="mt-4 p-4">
+        <strong>{{ 'api.error' | translate }} :</strong> {{ error() }}
+      </wa-callout>
+    }
   </section>
 
   <router-outlet></router-outlet>
 </div>
-

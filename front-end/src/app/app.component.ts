@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TestService } from './services/test.service';
 import { CommonModule } from '@angular/common';
@@ -10,6 +10,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [RouterOutlet, CommonModule, TranslatePipe],
   templateUrl: './app.component.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppComponent implements OnInit {
   title = 'OBC Planner';
@@ -27,7 +28,7 @@ export class AppComponent implements OnInit {
     // Initialize translation service
     const browserLang = this.translate.getBrowserLang();
     const defaultLang = browserLang?.startsWith('fr') ? 'fr' : 'en';
-    
+
     this.setLanguage(defaultLang);
     this.callTestApi();
   }
@@ -40,17 +41,19 @@ export class AppComponent implements OnInit {
   callTestApi(): void {
     this.loading.set(true);
     this.error.set(null);
-    
-    this.apiService.test().subscribe({
-      next: (result) => {
-        this.testResult.set(result);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.error.set(this.translate.instant('api.api_call_error') + err.message);
-        this.loading.set(false);
-      }
-    });
+
+    setTimeout(() => {
+      this.apiService.test().subscribe({
+        next: (result) => {
+          this.testResult.set(result);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.error.set(this.translate.instant('api.api_call_error') + err.message);
+          this.loading.set(false);
+        }
+      });
+    }, 500)
   }
 }
 
