@@ -1,8 +1,10 @@
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
+import {ApplicationConfig} from '@angular/core';
+import {provideRouter} from '@angular/router';
+import {HttpClient, provideHttpClient, withXsrfConfiguration} from '@angular/common/http';
+import {provideTranslateService, TranslateLoader} from '@ngx-translate/core';
+import {CustomTranslateLoader} from './services/custom-translate.loader';
 
-import { routes } from './app.routes';
+import {routes} from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +14,17 @@ export const appConfig: ApplicationConfig = {
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
       })
-    )
+    ),
+    provideTranslateService({
+      loader: {
+        provide: TranslateLoader,
+        useClass: CustomTranslateLoader,
+        deps: [HttpClient]
+      }
+    })
   ]
 };
+
+
+
+

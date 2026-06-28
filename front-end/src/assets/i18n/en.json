@@ -1,0 +1,10 @@
+{
+  "title": "OBC Planner",
+  "api": {
+    "test_button": "Call API",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "api_call_error": "Error calling API: "
+  }
+}
