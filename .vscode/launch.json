@@ -20,8 +20,7 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
-                "start"
-            ],
+                "start" ],
             "cwd": "${workspaceFolder}/front-end",
             "console": "integratedTerminal"
         }
