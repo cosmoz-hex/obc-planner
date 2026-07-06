@@ -67,6 +67,9 @@
               "buildTarget": "front-end:build:development"
             }
           },
+          "options": {
+            "host": "0.0.0.0"
+          },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {

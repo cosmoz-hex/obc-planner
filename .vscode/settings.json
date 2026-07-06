@@ -1,0 +1,4 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.jdt.ls.java.home": "/usr/lib/jvm/java-1.25.0-openjdk-amd64"
+}

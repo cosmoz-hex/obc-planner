@@ -1,0 +1,1 @@
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.config.import=optional:classpath:secure-application.properties"

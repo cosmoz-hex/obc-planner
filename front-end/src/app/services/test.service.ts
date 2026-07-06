@@ -7,11 +7,10 @@ import { TestModel } from '../models/test.model';
   providedIn: 'root'
 })
 export class TestService {
-  private readonly apiUrl = 'http://localhost:8080/api';
   private readonly http = inject(HttpClient);
 
   test(): Observable<TestModel> {
-    return this.http.get<TestModel>(`${this.apiUrl}/test`);
+    return this.http.get<TestModel>('/api/test');
   }
 }
 

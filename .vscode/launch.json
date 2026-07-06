@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Back-end (Spring Boot)",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "com.example.backend.BackEndApplication",
+            "projectName": "back-end",
+            "cwd": "${workspaceFolder}/back-end",
+            "args": "--spring.config.import=optional:classpath:secure-application.properties",
+            // On force l'extension Java à utiliser le runtime Linux
+            "vmArgs": "",
+            "javaExec": "/usr/lib/jvm/java-1.25.0-openjdk-amd64/bin/java"
+        },
+        {
+            "name": "Front-end (Angular)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "start"
+            ],
+            "cwd": "${workspaceFolder}/front-end",
+            "console": "integratedTerminal"
+        }
+    ]
+}
