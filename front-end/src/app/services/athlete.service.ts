@@ -5,34 +5,32 @@ import { Athlete } from '../models/athlete.model';
   providedIn: 'root'
 })
 export class AthleteService {
-  // Signal privé contenant la liste des athlètes
-  private athletesSignal = signal<Athlete[]>([
-    { id: 1, nom: 'Dupont', prenom: 'Thomas', age: 24, sexe: 'Homme', poids: 83.5, categorie: '-85kg', niveau: 'NAT', derniereEvaluation: '15/03/2026' },
-    { id: 2, nom: 'Martin', prenom: 'Sophie', age: 21, sexe: 'Femme', poids: 55.0, categorie: '-57kg', niveau: 'REG', derniereEvaluation: '20/02/2026' }
+  // Añadimos 'readonly'
+  private readonly athletesSignal = signal<Athlete[]>([
+    // Cambiamos 75.0 por 75
+    { id: 1, nom: 'Dupont', prenom: 'Jean', age: 25, sexe: 'Homme', poids: 75, categorie: '77kg', niveau: 'Élite', derniereEvaluation: '10/05/2026' },
+    { id: 2, nom: 'Martin', prenom: 'Claire', age: 22, sexe: 'Femme', poids: 60.5, categorie: '63kg', niveau: 'National', derniereEvaluation: '12/05/2026' }
   ]);
 
-  // Signal en lecture seule accessible par les composants
-  athletes = this.athletesSignal.asReadonly();
+  // Exponemos la señal como de solo lectura hacia los componentes
+  readonly athletes = this.athletesSignal.asReadonly();
 
-  // Ajouter un athlète
-  addAthlete(athleteData: Omit<Athlete, 'id' | 'derniereEvaluation'>) {
-    const newAthlete: Athlete = {
-      ...athleteData,
-      id: Date.now(),
-      derniereEvaluation: 'Non évalué'
-    };
-    this.athletesSignal.update(list => [newAthlete, ...list]);
+  // Metodo para añadir
+  addAthlete(athleteData: Omit<Athlete, 'id'>) {
+    const newId = Date.now(); // Genera un ID único basado en timestamp
+    const newAthlete: Athlete = { ...athleteData, id: newId };
+    this.athletesSignal.update(list => [...list, newAthlete]);
   }
 
-  // Mettre à jour un athlète
+  // Metodo para actualizar
   updateAthlete(updatedAthlete: Athlete) {
     this.athletesSignal.update(list =>
-      list.map(ath => ath.id === updatedAthlete.id ? updatedAthlete : ath)
+      list.map(a => (a.id === updatedAthlete.id ? updatedAthlete : a))
     );
   }
 
-  // Supprimer un athlète
+  // Metodo para eliminar
   deleteAthlete(id: number) {
-    this.athletesSignal.update(list => list.filter(ath => ath.id !== id));
+    this.athletesSignal.update(list => list.filter(a => a.id !== id));
   }
 }

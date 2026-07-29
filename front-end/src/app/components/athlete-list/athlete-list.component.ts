@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Athlete } from '../../models/athlete.model';
@@ -12,74 +12,76 @@ import { AthleteService } from '../../services/athlete.service';
   styleUrl: './athlete-list.component.css'
 })
 export class AthleteListComponent {
-  private athleteService = inject(AthleteService);
+  // Inyección del servicio
+  private readonly athleteService = inject(AthleteService);
 
-  // Récupération du signal des athlètes depuis le service
+  // Obtenemos los atletas directamente del servicio
   athletes = this.athleteService.athletes;
 
-  // Filtres de recherche
-  searchTerm = signal<string>('');
-  selectedCategory = signal<string>('');
-  selectedLevel = signal<string>('');
+  // Estados de filtros y búsqueda
+  searchTerm = signal('');
+  selectedCategory = signal('');
+  selectedLevel = signal('');
 
-  // Options des catégories et niveaux
-  hommesCategories = ['-60kg', '-65kg', '-70kg', '-75kg', '-85kg', '-95kg', '-110kg'];
-  femmesCategories = ['-49kg', '-53kg', '-57kg', '-61kg', '-69kg', '-77kg', '-86kg'];
-  niveaux = ['DEB', 'DPT', 'REG', 'IRG', 'HON', 'NAT', 'EUR', 'MONDE'];
+  // Listas de referencia para selectores
+  hommesCategories = ['55kg', '61kg', '67kg', '73kg', '81kg', '89kg', '96kg', '102kg', '+102kg'];
+  femmesCategories = ['45kg', '49kg', '55kg', '59kg', '64kg', '71kg', '76kg', '81kg', '+81kg'];
+  niveaux = ['Débutant', 'Intermédiaire', 'National', 'Élite'];
 
-  // État de la modale
-  showModal = signal<boolean>(false);
-  isEditMode = signal<boolean>(false);
-  editingAthleteId = signal<number | null>(null);
+  // Estados de la Modale y Formulario
+  showModal = signal(false);
+  isEditMode = signal(false);
 
-  // Formulaire de l'athlète
-  athleteForm = signal<Partial<Athlete>>({
+  athleteForm = signal<Athlete>({
+    id: 0,
     nom: '',
     prenom: '',
     age: undefined,
     sexe: 'Homme',
     poids: undefined,
-    categorie: '-70kg',
-    niveau: 'DEB'
+    categorie: '73kg',
+    niveau: 'Débutant',
+    derniereEvaluation: ''
   });
 
-  // Liste filtrée dynamique
+  // Athlètes filtrés (computados reactivamente)
   filteredAthletes = computed(() => {
     const search = this.searchTerm().toLowerCase().trim();
     const cat = this.selectedCategory();
-    const niv = this.selectedLevel();
+    const lev = this.selectedLevel();
 
     return this.athletes().filter(athlete => {
-      const matchSearch = !search ||
+      const matchesSearch = search === '' ||
         athlete.nom.toLowerCase().includes(search) ||
         athlete.prenom.toLowerCase().includes(search);
 
-      const matchCategory = !cat || athlete.categorie === cat;
-      const matchNiveau = !niv || athlete.niveau === niv;
+      const matchesCat = cat === '' || athlete.categorie === cat;
+      const matchesLev = lev === '' || athlete.niveau === lev;
 
-      return matchSearch && matchCategory && matchNiveau;
+      return matchesSearch && matchesCat && matchesLev;
     });
   });
 
+  // Apertura de modales
   openAddModal() {
     this.isEditMode.set(false);
-    this.editingAthleteId.set(null);
     this.athleteForm.set({
+      id: 0,
       nom: '',
       prenom: '',
       age: undefined,
       sexe: 'Homme',
       poids: undefined,
-      categorie: '-70kg',
-      niveau: 'DEB'
+      categorie: this.hommesCategories[0],
+      niveau: this.niveaux[0],
+      derniereEvaluation: new Date().toLocaleDateString()
     });
     this.showModal.set(true);
   }
 
   openEditModal(athlete: Athlete) {
     this.isEditMode.set(true);
-    this.editingAthleteId.set(athlete.id);
-    this.athleteForm.set({ ...athlete });
+    this.athleteForm.set({ ...athlete }); // Copia para evitar mutación directa
     this.showModal.set(true);
   }
 
@@ -87,39 +89,22 @@ export class AthleteListComponent {
     this.showModal.set(false);
   }
 
+  // Guardar (Añadir o Editar) usando el servicio
   saveAthlete() {
-    const form = this.athleteForm();
-    if (!form.nom || !form.prenom) return;
+    const formValue = this.athleteForm();
+    if (!formValue.nom || !formValue.prenom) return; // Validación básica
 
-    if (this.isEditMode() && this.editingAthleteId() !== null) {
-      this.athleteService.updateAthlete({
-        id: this.editingAthleteId()!,
-        nom: form.nom,
-        prenom: form.prenom,
-        age: form.age,
-        sexe: form.sexe || 'Homme',
-        poids: form.poids,
-        categorie: form.categorie || '-70kg',
-        niveau: form.niveau || 'DEB',
-        derniereEvaluation: form.derniereEvaluation || 'Non évalué'
-      });
+    if (this.isEditMode()) {
+      this.athleteService.updateAthlete(formValue);
     } else {
-      this.athleteService.addAthlete({
-        nom: form.nom,
-        prenom: form.prenom,
-        age: form.age,
-        sexe: form.sexe || 'Homme',
-        poids: form.poids,
-        categorie: form.categorie || '-70kg',
-        niveau: form.niveau || 'DEB'
-      });
+      this.athleteService.addAthlete(formValue);
     }
-
     this.closeModal();
   }
 
+  // Eliminar usando el servicio
   deleteAthlete(id: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet athlète ?')) {
+    if (confirm('Voulez-vous vraiment supprimer cet athlète ?')) {
       this.athleteService.deleteAthlete(id);
     }
   }
