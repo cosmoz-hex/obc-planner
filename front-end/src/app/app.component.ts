@@ -1,16 +1,16 @@
-import { Component, OnInit, inject, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TestService } from './services/test.service';
-import { CommonModule } from '@angular/common';
 import { TestModel } from './models/test.model';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, TranslatePipe],
+  imports: [RouterOutlet ],
   templateUrl: './app.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+
 })
 export class AppComponent implements OnInit {
   title = 'OBC Planner';
