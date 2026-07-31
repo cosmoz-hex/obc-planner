@@ -3,9 +3,9 @@ export interface Athlete {
   nom: string;
   prenom: string;
   age?: number;
-  sexe?: string;
+  sexe?: 'Homme' | 'Femme';
   poids?: number;
-  categorie?: string;
-  niveau?: string;
+  categorie: string;
+  niveau: string;
   derniereEvaluation?: string;
 }

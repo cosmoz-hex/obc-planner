@@ -1,36 +1,62 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Athlete } from '../models/athlete.model';
+import { Observable, of, EMPTY } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AthleteService {
-  // Añadimos 'readonly'
-  private readonly athletesSignal = signal<Athlete[]>([
-    // Cambiamos 75.0 por 75
-    { id: 1, nom: 'Dupont', prenom: 'Jean', age: 25, sexe: 'Homme', poids: 75, categorie: '77kg', niveau: 'Élite', derniereEvaluation: '10/05/2026' },
-    { id: 2, nom: 'Martin', prenom: 'Claire', age: 22, sexe: 'Femme', poids: 60.5, categorie: '63kg', niveau: 'National', derniereEvaluation: '12/05/2026' }
-  ]);
 
-  // Exponemos la señal como de solo lectura hacia los componentes
-  readonly athletes = this.athletesSignal.asReadonly();
+  // Tableau privé simulant les données
+  private readonly athletes: Athlete[] = [
+    { id: 1, nom: 'Dupont', prenom: 'Thomas', age: 24, sexe: 'Homme', poids: 83.5, categorie: '-85kg', niveau: 'NAT', derniereEvaluation: '15/03/2026' },
+    { id: 2, nom: 'Martin', prenom: 'Sophie', age: 21, sexe: 'Femme', poids: 55, categorie: '-57kg', niveau: 'REG', derniereEvaluation: '20/02/2026' },
+  ];
 
-  // Metodo para añadir
-  addAthlete(athleteData: Omit<Athlete, 'id'>) {
-    const newId = Date.now(); // Genera un ID único basado en timestamp
-    const newAthlete: Athlete = { ...athleteData, id: newId };
-    this.athletesSignal.update(list => [...list, newAthlete]);
+  // Listes de référence privées
+  private readonly categoriesHommes = [
+    '60kg', '65kg', '70kg', '75kg', '85kg', '95kg', '110kg', '+110kg'
+  ];
+  private readonly categoriesFemmes = [
+    '49kg', '53kg', '57kg', '61kg', '69kg', '77kg', '86kg', '+86kg'
+  ];
+  private readonly niveauxList = [
+    'DEB', 'DPT', 'REG', 'IRG', 'HON', 'NAT', 'EUR', 'MONDE'
+  ];
+
+  // Retourne un Observable pour simuler une requête HTTP
+  getAthletes(): Observable<Athlete[]> {
+    return of(this.athletes);
   }
 
-  // Metodo para actualizar
-  updateAthlete(updatedAthlete: Athlete) {
-    this.athletesSignal.update(list =>
-      list.map(a => (a.id === updatedAthlete.id ? updatedAthlete : a))
-    );
+  // --- Méthodes pour récupérer les listes de référence ---
+  getHommesCategories(): string[] {
+    return this.categoriesHommes;
   }
 
-  // Metodo para eliminar
-  deleteAthlete(id: number) {
-    this.athletesSignal.update(list => list.filter(a => a.id !== id));
+  getFemmesCategories(): string[] {
+    return this.categoriesFemmes;
   }
+
+  getNiveaux(): string[] {
+    return this.niveauxList;
+  }
+
+  // --- Méthodes d'action ---
+
+  // Méthode pour ajouter (retourne un Observable vide en attendant le backend)
+  addAthlete(athleteData: Omit<Athlete, 'id'>): Observable<void> {
+    return EMPTY;
+  }
+
+  // Méthode pour mettre à jour
+  updateAthlete(updatedAthlete: Athlete): Observable<void> {
+    return EMPTY;
+  }
+
+  // Méthode pour supprimer
+  deleteAthlete(id: number): Observable<void> {
+    return EMPTY;
+  }
+
 }
