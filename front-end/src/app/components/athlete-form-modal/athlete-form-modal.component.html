@@ -1,0 +1,137 @@
+<wa-dialog
+  light-dismiss
+  [open]="open"
+  (wa-after-hide)="cancel.emit()"
+  [label]="(isEditMode ? 'form.edit_title' : 'form.add_title') | translate"
+>
+  <form [formGroup]="form" (ngSubmit)="save.emit()" class="flex flex-col gap-3 py-1">
+
+    <!-- Nom -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.name' | translate }} *
+      </label>
+      <input
+        type="text"
+        formControlName="nom"
+        [placeholder]="'form.name_placeholder' | translate"
+        class="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-400"
+      />
+    </div>
+
+    <!-- Prénom -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.firstname' | translate }} *
+      </label>
+      <input
+        type="text"
+        formControlName="prenom"
+        [placeholder]="'form.firstname_placeholder' | translate"
+        class="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-400"
+      />
+    </div>
+
+    <!-- Âge -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.age' | translate }}
+      </label>
+      <input
+        type="number"
+        formControlName="age"
+        [placeholder]="'form.age_placeholder' | translate"
+        class="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-400"
+      />
+    </div>
+
+    <!-- Sexe (Homme / Femme) -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.sex' | translate }}
+      </label>
+      <div class="flex items-center gap-6 py-1">
+        <label class="flex items-center gap-2 text-sm text-slate-200 cursor-pointer">
+          <input
+            type="radio"
+            value="Homme"
+            formControlName="sexe"
+            class="accent-cyan-400 w-4 h-4 cursor-pointer"
+          />
+          {{ 'form.man' | translate }}
+        </label>
+        <label class="flex items-center gap-2 text-sm text-slate-200 cursor-pointer">
+          <input
+            type="radio"
+            value="Femme"
+            formControlName="sexe"
+            class="accent-cyan-400 w-4 h-4 cursor-pointer"
+          />
+          {{ 'form.woman' | translate }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Poids -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.weight' | translate }}
+      </label>
+      <input
+        type="number"
+        step="0.1"
+        formControlName="poids"
+        [placeholder]="'form.weight_placeholder' | translate"
+        class="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-400"
+      />
+    </div>
+
+    <!-- Catégorie -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.category' | translate }}
+      </label>
+      <select
+        formControlName="categorie"
+        class="w-full bg-slate-900 border border-slate-700 text-white rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-400 cursor-pointer"
+      >
+        <optgroup [label]="'athletes.men' | translate">
+          @for (cat of hommesCategories; track cat) {
+          <option [value]="cat" class="bg-slate-900 text-white">{{ cat }}</option>
+          }
+        </optgroup>
+        <optgroup [label]="'athletes.women' | translate">
+          @for (cat of femmesCategories; track cat) {
+          <option [value]="cat" class="bg-slate-900 text-white">{{ cat }}</option>
+          }
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Niveau -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-slate-200">
+        {{ 'form.level' | translate }}
+      </label>
+      <select
+        formControlName="niveau"
+        class="w-full bg-slate-900 border border-slate-700 text-white rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-400 cursor-pointer"
+      >
+        @for (niv of niveaux; track niv) {
+        <option [value]="niv" class="bg-slate-900 text-white">{{ niv }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div slot="footer" class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+      <wa-button variant="neutral" type="button" (click)="cancel.emit()">
+        {{ 'form.cancel' | translate }}
+      </wa-button>
+      <wa-button variant="brand" type="submit" [disabled]="form.invalid">
+        {{ 'form.save' | translate }}
+      </wa-button>
+    </div>
+
+  </form>
+</wa-dialog>
