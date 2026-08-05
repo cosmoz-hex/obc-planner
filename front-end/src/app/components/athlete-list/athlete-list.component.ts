@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule,
@@ -9,11 +9,14 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Athlete } from '../../models/athlete.model';
 import { AthleteService } from '../../services/athlete.service';
+import { AthleteFormModalComponent } from '../athlete-form-modal/athlete-form-modal.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-athlete-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AthleteFormModalComponent, TranslatePipe],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './athlete-list.component.html',
   styleUrl: './athlete-list.component.css',
 })
@@ -52,9 +55,9 @@ export class AthleteListComponent {
     id: [0],
     nom: ['', Validators.required],
     prenom: ['', Validators.required],
-    age: [undefined as number | undefined, [Validators.min(10), Validators.max(100)]],
+    age: [undefined as number | undefined, [Validators.min(10), Validators.max(70)]],
     sexe: ['Homme' as 'Homme' | 'Femme'],
-    poids: [undefined as number | undefined, [Validators.min(20), Validators.max(300)]],
+    poids: [undefined as number | undefined, [Validators.min(20), Validators.max(150)]],
     categorie: ['73kg'],
     niveau: ['Débutant'],
     derniereEvaluation: [''],
@@ -125,7 +128,7 @@ export class AthleteListComponent {
     this.closeModal();
   }
 
-  // --- Suppression avec popup de confirmation ---
+  // --- Confirmation de suppression (popup) ---
   askDeleteConfirmation(id: number) {
     this.athleteToDeleteId.set(id);
   }

@@ -1,13 +1,10 @@
-<!-- ========================================== -->
-<!-- CORRECCIÓN 1: Utiliser les composants de Web Awesome, notamment le wa-page pour structurer l'écran -->
-<!-- ========================================== -->
 <wa-page class="min-h-screen bg-slate-950 text-slate-100 font-sans">
 
   <!-- Sidebar estructurada dentro del slot de navegación/sidebar de Web Awesome -->
   <aside slot="sidebar" class="w-64 bg-slate-950 border-r border-slate-800/80 flex flex-col justify-between shrink-0 h-full">
     <div>
       <!-- Header / Logo -->
-      <div class="flex items-center gap-3 px-5 py-5 border-b border-slate-800/80">
+      <div slot="navigation-header" class="flex items-center gap-3 px-5 py-5 border-b border-slate-800/80">
         <div class="w-9 h-9 rounded-lg bg-cyan-400 flex items-center justify-center font-bold text-slate-950 text-sm shadow-md shadow-cyan-500/20">
           OH
         </div>
@@ -18,7 +15,7 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="px-3 py-5 space-y-1">
+      <nav slot="navigation" class="px-3 py-5 space-y-1">
         <div class="text-slate-500 text-[11px] uppercase tracking-wider font-bold px-3 mb-3">Navigation</div>
 
         <a
@@ -26,9 +23,6 @@
           routerLinkActive="bg-slate-800/80 text-cyan-400 font-medium shadow-sm"
           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800/50 hover:text-slate-100 transition-colors no-underline block"
         >
-          <!-- ========================================== -->
-          <!-- CORRECCIÓN 2: Utiliser les icônes de Font Awesome plutôt -->
-          <!-- ========================================== -->
           <i class="fa-solid fa-user-group w-4 h-4 flex items-center justify-center"></i>
           <span>Athlètes</span>
         </a>
@@ -37,9 +31,6 @@
           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-500 cursor-not-allowed no-underline block opacity-60"
           title="Bientôt disponible"
         >
-          <!-- ========================================== -->
-          <!-- CORRECCIÓN 2: Utiliser les icônes de Font Awesome plutôt -->
-          <!-- ========================================== -->
           <i class="fa-solid fa-clipboard-list w-4 h-4 flex items-center justify-center"></i>
           <span>Formulaire d'Évaluation</span>
         </a>
@@ -47,7 +38,7 @@
     </div>
 
     <!-- Footer Sidebar -->
-    <div class="px-5 py-4 border-t border-slate-800/80 text-xs text-slate-500">
+    <div slot="navigation-footer" class="px-5 py-4 border-t border-slate-800/80 text-xs text-slate-500">
       <div class="flex items-center gap-2 mb-1">
         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
         Mode Local — Hors ligne
