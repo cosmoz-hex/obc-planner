@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { TestModel } from '../models/test.model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,9 +8,7 @@ import { TestModel } from '../models/test.model';
 export class TestService {
   private readonly http = inject(HttpClient);
 
-  test(): Observable<TestModel> {
-    return this.http.get<TestModel>('/api/test');
+  test(): Observable<any> {
+    return this.http.get<any>('/api/test');
   }
 }
-
-

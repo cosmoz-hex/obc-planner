@@ -1,14 +1,13 @@
 import { Component, OnInit, inject, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TestService } from './services/test.service';
-import { CommonModule } from '@angular/common';
-import { TestModel } from './models/test.model';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, TranslatePipe],
+  imports: [RouterOutlet, TranslatePipe],
   templateUrl: './app.component.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
@@ -20,7 +19,7 @@ export class AppComponent implements OnInit {
 
   // Component state management with Signals
   loading = signal(false);
-  testResult = signal<TestModel | null>(null);
+  testResult = signal<any | null>(null);
   error = signal<string | null>(null);
   currentLanguage = signal('en');
 
@@ -56,6 +55,3 @@ export class AppComponent implements OnInit {
     }, 500)
   }
 }
-
-
-

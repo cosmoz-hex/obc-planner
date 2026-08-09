@@ -1,10 +1,64 @@
 {
-  "title": "OBC Planner",
-  "api": {
-    "test_button": "Appeler l'API",
-    "loading": "Chargement...",
-    "success": "Succès",
-    "error": "Erreur",
-    "api_call_error": "Erreur lors de l'appel API: "
+  "athletes": {
+    "title": "OBC Haltéro",
+    "displayed_of": "athlètes affichés sur",
+    "registered": "athlètes inscrits",
+    "add_button": "Ajouter un athlète",
+    "search": "Rechercher",
+    "search_placeholder": "Nom ou prénom...",
+    "category": "Catégorie",
+    "all_categories": "Toutes les catégories",
+    "men": "Hommes",
+    "women": "Femmes",
+    "level": "Niveau",
+    "all_levels": "Tous les niveaux",
+    "reset_filters": "Réinitialiser les filtres",
+    "table": {
+      "athlete": "Athlète",
+      "age_sex": "Âge / Sexe",
+      "weight": "Poids actuel",
+      "category": "Catégorie",
+      "level": "Niveau",
+      "last_eval": "Dernière Évaluation",
+      "actions": "Actions"
+    },
+    "no_results": "Aucun résultat trouvé.",
+    "years": "ans",
+    "none": "Aucune",
+    "na": "N/A"
+  },
+  "form": {
+    "add_title": "Ajouter un athlète",
+    "edit_title": "Modifier un athlète",
+    "name": "Nom *",
+    "name_placeholder": "ex: Dupont",
+    "firstname": "Prénom *",
+    "firstname_placeholder": "ex: Thomas",
+    "age": "Âge",
+    "age_placeholder": "ex: 24",
+    "sex": "Sexe",
+    "man": "Homme",
+    "woman": "Femme",
+    "weight": "Poids (kg)",
+    "weight_placeholder": "ex: 83.5",
+    "category": "Catégorie",
+    "level": "Niveau",
+    "cancel": "Annuler",
+    "save": "Enregistrer"
+  },
+  "dialog": {
+    "confirm_title": "Confirmation",
+    "delete_message": "Êtes-vous sûr de vouloir supprimer cet athlète ?",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "sidebar": {
+    "title": "HaltéroCoach",
+    "subtitle": "Gestion Athlètes",
+    "nav_section": "NAVIGATION",
+    "athletes": "Athlètes",
+    "eval_form": "Formulaire d'Évaluation",
+    "tools_section": "OUTILS",
+    "stats": "Statistiques"
   }
 }
