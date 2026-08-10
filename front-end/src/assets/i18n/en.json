@@ -6,5 +6,10 @@
     "success": "Success",
     "error": "Error",
     "api_call_error": "Error calling API: "
+  },
+  "athlete": {
+    "actions": {
+      "add": "Add Athlete"
+    }
   }
 }
