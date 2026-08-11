@@ -85,7 +85,6 @@ inclusion: always
 - Utiliser les composants WebAwesome et FontAwesome pour les éléments UI ([documentation complète](node_modules/@awesome.me/webawesome/dist/skills/webawesome/SKILL.md))
 - Importer les composants nécessaires dans `main.ts` ou un fichier `webawesome.ts` dédié
 - Déclarer `CUSTOM_ELEMENTS_SCHEMA` dans chaque composant utilisant des balises `<wa-*>`
-- Combiner avec les classes Tailwind pour le layout et l'espacement
 - Utiliser Tailwind pour le layout et l'espacement
 
 ### Accessibilité
@@ -98,10 +97,20 @@ inclusion: always
 - Lors de la fermeture d'une modale ou d'un dropdown, remettre le focus sur l'élément qui a ouvert la modale
 - Dans le cadre d'un formulaire dynamique, ne jamais ajouter/supprimer des champs du formulaire s'ils se trouvent avant le champ actuellement focus — cela déplace le focus et perturbe l'utilisateur
 
-### Internationalisation
-- Toutes les chaînes visibles passent par `@ngx-translate` — aucun texte en dur dans les templates
-- Utiliser `translate` pipe dans les .html : `{{ 'key.code' | translate }}` et TranslationService dans les .ts : `this.translationService.instant('key.code')`
-- Fichiers de traduction dans `assets/i18n/{lang}.json` — un fichier par langue, ils doivent être synchronisés et complets
+### Internationalisation et formatage
+- Toutes les chaînes visibles passent par `@ngx-translate` — aucun texte en dur en français
+  - Dans les .html : `{{ 'key.code' | translate }}`
+  - Dans les .ts : `this.#translationService.instant('key.code')`
+- Fichiers de traduction dans `public/assets/i18n/{lang-LANG}.json` — un fichier par langue, ils doivent être synchronisés et complets
+- Pour le formatage des chaines, dates et nombres, utiliser les pipes Angular natifs : 
+  - Pour les nombres : `DecimalPipe` avec `this.#decimalPipe.transform(maValeur, format)` ou `{{ maValeur | number: format }}`
+  - Pour les pourcentages : `PercentPipe` avec `this.#percentPipe.transform(maValeur)` ou `{{ maValeur | percent }}`
+  - Pour les devises : `CurrencyPipe` avec `this.#currencyPipe.transform(maValeur, devise)` ou `{{ maValeur | currency: devise }}`
+  - Pour les dates : `DatePipe` avec `this.#datePipe.transform(maDate, format)` ou `{{ maDate | date: format }}`
+  - Pour le texte : 
+    - `TitleCasePipe` avec `this.#titleCasePipe.transform(monTexte)` ou `{{ monTexte | titlecase }}`
+    - `LowerCasePipe` avec `this.#lowerCasePipe.transform(monTexte)` ou `{{ monTexte | lowercase }}`
+    - `UpperCasePipe` avec `this.#upperCasePipe.transform(monTexte)` ou `{{ monTexte | uppercase }}`
 
 ---
 
@@ -144,7 +153,7 @@ inclusion: always
 - Une PR ou un commit = une feature ou un fix — pas de commits fourre-tout
 - Le message de commit doit respecter la convention suivante : 
 ```
-{type}({scope}): {title}
+{type}({scope}): {reference} - {title}
 
 {body}
 
