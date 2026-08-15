@@ -88,117 +88,130 @@ src/app/
 
 ## Base de données — PostgreSQL 17
 
-### Schéma
+### Schéma (Mermaid)
 
-#### `athletes`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id | VARCHAR(255) | NO | PK |
-| prenom | VARCHAR(255) | YES | |
-| nom | VARCHAR(255) | YES | |
-| sexe | VARCHAR(255) | YES | |
-| date_naissance | DATE | YES | |
+classDiagram
 
-#### `evaluations`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id | VARCHAR(255) | NO | PK |
-| id_athlete | VARCHAR(255) | YES | FK → athletes.id |
-| date_evaluation | DATE | YES | |
-| poids_kg | NUMERIC | YES | |
-| niveau | VARCHAR(255) | YES | |
+    ATHLETE <-- EVAL_SUMMARY
 
-#### `profils_force_vitesse`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id_evaluation | VARCHAR(255) | NO | PK, FK → evaluations.id |
-| detente_avec_elan_cm | NUMERIC | YES | |
-| detente_seche_cm | NUMERIC | YES | |
-| squat_30pct_mps | NUMERIC | YES | |
-| squat_50pct_mps | NUMERIC | YES | |
-| squat_70pct_mps | NUMERIC | YES | |
-| tirage_haut_80pct_mps | NUMERIC | YES | |
-| ratio_3rm_front_squat | NUMERIC | YES | |
-| ratio_3rm_back_squat | NUMERIC | YES | |
-| ratio_3rm_tirage_arrache | NUMERIC | YES | |
-| ratio_3rm_tirage_epj | NUMERIC | YES | |
-| grip_pct_bw | NUMERIC | YES | |
-| profil_resultat | VARCHAR(255) | YES | |
+    EVAL_SUMMARY <-- EVAL_DETAIL
+    EVAL_SUMMARY <-- REF_ARCHETYPE
+    EVAL_SUMMARY <-- PROG
 
-#### `profils_neuromusculaires`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id_evaluation | VARCHAR(255) | NO | PK, FK → evaluations.id |
-| type_protocole | INTEGER | YES | |
-| bpm_tension_au_repos | VARCHAR(255) | YES | |
-| bpm_tension_sous_fatigue | VARCHAR(255) | YES | |
-| duree_du_protocole | VARCHAR(255) | YES | |
-| duree_de_recuperation | VARCHAR(255) | YES | |
-| max_reps_squat_nuque_70pct | INTEGER | YES | |
-| max_reps_tirage_epaule_70pct | INTEGER | YES | |
-| pct_arrache_3reps | NUMERIC | YES | |
-| pct_arrache_2reps | NUMERIC | YES | |
-| pct_epj_3reps | NUMERIC | YES | |
-| pct_epj_2reps | NUMERIC | YES | |
-| gainage_planche_sec | INTEGER | YES | |
-| gainage_planche_50pct_bw_sec | INTEGER | YES | |
-| gainage_planche_100pct_bw_sec | INTEGER | YES | |
-| profil_resultat_cardio | VARCHAR(255) | YES | |
-| profil_resultat_musculaire | VARCHAR(255) | YES | |
+    PROG <-- PROG_WEEK
+    PROG_WEEK <-- PROG_TRAINING
 
-#### `profils_psychologiques`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id_evaluation | VARCHAR(255) | NO | PK, FK → evaluations.id |
-| score_gestion_emotionnelle | INTEGER | YES | |
-| score_confiance | INTEGER | YES | |
-| score_motivation | INTEGER | YES | |
-| score_concentration | INTEGER | YES | |
-| score_competition | INTEGER | YES | |
-| score_rapport_echec | INTEGER | YES | |
-| score_autonomie | INTEGER | YES | |
-| forces | VARCHAR(255) | YES | |
-| faiblesses | VARCHAR(255) | YES | |
+    EXERCICE <-- PROG_TRAINING
+    CORRECTION --> EXERCICE
 
-#### `profils_techniques`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id_evaluation | VARCHAR(255) | NO | PK, FK → evaluations.id |
-| taux_reussite_arrache | NUMERIC | YES | |
-| taux_reussite_epj | NUMERIC | YES | |
-| taux_reussite_1er_essai_arrache | NUMERIC | YES | |
-| taux_reussite_1er_essai_epj | NUMERIC | YES | |
-| points_forts | VARCHAR(255) | YES | |
-| points_faibles | VARCHAR(255) | YES | |
-| profil_resultat | VARCHAR(255) | YES | |
+    REF_TIMELINE <-- REF_PLANNING
 
-#### `catalogue_exercices`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id | INTEGER | NO | PK (auto-increment) |
-| type_mouvement | VARCHAR(255) | YES | |
-| categorie | VARCHAR(255) | YES | |
-| nom_exercice | VARCHAR(255) | YES | |
-| id_exercice_reference | INTEGER | YES | FK → catalogue_exercices.id |
-| pct_charge_theorique | NUMERIC | YES | |
-
-#### `exercices_correctifs`
-| Colonne | Type | Nullable | Contrainte |
-|---|---|---|---|
-| id_exercice | INTEGER | NO | PK, FK → catalogue_exercices.id |
-| id_exercice_correctif | INTEGER | NO | PK, FK → catalogue_exercices.id |
-
-### Index
-
-| Table | Index | Type | Colonnes |
-|---|---|---|---|
-| athletes | athletes_pkey | UNIQUE | id |
-| catalogue_exercices | catalogue_exercices_pkey | UNIQUE | id |
-| evaluations | evaluations_pkey | UNIQUE | id |
-| exercices_correctifs | exercices_correctifs_pkey | UNIQUE | id_exercice, id_exercice_correctif |
-| profils_force_vitesse | profils_force_vitesse_pkey | UNIQUE | id_evaluation |
-| profils_neuromusculaires | profils_neuromusculaires_pkey | UNIQUE | id_evaluation |
-| profils_psychologiques | profils_psychologiques_pkey | UNIQUE | id_evaluation |
-| profils_techniques | profils_techniques_pkey | UNIQUE | id_evaluation |
-
-> ⚠️ Seuls les index de clés primaires existent actuellement. Ajouter des index sur `evaluations.id_athlete` et les colonnes fréquemment filtrées lors de la montée en charge.
+    class ATHLETE {
+        # ATHLETE_ID
+        FIRST_NAME
+        LAST_NAME
+        SEXE
+        AGE_CATEGORIE
+        WEIGHT_CATEGORIE
+        COMP_LEVEL
+    }
+    class EVAL_SUMMARY {
+        # EVALUATION_ID
+        + ATHLETE_ID
+        EVALUATION_DATE
+        ARCHETYPE
+        STRENGTH_SPEED
+        TECHNIQUE
+        ENDURANCE
+        SQUAT
+        PULL
+        SNATCH_STRENTGH
+        SNATCH_WEAKNESS
+        CLEAN_STRENTGH
+        CLEAN_WEAKNESS
+        JERK_STRENTGH
+        JERK_WEAKNESS
+        PSYCHO_STRENTGH
+        PSYCHO_WEAKNESS
+    }
+    class EVAL_DETAIL {
+        # EVALUATION_DETAIL_ID
+        + EVALUATION_ID
+        EVAL_CATEGORIE
+        EXERCICE_CODE
+        REAL_VALUE
+        RESULT
+    }
+    class EXERCICE {
+        # EXERCICE_ID
+        + EXERCICE_REF
+        CATEGORIE_EXERCICE
+        TYPE_EXERCICE
+        EXERCICE_CODE
+        ESTIMATE_VALUE
+    }
+    class CORRECTION {
+        # EXERCICE_ID
+        # CORRECTION_ID
+    }
+    class PROG {
+        # PROGRAMME_ID
+        + EVALUATION_ID
+        WEEKS
+        FREQUENCY
+        DURATION
+        START_DATE
+        END_DATE
+        SNACHT_GOAL
+        CJ_GOAL
+    }
+    class PROG_WEEK {
+        # PROGRAMME_WEEK_ID
+        + PROGRAMME_ID
+        WEEK_NUMBER
+        START_DATE
+        END_DATE
+        WEEK_TYPE
+        BASE_PERCENT
+        SNACHT_GOAL
+        CJ_GOAL
+        BACK_SQUAT_GOAL
+        FRONT_SQUAT_GOAL
+        SNACHT_PULL_GOAL
+        CJ_PULL_GOAL
+    }
+    class PROG_TRAINING {
+        # PROGRAMME_TRAINING_ID
+        + PROGRAMME_WEEK_ID
+        EXERCICE_ORDER
+        EXERCICE_ID
+        SET_NUMBER
+        REP_NUMBER
+        MIN_WEIGHT
+        MAX_WEIGHT
+    }
+    class REF_ARCHETYPE {
+        # REF_ARCHETYPE_ID
+        ARCHETYPE
+        STRENGTH_SPEED
+        TECHNIQUE
+        ENDURANCE
+    }
+    class REF_TIMELINE {
+        # REF_TIMELINE
+        ARCHETYPE
+        WEEKS
+        TIMELINE
+    }
+    class REF_PLANNING {
+        # REF_PLANNING
+        + REF_TIMELINE
+        WEEK_TYPE
+        DAY_OF_WEEK
+        EXERCICE_ORDER
+        CATEGORIE_EXERCICE
+        TYPE_EXERCICE
+        STRENGH_WEAKNESS
+        SET_NUMBER
+        REP_NUMBER
+    }

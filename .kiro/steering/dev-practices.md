@@ -5,7 +5,7 @@ inclusion: always
 
 # Development Best Practices — OBC Planner
 
-- Mettre à jour le fichier `architecture.md` à chaque modification de l'architecture 
+- Mettre à jour le fichier `docs/architecture.md` à chaque modification de l'architecture 
     - mise à jour de libraries (cf pom.xml / package.json)
     - modification de la structure des packages backend ou frontend
     - modification de la structure des tables
@@ -86,9 +86,10 @@ inclusion: always
 - Importer les composants nécessaires dans `main.ts` ou un fichier `webawesome.ts` dédié
 - Déclarer `CUSTOM_ELEMENTS_SCHEMA` dans chaque composant utilisant des balises `<wa-*>`
 - Utiliser Tailwind pour le layout et l'espacement
+- Éviter d'utiliser `title` pour les tooltips et utiliser le composant `<wa-tooltip>` à la place
 
 ### Accessibilité
-- Toujours associer les labels aux champs de formulaire avec `for` + `id` ou `aria-label`
+- Toujours associer les labels aux champs de formulaire avec `for` + `id` ou `aria-label` ou `label`
 - Utiliser les balises et rôles ARIA appropriées
 - Respecter l'ordre du DOM pour la navigation au clavier
 - Utiliser des couleurs contrastées pour le texte et les éléments interactifs

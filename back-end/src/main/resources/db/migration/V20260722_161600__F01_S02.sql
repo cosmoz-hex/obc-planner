@@ -33,16 +33,16 @@ INSERT INTO "catalogue_exercices" ("id", "type_mouvement", "categorie", "nom_exe
 (24, 'JT', 'TECH', 'Jeté', 1, 56.00),
 
 -- Dérivés de l'Arraché (Dépendent d'Arraché - ID 2)
-(28, 'ARR', 'COMBINE', '1 Tirage Haut Arraché + 2 Arraché Bassin + 2 Chute Arraché', 2, 75.00),
-(29, 'ARR', 'COMBINE', '1 Arraché Debout + 2 Flexion Arraché + 1 Arraché Flexion', 2, 70.00),
+(28, 'ARR', 'COMBINE', '1 Tirage Haut Arraché + 2 Arraché Bassin + 2 Chute Arraché', 2, 80.00),
+(29, 'ARR', 'COMBINE', '1 Arraché Debout + 2 Flexion Arraché + 1 Arraché Flexion', 2, 80.00),
 (35, 'ARR', 'COMBINE', '3 x (1 Tirage Haut Arraché + 1 Arraché Debout Suspension)', 2, 75.00),
 (36, 'ARR', 'COMBINE', '2 Tirage Lourd Arraché + 2 Arraché Debout', 2, 80.00),
-(43, 'ARR', 'COMBINE', '3 x (1 Tirage Haut Arraché + 1 Arraché Suspension)', 2, 75.00),
-(44, 'ARR', 'COMBINE', '1 Arraché + 1 Arraché Suspension + 1 Arraché', 2, 80.00),
-(52, 'ARR', 'COMBINE', '2 x (1 Tirage Arraché + 1 Arraché Puissance + 1 Flexion)', 2, 75.00),
+(43, 'ARR', 'COMBINE', '3 x (1 Tirage Haut Arraché + 1 Arraché Suspension)', 2, 80.00),
+(44, 'ARR', 'COMBINE', '1 Arraché + 1 Arraché Suspension + 1 Arraché', 2, 85.00),
+(52, 'ARR', 'COMBINE', '2 x (1 Tirage Arraché + 1 Arraché Puissance + 1 Flexion)', 2, 85.00),
 (53, 'ARR', 'COMBINE', '1 Arraché Puissance Bassin + 1 Arraché Puissance Suspension + 1 Arraché Puissance', 2, 75.00),
 (58, 'ARR', 'COMBINE', '3 x (1 Arraché Force + 1 Chute Arraché avec élan)', 2, 60.00),
-(65, 'ARR', 'COMBINE', '2 x (1 Tirage Haut Arraché + 1 Arraché Bassin + 1 Chute Arraché)', 2, 75.00),
+(65, 'ARR', 'COMBINE', '2 x (1 Tirage Haut Arraché + 1 Arraché Bassin + 1 Chute Arraché)', 2, 80.00),
 (66, 'ARR', 'COMBINE', '1 Arraché + 1 Arraché Suspension Basse + 1 Arraché Suspension Haute', 2, 80.00),
 
 (3, 'ARR', 'SEMI_TECH_LOURD', 'Arraché Flexion', 2, 100.00),
@@ -63,8 +63,6 @@ INSERT INTO "catalogue_exercices" ("id", "type_mouvement", "categorie", "nom_exe
 (8, 'ARR', 'SEMI_TECH_LEGER', 'Arraché Force', 2, 66.00),
 (10, 'ARR', 'SEMI_TECH_LEGER', 'Passage Arraché', 2, 56.00),
 (32, 'ARR', 'SEMI_TECH_LEGER', 'Chute Arraché (sans élan)', 2, 56.00),
-(33, 'ARR', 'SEMI_TECH_LEGER', 'Développé Arraché Flexion', 2, 45.00),
-(34, 'ARR', 'SEMI_TECH_LEGER', 'Flexion Arraché avec Élastique', 2, 60.00),
 (39, 'ARR', 'SEMI_TECH_LEGER', 'Arraché Force Prise Épaulé', 2, 60.00),
 (40, 'ARR', 'SEMI_TECH_LEGER', 'Arraché Debout Bassin', 2, 75.00),
 (46, 'ARR', 'SEMI_TECH_LEGER', 'Arraché Force Plots', 2, 63.00),
@@ -78,16 +76,18 @@ INSERT INTO "catalogue_exercices" ("id", "type_mouvement", "categorie", "nom_exe
 (48, 'ARR', 'RENFO_SPE', 'Rowing Prise Arraché', 2, 55.00),
 (42, 'ARR', 'RENFO_SPE', 'Développé Arraché Debout', 2, 50.00),
 (56, 'ARR', 'RENFO_SPE', 'Passage Arraché Pied Plat', 2, 40.00),
+(33, 'ARR', 'RENFO_SPE', 'Développé Arraché Flexion', 2, 45.00),
+(34, 'ARR', 'RENFO_SPE', 'Flexion Arraché avec Élastique', 2, 60.00),
 
 -- Dérivés de l'Épaulé (Dépendent d'Épaulé - ID 13)
 (67, 'EP', 'COMBINE', '1 Épaulé Debout + 2 Flexion + 1 Jeté + 1 Épaulé Flexion + 1 Jeté', 13, 75.00),
-(68, 'EP', 'COMBINE', '1 Épaulé Bassin + 1 Épaulé Suspension Haute + 1 Épaulé Suspension Basse + 1 Jeté', 13, 75.00),
-(74, 'EP', 'COMBINE', '2 x (1 Tirage Épaulé Bassin + 1 Épaulé Debout) + 1 Jeté', 13, 75.00),
-(75, 'EP', 'COMBINE', '1 Épaulé Debout Suspension Haute + 1 Épaulé Debout Suspension Basse + 1 Épaulé Debout + 1 Jeté', 13, 75.00),
+(68, 'EP', 'COMBINE', '1 Épaulé Bassin + 1 Épaulé Suspension Haute + 1 Épaulé Suspension Basse + 1 Jeté', 13, 80.00),
+(74, 'EP', 'COMBINE', '2 x (1 Tirage Épaulé Bassin + 1 Épaulé Debout) + 1 Jeté', 13, 80.00),
+(75, 'EP', 'COMBINE', '1 Épaulé Debout Suspension Haute + 1 Épaulé Debout Suspension Basse + 1 Épaulé Debout + 1 Jeté', 13, 70.00),
 (81, 'EP', 'COMBINE', '1 Épaulé Debout + 1 Épaulé Suspension Basse + 1 Épaulé Suspension Haute + 1 Jeté', 13, 75.00),
 (88, 'EP', 'COMBINE', '2 x (1 Épaulé Puissance Debout + 1 Flexion + 1 Jeté)', 13, 75.00),
-(89, 'EP', 'COMBINE', '2 x (1 Tirage Épaulé + 1 Épaulé Puissance Suspension + 1 Jeté)', 13, 75.00),
-(95, 'EP', 'COMBINE', '2 x (1 Épaulé Plot + 1 Flexion) + 1 Jeté', 13, 75.00),
+(89, 'EP', 'COMBINE', '2 x (1 Tirage Épaulé + 1 Épaulé Puissance Suspension + 1 Jeté)', 13, 80.00),
+(95, 'EP', 'COMBINE', '2 x (1 Épaulé Plot + 1 Flexion) + 1 Jeté', 13, 85.00),
 
 (14, 'EP', 'SEMI_TECH_LOURD', 'Épaulé Flexion', 13, 100.00),
 (15, 'EP', 'SEMI_TECH_LOURD', 'Épaulé Debout', 13, 84.00),
@@ -117,11 +117,11 @@ INSERT INTO "catalogue_exercices" ("id", "type_mouvement", "categorie", "nom_exe
 (79, 'EP', 'RENFO_SPE', 'Tirage Bras Épaulé', 13, 45.00),
 
 -- Dérivés du Jeté (Dépendent de Jeté - ID 24)
-(97, 'JT', 'COMBINE', '1 Épaulé Debout + 1 Jeté Debout + 1 Épaulé + 1 Jeté Fente', 24, 75.00),
-(98, 'JT', 'COMBINE', '1 Épaulé Debout + 2 Flexion + 1 Jeté Pause + 1 Épaulé Flexion + 1 Jeté', 24, 75.00),
-(105, 'JT', 'COMBINE', '1 Épaulé Debout + 2 Jeté Force + 1 Épaulé Debout + 1 Jeté Debout', 24, 75.00),
-(109, 'JT', 'COMBINE', '1 Épaulé Puissance Debout + 2 Jeté Force + 1 Puissance Debout + 1 Jeté Puissance', 24, 75.00),
-(111, 'JT', 'COMBINE', '5s Appel Jeté + 3 Jeté Force', 24, 70.00),
+(97, 'JT', 'COMBINE', '1 Épaulé Debout + 1 Jeté Debout + 1 Épaulé + 1 Jeté Fente', 24, 80.00),
+(98, 'JT', 'COMBINE', '1 Épaulé Debout + 2 Flexion + 1 Jeté Pause + 1 Épaulé Flexion + 1 Jeté', 24, 80.00),
+(105, 'JT', 'COMBINE', '1 Épaulé Debout + 2 Jeté Force + 1 Épaulé Debout + 1 Jeté Debout', 24, 65.00),
+(109, 'JT', 'COMBINE', '1 Épaulé Puissance Debout + 2 Jeté Force + 1 Puissance Debout + 1 Jeté Puissance', 24, 65.00),
+(111, 'JT', 'COMBINE', '5s Appel Jeté + 3 Jeté Force', 24, 65.00),
 
 (114, 'JT', 'SEMI_TECH_LOURD', 'Jeté Fente', 24, 100.00),
 (25, 'JT', 'SEMI_TECH_LOURD', 'Jeté Debout', 24, 92.00),
@@ -135,7 +135,7 @@ INSERT INTO "catalogue_exercices" ("id", "type_mouvement", "categorie", "nom_exe
 
 (103, 'JT', 'RENFO_SPE', 'Développé Fente', 24, 55.00),
 (104, 'JT', 'RENFO_SPE', 'Fente à la barre', 24, 70.00),
-(107, 'JT', 'RENFO_SPE', 'Développé Nuque', 24, 60.00),
+(107, 'JT', 'RENFO_SPE', 'Développé Nuque', 24, 50.00),
 (108, 'JT', 'RENFO_SPE', 'Appel de Jeté', 24, 120.00),
 (113, 'JT', 'RENFO_SPE', 'Développé Militaire', 24, 58.00);
 

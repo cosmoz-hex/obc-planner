@@ -5,7 +5,8 @@ inclusion: always
 
 # Product — OBC Planner
 
-Application de génération de plans d'entrainement d'haltérophilie personnalisés.
+> Application de génération de plans d'entrainement d'haltérophilie personnalisés.
+> Pour plus de détails voir le fichier `docs/fonctionnalites.md`.
 
 ## Domaine métier
 

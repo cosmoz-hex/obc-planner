@@ -100,9 +100,10 @@ X séries x Y répétitions @ charge min - charge max kg
 ### Référentiel
 
 Le référentiel contient les données nécessaires pour réaliser les évaluations et générer les plans d'entrainement.
-Un écran permet de gérer le référentiel (consultation, ajout, modification, suppression).
+Un écran permet de gérer le référentiel (consultation, ajout, modification, suppression) afin de faire évoluer les données.
 Il est composé de plusieurs entités / onglets :
 - Exercices : liste des exercices avec leurs caractéristiques (nom, type, charge de travail)
 - Correctifs : liste des exercices et de leurs correctifs associés
 - Archétypes : associations des différents profils d'athlètes
 - Trame générale : définition des semaines et séances types pour chaque archétype d'athlète
+- Evaluations : définition des axes d'analyse et des questions associées

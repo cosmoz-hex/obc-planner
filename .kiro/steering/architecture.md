@@ -5,7 +5,8 @@ inclusion: always
 
 # Architecture — OBC Planner
 
-> ⚠️ Projet en développement initial — la structure évolue rapidement
+> ⚠️ Projet en développement initial — la structure évolue rapidement.
+> Pour plus de détails voir le fichier `docs/architecture.md`.
 
 ## Stack
 - **Backend** : Spring Boot 4.1 / Java 25
