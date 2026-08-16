@@ -1,0 +1,154 @@
+classDiagram
+
+    ATHLETE <-- EVAL_SUMMARY
+
+    EVAL_SUMMARY <-- EVAL_DETAIL
+    EVAL_SUMMARY <-- REF_ARCHETYPE
+    EVAL_SUMMARY <-- PROG
+
+    PROG <-- PROG_WEEK
+    PROG_WEEK <-- PROG_TRAINING
+
+    EXERCICE <-- PROG_TRAINING
+    CORRECTION --> EXERCICE
+
+    REF_TIMELINE <-- REF_PLANNING
+    REF_TIMELINE <-- REF_SQUAT
+    REF_TIMELINE <-- REF_PULL
+
+    class ATHLETE {
+        # ATHLETE_ID
+        FIRST_NAME
+        LAST_NAME
+        SEXE
+        AGE_CATEGORIE
+        WEIGHT_CATEGORIE
+        COMP_LEVEL
+    }
+    class EVAL_SUMMARY {
+        # EVALUATION_ID
+        + ATHLETE_ID
+        EVALUATION_DATE
+        ARCHETYPE
+        STRENGTH_SPEED
+        TECHNIQUE
+        ENDURANCE
+        SQUAT
+        PULL
+        SNATCH_STRENTGH
+        SNATCH_WEAKNESS
+        CLEAN_STRENTGH
+        CLEAN_WEAKNESS
+        JERK_STRENTGH
+        JERK_WEAKNESS
+        PSYCHO_STRENTGH
+        PSYCHO_WEAKNESS
+    }
+    class EVAL_DETAIL {
+        # EVALUATION_DETAIL_ID
+        + EVALUATION_ID
+        EVAL_CATEGORIE
+        EXERCICE_CODE
+        REAL_VALUE
+        RESULT
+    }
+    class EXERCICE {
+        # EXERCICE_ID
+        + EXERCICE_REF
+        CATEGORIE_EXERCICE
+        TYPE_EXERCICE
+        EXERCICE_CODE
+        ESTIMATE_VALUE
+    }
+    class CORRECTION {
+        # EXERCICE_ID
+        # CORRECTION_ID
+    }
+    class PROG {
+        # PROGRAMME_ID
+        + EVALUATION_ID
+        WEEKS
+        FREQUENCY
+        DURATION
+        START_DATE
+        END_DATE
+        SNACHT_GOAL
+        CJ_GOAL
+    }
+    class PROG_WEEK {
+        # PROGRAMME_WEEK_ID
+        + PROGRAMME_ID
+        WEEK_NUMBER
+        START_DATE
+        END_DATE
+        WEEK_TYPE
+        BASE_PERCENT
+        SNATCH_GOAL
+        CJ_GOAL
+        BACK_SQUAT_GOAL
+        FRONT_SQUAT_GOAL
+        SNACHT_PULL_GOAL
+        CJ_PULL_GOAL
+    }
+    class PROG_TRAINING {
+        # PROGRAMME_TRAINING_ID
+        + PROGRAMME_WEEK_ID
+        TRAINING_NUMBER
+        EXERCICE_ORDER
+        EXERCICE_ID
+        SET_NUMBER
+        REP_NUMBER
+        MIN_WEIGHT
+        MAX_WEIGHT
+    }
+    class REF_ARCHETYPE {
+        # REF_ARCHETYPE_ID
+        ARCHETYPE
+        STRENGTH_SPEED
+        TECHNIQUE
+        ENDURANCE
+    }
+    class REF_TIMELINE {
+        # REF_TIMELINE
+        ARCHETYPE
+        WEEKS
+        TIMELINE
+    }
+    class REF_PLANNING {
+        # REF_PLANNING
+        + REF_TIMELINE
+        WEEK_TYPE
+        TRAINING_NUMBER
+        EXERCICE_ORDER
+        CATEGORIE_EXERCICE
+        TYPE_EXERCICE
+        STRENGH_WEAKNESS
+        SET_NUMBER
+        REP_NUMBER
+        REP_LABEL
+    }
+    class REF_SQUAT {
+        # REF_SQUAT_ID
+        + REF_TIMELINE
+        WEEK_TYPE
+        TRAINING_NUMBER
+        SQUAT_TYPE
+        EXERCICE_CODE
+        SET_NUMBER
+        REP_NUMBER
+        REP_LABEL
+        ESTIMATE_VALUE
+    }
+
+    class REF_PULL {
+        # REF_PULL_ID
+        + REF_TIMELINE
+        WEEK_TYPE
+        TRAINING_NUMBER
+        PULL_TYPE
+        EXERCICE_CODE
+        SET_NUMBER
+        REP_NUMBER
+        REP_LABEL
+        ESTIMATE_VALUE
+    }

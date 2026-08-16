@@ -1,29 +1,54 @@
----
-title: Architecture
-inclusion: always
----
-
 # Architecture — OBC Planner
 
-> ⚠️ Projet en développement initial — la structure évolue rapidement.
-> Pour plus de détails voir le fichier `docs/architecture.md`.
+> Ce fichier doit être mis à jour à chaque modification structurelle (libs, packages, tables, APIs).
 
-## Stack
-- **Backend** : Spring Boot 4.1 / Java 25
-- **Frontend** : Angular 20 standalone + Tailwind + WebAwesome
-- **BDD** : PostgreSQL 17 + Flyway
+---
 
-## Structure packages backend
-- `controllers/` : REST endpoints → délèguent aux services
-- `services/` : logique métier (interfaces + impl/)
-- `repositories/` : Spring Data JPA
-- `entities/` : JPA entities
-- `dto/` : Request/Response objects
+## Backend — Spring Boot 4.1 / Java 25
 
-## Domaine métier
-Application de planification d'entrainement d'haltérophilie basée sur :
-- Profils athlètes (force/vitesse, technique, endurance, psycho)
-- Évaluations → calcul archétype → génération plan personnalisé
-- Référentiel d'exercices et correctifs
+### Structure des packages
 
-> Détails du schéma BDD : voir migrations Flyway `db/migration/`
+```
+com.example.backend
+├── BackEndApplication.java
+├── annotations/        # Annotations custom : contrôle d'accès, AOP, validators (email, téléphone)
+├── aspects/            # Implémentations AOP des annotations (logs, activation conditionnelle)
+├── configuration/      # Sécurité Spring, CORS, JWT filter chain
+├── controllers/        # Endpoints REST — délèguent aux services, aucune logique métier
+├── dto/                # Objets de transfert (*Request / *Response)
+├── entities/           # Entités JPA mappées sur les tables PostgreSQL
+├── filter/             # Filtres HTTP (validation JWT sur chaque requête)
+├── interceptor/        # Intercepteurs MVC (contrôle d'accès par annotation)
+├── repositories/       # Interfaces Spring Data JPA
+├── services/           # Interfaces métier + implémentations (sous-dossier impl/)
+└── utils/              # Utilitaires transversaux (dates, strings, numbers, objects)
+```
+
+### API REST
+
+Base URL: `/api`
+
+| Méthode | Endpoint | Java Class | Description |
+|---|---|---|---|
+
+---
+
+## Frontend — Angular 20
+
+### Structure des modules
+
+```
+src/app/
+├── app.component.*     # Composant racine
+├── app.config.ts       # Configuration standalone (providers, i18n, HTTP)
+├── app.routes.ts       # Définition des routes
+├── components/         # Composants UI (layout global, liste athlètes, modal formulaire)
+├── models/             # Interfaces TypeScript correspondant aux DTOs backend
+└── services/           # Services HTTP par domaine métier + loader i18n custom
+```
+
+---
+
+## Base de données — PostgreSQL 17
+
+### Schéma

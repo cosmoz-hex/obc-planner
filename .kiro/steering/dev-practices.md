@@ -152,7 +152,7 @@ inclusion: always
 ### Structure et conventions
 - Branches : `main`, `release/R{number}`, `feature/F{name}`, `story/S{name}`, `bugfix/B{name}`, `hotfix/H{name}`,
 - Une PR ou un commit = une feature ou un fix — pas de commits fourre-tout
-- Le message de commit doit respecter la convention suivante : 
+- Le message de commit doit être concis, orienté fonctionnel et respecter la convention suivante : 
 ```
 {type}({scope}): {reference} - {title}
 
