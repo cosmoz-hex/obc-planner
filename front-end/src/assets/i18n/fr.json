@@ -1,64 +1,231 @@
 {
-  "athletes": {
-    "title": "OBC Haltéro",
-    "displayed_of": "athlètes affichés sur",
-    "registered": "athlètes inscrits",
-    "add_button": "Ajouter un athlète",
-    "search": "Rechercher",
-    "search_placeholder": "Nom ou prénom...",
-    "category": "Catégorie",
-    "all_categories": "Toutes les catégories",
-    "men": "Hommes",
-    "women": "Femmes",
-    "level": "Niveau",
-    "all_levels": "Tous les niveaux",
-    "reset_filters": "Réinitialiser les filtres",
-    "table": {
-      "athlete": "Athlète",
-      "age_sex": "Âge / Sexe",
-      "weight": "Poids actuel",
-      "category": "Catégorie",
-      "level": "Niveau",
-      "last_eval": "Dernière Évaluation",
-      "actions": "Actions"
+  "exercice": {
+    "total": "Total",
+    "snatch": {
+      "tech": {
+        "simple": "Arraché",
+        "double": "Arraché (x2)",
+        "triple": "Arraché (x3)"
+      },
+      "complex": {
+        "complex-1": "1 Tirage Haut Arraché + 2 Arraché Bassin + 2 Chute Arraché",
+        "complex-2": "1 Arraché Debout + 2 Flexion d'Arraché + 1 Arraché Flexion",
+        "complex-3": "3 x (1 Tirage Haut Arraché + 1 Arraché Debout Suspension)",
+        "complex-4": "2 Tirage Lourd Arraché + 2 Arraché Debout",
+        "complex-5": "3 x (1 Tirage Haut Arraché + 1 Arraché Suspension)",
+        "complex-6": "1 Arraché + 1 Arraché Suspension + 1 Arraché",
+        "complex-7": "2 x (1 Tirage Arraché + 1 Arraché Puissance + 1 Flexion)",
+        "complex-8": "1 Arraché Puissance Bassin + 1 Arraché Puissance Susp. + 1 Arraché Puissance",
+        "complex-9": "3 x (1 Arraché Force + 1 Chute Arraché avec élan)",
+        "complex-10": "2 x (1 Tirage Haut Arraché + 1 Arraché Bassin + 1 Chute Arraché)",
+        "complex-11": "1 Arraché + 1 Arraché Suspension Basse + 1 Arraché Suspension Haute"
+      },
+      "heavy": {
+        "squat": "Arraché flexion",
+        "power": "Arraché debout",
+        "block": "Arraché plots",
+        "hang": "Arraché suspension",
+        "no-feet": "Arraché puissance",
+        "balance": "Chute arraché",
+        "pause": "Arraché pause",
+        "hip": "Arraché bassin",
+        "deficit": "Arraché déficit",
+        "slow-start": "Arraché départ lent",
+        "block-power": "Arraché debout plot",
+        "squat-pause": "Arraché flexion pause réception",
+        "hang-low": "Arraché suspension basse",
+        "hang-high": "Arraché suspension haute",
+        "no-feet-hip": "Arraché puissance bassin",
+        "no-feet-hang": "Arraché puissance suspension",
+        "hang-power": "Arraché debout suspension"
+      },
+      "light": {
+        "muscle": "Arraché force",
+        "tall": "Passage arraché",
+        "drop": "Chute arraché sans élan",
+        "muscle-hang": "Arraché force suspension",
+        "muscle-block": "Arraché force plots",
+        "muscle-no-contact": "Arraché force sans contact",
+        "no-feet-power-hip": "Arraché puissance debout bassin",
+        "muscle-clean-grip": "Arraché force prise épaulé",
+        "hip-power": "Arraché debout bassin"
+      },
+      "pull": {
+        "simple": "Tirage arraché",
+        "double": "Tirage arraché (x2)",
+        "triple": "Tirage arraché (x3)",
+        "high": "Tirage haut arraché",
+        "high-hang": "Tirage haut arraché suspension",
+        "block": "Tirage haut arraché plots",
+        "deficit": "Tirage arraché surélevé",
+        "pause": "Tirage arraché pause",
+        "hip": "Tirage arraché bassin",
+        "tng": "Tirage arraché touch-and-go"
+      },
+      "renfo": {
+        "sots-press": "Développé arraché flexion",
+        "squat-elastic": "Flexion arraché avec élastique",
+        "pull-arm": "Tirage bras arraché",
+        "row": "Rowing prise arraché",
+        "strict-press": "Développé arraché debout",
+        "tall-no-feet": "Passage arraché pied plat"
+      }
     },
-    "no_results": "Aucun résultat trouvé.",
-    "years": "ans",
-    "none": "Aucune",
-    "na": "N/A"
-  },
-  "form": {
-    "add_title": "Ajouter un athlète",
-    "edit_title": "Modifier un athlète",
-    "name": "Nom *",
-    "name_placeholder": "ex: Dupont",
-    "firstname": "Prénom *",
-    "firstname_placeholder": "ex: Thomas",
-    "age": "Âge",
-    "age_placeholder": "ex: 24",
-    "sex": "Sexe",
-    "man": "Homme",
-    "woman": "Femme",
-    "weight": "Poids (kg)",
-    "weight_placeholder": "ex: 83.5",
-    "category": "Catégorie",
-    "level": "Niveau",
-    "cancel": "Annuler",
-    "save": "Enregistrer"
-  },
-  "dialog": {
-    "confirm_title": "Confirmation",
-    "delete_message": "Êtes-vous sûr de vouloir supprimer cet athlète ?",
-    "cancel": "Annuler",
-    "confirm": "Confirmer"
-  },
-  "sidebar": {
-    "title": "HaltéroCoach",
-    "subtitle": "Gestion Athlètes",
-    "nav_section": "NAVIGATION",
-    "athletes": "Athlètes",
-    "eval_form": "Formulaire d'Évaluation",
-    "tools_section": "OUTILS",
-    "stats": "Statistiques"
+    "clean": {
+      "tech": {
+        "simple": "Épaulé",
+        "double": "Épaulé (x2)",
+        "triple": "Épaulé (x3)"
+      },
+      "complex": {
+        "complex-1": "1 Épaulé Debout + 2 Flexion + 1 Jeté + 1 Épaulé Flexion + 1 Jeté",
+        "complex-2": "1 Épaulé Bassin + 1 Épaulé Susp. H. + 1 Épaulé Susp. B. + 1 Jeté",
+        "complex-3": "2 x (1 Tirage Épaulé Bassin + 1 Épaulé Debout) + 1 Jeté",
+        "complex-4": "1 Épaulé Deb. Susp. H. + 1 Épaulé Deb. Susp. B. + 1 Épaulé Debout + 1 Jeté",
+        "complex-5": "1 Épaulé Debout + 1 Épaulé Susp. B. + 1 Épaulé Susp. H. + 1 Jeté",
+        "complex-6": "2 x (1 Épaulé Puissance Debout + 1 Flexion + 1 Jeté)",
+        "complex-7": "2 x (1 Épaulé Plot + 1 Flexion) + 1 Jeté",
+        "complex-8": "1 Épaulé Debout + 2 Flexion + 1 Jeté + 1 Épaulé Flexion + 1 Jeté"
+      },
+      "heavy": {
+        "squat": "Épaulé flexion",
+        "power": "Épaulé debout",
+        "block": "Épaulé plots",
+        "hang": "Épaulé suspension",
+        "no-feet": "Épaulé puissance",
+        "pause": "Épaulé pause",
+        "hip": "Épaulé bassin",
+        "deficit": "Épaulé déficit",
+        "block-power": "Épaulé debout plot",
+        "hang-high": "Épaulé suspension haute",
+        "hang-low": "Épaulé suspension basse",
+        "hang-power-high": "Épaulé debout suspension haute",
+        "hang-power-low": "Épaulé debout suspension basse",
+        "no-feet-hip": "Épaulé puissance bassin",
+        "no-feet-power": "Épaulé puissance debout"
+      },
+      "light": {
+        "muscle": "Épaulé force",
+        "tall": "Passage épaulé",
+        "hip-power": "Épaulé debout bassin",
+        "no-feet-hang": "Épaulé puissance suspension",
+        "no-feet-power-hip": "Épaulé puissance flexion bassin",
+        "muscle-hang": "Épaulé force suspension",
+        "muscle-block": "Épaulé force plots",
+        "muscle-no-contact": "Épaulé force sans contact",
+        "muscle-power-hip": "Épaulé puissance debout bassin"
+      },
+      "pull": {
+        "simple": "Tirage épaulé",
+        "double": "Tirage épaulé (x2)",
+        "triple": "Tirage épaulé (x3)",
+        "hip": "Tirage épaulé bassin",
+        "block": "Tirage épaulé plot",
+        "deficit": "Tirage épaulé surélevé",
+        "pause": "Tirage épaulé pause",
+        "tng": "Tirage épaulé touch-and-go"
+      },
+      "renfo": {
+        "pull-arm": "Tirage bras épaulé",
+        "row": "Rowing prise épaulé",
+        "tall-no-feet": "Passage épaulé pied plat"
+      }
+    },
+    "jerk": {
+      "tech": {
+        "simple": "Jeté fente"
+      },
+      "complex": {
+        "complex-1": "1 Épaulé Debout + 1 Jeté Debout + 1 Épaulé + 1 Jeté Fente",
+        "complex-2": "1 Épaulé Debout + 2 Flexion + 1 Jeté Pause + 1 Épaulé Flexion + 1 Jeté",
+        "complex-3": "1 Épaulé Debout + 2 Jeté Force + 1 Épaulé Debout + 1 Jeté Debout",
+        "complex-4": "5s Appel Jeté + 3 Jeté Force"
+      },
+      "heavy": {
+        "power": "Jeté debout",
+        "no-feet": "Jeté puissance",
+        "pause": "Jeté pause"
+      },
+      "light": {
+        "muscle": "Jeté force",
+        "va-et-vient": "Va-et-viens jeté",
+        "split-call": "Jeté fente appel fente",
+        "drop": "Chute de jeté"
+      },
+      "renfo": {
+        "develop-split": "Développé fente",
+        "split-bar": "Fente à la barre",
+        "military-press": "Développé militaire",
+        "military-press-elastic": "Développé militaire + élastique",
+        "neck-press": "Développé nuque",
+        "call": "Appel de jeté",
+        "bar-hold": "Gainage barre jeté",
+        "bar-hold-renfo": "Appel de jeté ou gainage barre"
+      }
+    },
+    "squat": {
+      "back": {
+        "simple": "Flexion nuque",
+        "double": "Flexion nuque (x2)",
+        "triple": "Flexion nuque (x3)",
+        "pause": "Flexion nuque pause",
+        "eccentric": "Flexion nuque excentrique",
+        "eccentric-pause": "Flexion nuque excentrique pause",
+        "jump": "Flexion nuque sautée"
+      },
+      "front": {
+        "simple": "Flexion clavicule",
+        "double": "Flexion clavicule (x2)",
+        "triple": "Flexion clavicule (x3)",
+        "pause": "Flexion clavicule pause",
+        "plus-back": "Flexion clavicule + flexion nuque",
+        "anderson": "Anderson squat"
+      }
+    },
+    "muscu": {
+      "rdl-unilateral": "SDT roumain unilatéral",
+      "single-leg-glute-bridge": "Single leg glute bridge",
+      "nordic-curl": "Nordic curl",
+      "lunge-bulgarian": "Fentes bulgares",
+      "lunge-walking": "Fentes marchées",
+      "lunge-box": "Fentes sur box",
+      "lower-back-prone": "Lombaires plinth lesté",
+      "superman": "Superman",
+      "leg-extension-unilateral": "Chaise unilatérale",
+      "leg-extension": "Leg extension",
+      "bent-over-row": "Tirage buste penché",
+      "australian-row": "Tractions australiennes",
+      "lumberjack-row": "Tirage bûcheron",
+      "leg-curl-swissball": "Leg curl swissball",
+      "leg-curl-elastic-unilateral": "Leg curl élastique unilatéral",
+      "pull-ups": "Tractions",
+      "push-ups": "Pompes",
+      "lateral-raises": "Élévations latérales",
+      "sled-push": "Sled push",
+      "goblet-squat": "Goblet squat",
+      "pistol-squat": "Pistol squat",
+      "weighted-plank": "Gainage lesté",
+      "dynamic-plank": "Gainage dynamique",
+      "swissball-plank": "Gainage swissball",
+      "hip-thrust-bar": "Hip thrust barre",
+      "hip-extension-elastic": "Extension hanche élastique",
+      "obliques-elastic": "Obliques élastique",
+      "obliques-bar": "Obliques barre",
+      "russian-twist": "Russian twist",
+      "kettlebell-swing": "Kettlebell swing",
+      "good-morning": "Good morning",
+      "rdl-romanian": "Soulevé de terre roumain",
+      "bench-row": "Tirage banc",
+      "sled-pull": "Sled pull",
+      "bar-plank": "Gainage barre",
+      "bosu-cj-pull": "Tirage épaulé bosu",
+      "inclined-plank": "Planche chinoise",
+      "snatch-squat-elastic-muscu": "Flexion d'arraché + élastique",
+      "neck-pull-ups": "Tractions nuque",
+      "bird-row": "Oiseaux haltères",
+      "pull-over": "Pull over",
+      "box-jump": "Box jump",
+      "cardio-plyo": "Cardio ou plyométrie"
+    }
   }
 }

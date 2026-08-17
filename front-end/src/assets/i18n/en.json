@@ -1,15 +1,231 @@
 {
-  "title": "OBC Planner",
-  "api": {
-    "test_button": "Call API",
-    "loading": "Loading...",
-    "success": "Success",
-    "error": "Error",
-    "api_call_error": "Error calling API: "
-  },
-  "athlete": {
-    "actions": {
-      "add": "Add Athlete"
+  "exercice": {
+    "total": "Total",
+    "snatch": {
+      "tech": {
+        "simple": "Snatch",
+        "double": "Snatch (x2)",
+        "triple": "Snatch (x3)"
+      },
+      "complex": {
+        "complex-1": "1 High Pull Snatch + 2 Hip Snatch + 2 Snatch Drop",
+        "complex-2": "1 Snatch (no dip) + 2 Snatch Squat + 1 Squat Snatch",
+        "complex-3": "3 x (1 High Pull Snatch + 1 Hang Snatch (no dip))",
+        "complex-4": "2 Heavy Snatch Pull + 2 Snatch (no dip)",
+        "complex-5": "3 x (1 High Pull Snatch + 1 Hang Snatch)",
+        "complex-6": "1 Snatch + 1 Hang Snatch + 1 Snatch",
+        "complex-7": "2 x (1 Snatch Pull + 1 Power Snatch + 1 Squat)",
+        "complex-8": "1 Hip Power Snatch + 1 Hang Power Snatch + 1 Power Snatch",
+        "complex-9": "3 x (1 Muscle Snatch + 1 Snatch Drop with swing)",
+        "complex-10": "2 x (1 High Pull Snatch + 1 Hip Snatch + 1 Snatch Drop)",
+        "complex-11": "1 Snatch + 1 Low Hang Snatch + 1 High Hang Snatch"
+      },
+      "heavy": {
+        "squat": "Squat snatch",
+        "power": "Power snatch (no dip)",
+        "block": "Block snatch",
+        "hang": "Hang snatch",
+        "no-feet": "Power snatch",
+        "balance": "Snatch balance",
+        "pause": "Pause snatch",
+        "hip": "Hip snatch",
+        "deficit": "Deficit snatch",
+        "slow-start": "Slow-start snatch",
+        "block-power": "Block power snatch (no dip)",
+        "squat-pause": "Squat snatch with pause at catch",
+        "hang-low": "Low hang snatch",
+        "hang-high": "High hang snatch",
+        "no-feet-hip": "Hip power snatch",
+        "no-feet-hang": "Hang power snatch",
+        "hang-power": "Hang power snatch (no dip)"
+      },
+      "light": {
+        "muscle": "Muscle snatch",
+        "tall": "Snatch turnover",
+        "drop": "Snatch drop (no swing)",
+        "muscle-hang": "Hang muscle snatch",
+        "muscle-block": "Block muscle snatch",
+        "muscle-no-contact": "Muscle snatch (no contact)",
+        "no-feet-power-hip": "Hip power snatch (no dip)",
+        "muscle-clean-grip": "Muscle snatch with clean grip",
+        "hip-power": "Hip power snatch (no dip)"
+      },
+      "pull": {
+        "simple": "Snatch pull",
+        "double": "Snatch pull (x2)",
+        "triple": "Snatch pull (x3)",
+        "high": "High pull snatch",
+        "high-hang": "Hang high pull snatch",
+        "block": "Block high pull snatch",
+        "deficit": "deficit snatch pull",
+        "pause": "Snatch pull with pause",
+        "hip": "Hip snatch pull",
+        "tng": "Snatch pull touch-and-go"
+      },
+      "renfo": {
+        "sots-press": "Snatch grip overhead squat press",
+        "squat-elastic": "Snatch grip squat with bands",
+        "pull-arm": "Snatch grip arm pull",
+        "row": "Snatch grip row",
+        "strict-press": "Snatch grip press (standing)",
+        "tall-no-feet": "Snatch turnover no-feet"
+      }
+    },
+    "clean": {
+      "tech": {
+        "simple": "Clean",
+        "double": "Clean (x2)",
+        "triple": "Clean (x3)"
+      },
+      "complex": {
+        "complex-1": "1 Clean (no dip) + 2 Squat + 1 Jerk + 1 Squat Clean + 1 Jerk",
+        "complex-2": "1 Hip Clean + 1 High Hang Clean + 1 Low Hang Clean + 1 Jerk",
+        "complex-3": "2 x (1 Hip Clean Pull + 1 Clean (no dip)) + 1 Jerk",
+        "complex-4": "1 High Hang Clean (no dip) + 1 Low Hang Clean (no dip) + 1 Clean (no dip) + 1 Jerk",
+        "complex-5": "1 Clean (no dip) + 1 Low Hang Clean + 1 High Hang Clean + 1 Jerk",
+        "complex-6": "2 x (1 Power Clean (no dip) + 1 Squat + 1 Jerk)",
+        "complex-7": "2 x (1 Block Clean + 1 Squat) + 1 Jerk",
+        "complex-8": "1 Clean (no dip) + 2 Squat + 1 Jerk + 1 Squat Clean + 1 Jerk"
+      },
+      "heavy": {
+        "squat": "Squat clean",
+        "power": "Clean (no dip)",
+        "block": "Block clean",
+        "hang": "Hang clean",
+        "no-feet": "Power clean",
+        "pause": "Pause clean",
+        "hip": "Hip clean",
+        "deficit": "Deficit clean",
+        "block-power": "Block clean (no dip)",
+        "hang-high": "High hang clean",
+        "hang-low": "Low hang clean",
+        "hang-power-high": "High hang clean (no dip)",
+        "hang-power-low": "Low hang clean (no dip)",
+        "no-feet-hip": "Hip power clean",
+        "no-feet-power": "Power clean (no dip)"
+      },
+      "light": {
+        "muscle": "Muscle clean",
+        "tall": "Clean turnover",
+        "hip-power": "Hip clean (no dip)",
+        "no-feet-hang": "Hang power clean",
+        "no-feet-power-hip": "Hip power clean (squat)",
+        "muscle-hang": "Hang muscle clean",
+        "muscle-block": "Block muscle clean",
+        "muscle-no-contact": "Muscle clean (no contact)",
+        "muscle-power-hip": "Hip power clean (no dip)"
+      },
+      "pull": {
+        "simple": "Clean pull",
+        "double": "Clean pull (x2)",
+        "triple": "Clean pull (x3)",
+        "hip": "Hip clean pull",
+        "block": "Block clean pull",
+        "deficit": "deficit clean pull",
+        "pause": "Clean pull with pause",
+        "tng": "Clean pull touch-and-go"
+      },
+      "renfo": {
+        "pull-arm": "Clean grip arm pull",
+        "row": "Clean grip row",
+        "tall-no-feet": "Clean turnover no-feet"
+      }
+    },
+    "jerk": {
+      "tech": {
+        "simple": "Jerk"
+      },
+      "complex": {
+        "complex-1": "1 Clean (no dip) + 1 Push Jerk + 1 Clean + 1 Jerk",
+        "complex-2": "1 Clean (no dip) + 2 Squat + 1 Pause Jerk + 1 Squat Clean + 1 Jerk",
+        "complex-3": "1 Clean (no dip) + 2 Jerk Drive + 1 Clean (no dip) + 1 Push Jerk",
+        "complex-4": "5s Jerk Dip + 3 Jerk Drive"
+      },
+      "heavy": {
+        "power": "Push jerk",
+        "no-feet": "Power jerk",
+        "pause": "Pause jerk"
+      },
+      "light": {
+        "muscle": "Jerk drive",
+        "va-et-vient": "Jerk footwork drill",
+        "split-call": "Jerk split foot call",
+        "drop": "Jerk drop"
+      },
+      "renfo": {
+        "develop-split": "Split press",
+        "split-bar": "Split lunge with bar",
+        "military-press": "Military press",
+        "military-press-elastic": "Military press with bands",
+        "neck-press": "Behind-the-neck press",
+        "call": "Jerk dip",
+        "bar-hold": "Jerk bar hold",
+        "bar-hold-renfo": "Jerk dip or bar hold"
+      }
+    },
+    "squat": {
+      "back": {
+        "simple": "Back squat",
+        "double": "Back squat (x2)",
+        "triple": "Back squat (x3)",
+        "pause": "Pause back squat",
+        "eccentric": "Eccentric back squat",
+        "eccentric-pause": "Eccentric pause back squat",
+        "jump": "Jump squat",
+        "anderson": "Anderson squat"
+      },
+      "front": {
+        "simple": "Front squat",
+        "double": "Front squat (x2)",
+        "triple": "Front squat (x3)",
+        "pause": "Pause front squat",
+        "plus-back": "Front squat + back squat"
+      }
+    },
+    "muscu": {
+      "rdl-unilateral": "Unilateral Romanian deadlift",
+      "single-leg-glute-bridge": "Single leg glute bridge",
+      "nordic-curl": "Nordic curl",
+      "lunge-bulgarian": "Bulgarian split squat",
+      "lunge-walking": "Walking lunges",
+      "lunge-box": "Box lunges",
+      "lower-back-prone": "Weighted prone back extension",
+      "superman": "Superman",
+      "leg-extension-unilateral": "Single-leg extension",
+      "leg-extension": "Leg extension",
+      "bent-over-row": "Bent-over row",
+      "australian-row": "Australian pull-up",
+      "lumberjack-row": "Lumberjack row",
+      "leg-curl-swissball": "Swissball leg curl",
+      "leg-curl-elastic-unilateral": "Single-leg elastic leg curl",
+      "pull-ups": "Pull-ups",
+      "push-ups": "Push-ups",
+      "lateral-raises": "Lateral raises",
+      "sled-push": "Sled push",
+      "goblet-squat": "Goblet squat",
+      "pistol-squat": "Pistol squat",
+      "weighted-plank": "Weighted plank",
+      "dynamic-plank": "Dynamic plank",
+      "swissball-plank": "Swissball plank",
+      "hip-thrust-bar": "Barbell hip thrust",
+      "hip-extension-elastic": "Elastic hip extension",
+      "obliques-elastic": "Elastic obliques",
+      "obliques-bar": "Bar obliques",
+      "russian-twist": "Russian twist",
+      "kettlebell-swing": "Kettlebell swing",
+      "good-morning": "Good morning",
+      "rdl-romanian": "Romanian deadlift",
+      "bench-row": "Bench row",
+      "sled-pull": "Sled pull",
+      "bar-plank": "Bar plank",
+      "bosu-cj-pull": "Bosu clean pull",
+      "inclined-plank": "Inclined plank",
+      "snatch-squat-elastic-muscu": "Snatch grip squat with bands",
+      "neck-pull-ups": "Behind-the-neck pull-ups",
+      "bird-row": "Dumbbell row",
+      "pull-over": "Pull over",
+      "box-jump": "Box jump",
+      "cardio-plyo": "Cardio or plyometrics"
     }
   }
 }
