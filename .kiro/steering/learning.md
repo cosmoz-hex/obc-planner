@@ -17,3 +17,13 @@ Kiro doit y consigner toute leçon apprise suite à une correction demandée par
 ---
 
 ## Leçons apprises
+
+### 2026-08-18 — Exercices composés squat + box jump : rep_number
+- **Contexte** : Pour un exercice "Flexion Nuque Excentrique + Box Jump" avec format `4 x (4 + 8)`.
+- **Erreur initiale** : Additionner les reps squat + box jump dans `rep_number` (4+8=12).
+- **Bonne pratique** : `rep_number` ne compte que les reps à la barre (squat). Les box jumps sont sans barre, donc `rep_number=4`. On additionne uniquement quand les 2 mouvements sont à la barre (ex: front + back squat).
+
+### 2026-08-18 — Notation `n (1 + 1)` dans les protocoles
+- **Contexte** : Le PDF note `4 x 2 (1 + 1)` pour un exercice composé (tirage haut + tirage haut suspension).
+- **Erreur initiale** : Interpréter `2 (1 + 1)` comme 2 reps au lieu de `2 × (1+1) = 4` reps.
+- **Bonne pratique** : `n (1 + 1)` est une notation mathématique. `2 (1 + 1) = 4` reps totales à la barre. `rep_label = '2 (1 + 1)'` pour l'affichage, `rep_number = 4` pour le volume réel.

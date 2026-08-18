@@ -39,13 +39,33 @@ Base URL: `/api`
 
 ```
 src/app/
-├── app.component.*     # Composant racine
+├── app.component.*     # Composant racine (bootstrap, détection langue navigateur)
 ├── app.config.ts       # Configuration standalone (providers, i18n, HTTP)
-├── app.routes.ts       # Définition des routes
-├── components/         # Composants UI (layout global, liste athlètes, modal formulaire)
+├── app.routes.ts       # Définition des routes (lazy-loaded)
+├── components/         # Composants communs / réutilisables
+│   └── layout/         # Shell principal : header, sidebar (wa-page), footer, sélecteur de langue
+├── pages/              # Pages principales
+│   ├── athletes/       # Gestion des athlètes
+│   └── referentiel/    # Référentiel avec onglets routés
+│       ├── exercices/
+│       ├── correctifs/
+│       ├── archetypes/
+│       └── trame-generale/
 ├── models/             # Interfaces TypeScript correspondant aux DTOs backend
 └── services/           # Services HTTP par domaine métier + loader i18n custom
 ```
+
+### Routes
+
+| Path | Composant | Description |
+|---|---|---|
+| `/` | redirect → `/athletes` | Redirection par défaut |
+| `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
+| `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
+| `/referentiel/exercices` | `ExercicesComponent` | Catalogue des exercices |
+| `/referentiel/correctifs` | `CorrectifsComponent` | Exercices correctifs |
+| `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
+| `/referentiel/trame-generale` | `TrameGeneraleComponent` | Trame générale de programmation |
 
 ---
 
@@ -60,10 +80,10 @@ Catalogue des exercices de référence.
 |---|---|---|---|
 | `exercice_id` | `INTEGER` | PK | Identifiant auto-généré |
 | `exercice_ref` | `INTEGER` | FK → exercices | Référence vers un exercice parent (auto-référence) |
-| `type_exercice` | `VARCHAR(10)` | NOT NULL | Type d'exercice : `SQUAT`, `PULL`, `SNATCH`, `CLEAN`, `JERK`, `MUSCU` |
-| `categorie_exercice` | `VARCHAR(10)` | NOT NULL | Catégorie / groupe musculaire : `TECH`, `COMBI`, `SEMI_LEGER`, `SEMI_LOURD`, `RENFO`, `GEN`, `LEG`, `POST`, `CORE`, `CARDIO`, `PLYO` |
+| `type_exercice` | `VARCHAR(10)` | NOT NULL | Type d'exercice : `SQUAT`, `PULL`, `SNATCH`, `CLEAN`, `JERK` |
+| `categorie_exercice` | `VARCHAR(10)` | NOT NULL | Catégorie / groupe musculaire : `TECH`, `COMBI`, `SEMI_LEGER`, `SEMI_LOURD`, `RENFO`, `CARDIO`, `PLYO`, `BACK`, `FRONT` |
 | `exercice_code` | `VARCHAR(50)` | NOT NULL, UNIQUE | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
-| `estimate_value` | `NUMERIC(1, 2)` | — | Charge théorique (% de l'exercice de référence) |
+| `estimate_value` | `NUMERIC(4, 2)` | — | Charge théorique (% de l'exercice de référence) |
 
 ---
 
@@ -171,8 +191,8 @@ Découpage hebdomadaire d'un programme.
 | `week_number` | `INTEGER` | NOT NULL | Numéro de semaine (1 à 16), UNIQUE avec `programme_id` |
 | `start_date` | `DATE` | NOT NULL | Date de début de la semaine |
 | `end_date` | `DATE` | NOT NULL | Date de fin de la semaine |
-| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `VOLUME`, `TECH`, `STRENGTH`, `PEAK`, `DELOAD` |
-| `base_percent` | `NUMERIC(1, 2)` | NOT NULL | Pourcentage de l'objectif final |
+| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload), `PC` (Pré-Compétition) |
+| `base_percent` | `NUMERIC(4, 2)` | NOT NULL | Pourcentage de l'objectif final |
 | `snatch_goal` | `INTEGER` | NOT NULL | Base arraché de la semaine (kg) |
 | `cj_goal` | `INTEGER` | NOT NULL | Base épaulé-jeté de la semaine (kg) |
 | `back_squat_goal` | `INTEGER` | NOT NULL | Base squat nuque de la semaine (kg) |
@@ -208,7 +228,7 @@ Timelines de référence par archétype et durée de programme.
 | `ref_timeline_id` | `INTEGER` | PK | Identifiant auto-généré |
 | `archetype` | `VARCHAR(10)` | NOT NULL | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN`, UNIQUE avec `weeks` |
 | `weeks` | `INTEGER` | NOT NULL | Durée du programme : `8`, `12`, `16` |
-| `timeline` | `VARCHAR(255)` | NOT NULL | Séquence de types de semaines : `VOLUME` (F), `TECH` (T), `STRENGTH` (S), `PEAK` (A), `DELOAD` (D) |
+| `timeline` | `VARCHAR(255)` | NOT NULL | Séquence de types de semaines : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload), `PC` (Pré-Compétition) |
 
 ---
 
@@ -239,14 +259,14 @@ Exercices de squat de référence par archétype, objectif et type de semaine.
 | `ref_squat_id` | `INTEGER` | PK | Identifiant auto-généré |
 | `goal` | `VARCHAR(10)` | NOT NULL | Objectif : `STRENGTH` = Force, `SPEED` = Vitesse, `KEEP` = Maintien |
 | `archetype` | `VARCHAR(10)` | NOT NULL | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
-| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload) |
+| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload), `PC` (Pré-Compétition) |
 | `training_number` | `INTEGER` | NOT NULL | Numéro de la séance dans la semaine (1 à 3) |
 | `squat_type` | `VARCHAR(50)` | NOT NULL | Type de squat : `BACK`, `FRONT` |
 | `exercice_code` | `VARCHAR(50)` | NOT NULL | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
 | `set_number` | `INTEGER` | NOT NULL | Nombre de séries de référence |
 | `rep_number` | `INTEGER` | NOT NULL | Nombre de répétitions de référence |
 | `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
-| `estimate_value` | `NUMERIC(1, 2)` | — | Pourcentage de charge estimée par rapport à l'objectif de squat |
+| `estimate_value` | `NUMERIC(4, 2)` | — | Pourcentage de charge estimée par rapport à l'objectif de squat |
 
 ---
 
@@ -258,11 +278,11 @@ Exercices de tirage de référence par archétype, objectif et type de semaine.
 | `ref_pull_id` | `INTEGER` | PK | Identifiant auto-généré |
 | `goal` | `VARCHAR(10)` | NOT NULL | Objectif : `STRENGTH` = Force, `SPEED` = Vitesse, `KEEP` = Maintien |
 | `archetype` | `VARCHAR(10)` | NOT NULL | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
-| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload) |
+| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload), `PC` (Pré-Compétition) |
 | `training_number` | `INTEGER` | NOT NULL | Numéro de la séance dans la semaine (1 à 3) |
 | `pull_type` | `VARCHAR(50)` | NOT NULL | Type de tirage : `SNATCH_PULL`, `CJ_PULL`, etc. |
 | `exercice_code` | `VARCHAR(50)` | NOT NULL | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
 | `set_number` | `INTEGER` | NOT NULL | Nombre de séries de référence |
 | `rep_number` | `INTEGER` | NOT NULL | Nombre de répétitions de référence |
 | `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
-| `estimate_value` | `NUMERIC(1, 2)` | — | Pourcentage de charge estimée par rapport à l'objectif de tirage |
+| `estimate_value` | `NUMERIC(4, 2)` | — | Pourcentage de charge estimée par rapport à l'objectif de tirage |

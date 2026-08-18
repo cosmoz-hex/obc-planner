@@ -1,4 +1,41 @@
 {
+  "layout": {
+    "skip-to-content": "Skip to content",
+    "language": "Change language",
+    "menu": "Navigation",
+    "main-navigation": "Main navigation"
+  },
+  "nav": {
+    "athletes": "Athletes",
+    "referentiel": "Reference Data"
+  },
+  "pages": {
+    "athletes": {
+      "title": "Athletes",
+      "placeholder": "Athlete management will be available here."
+    },
+    "referentiel": {
+      "title": "Reference Data",
+      "tabs": {
+        "exercices": "Exercises",
+        "correctifs": "Correctives",
+        "archetypes": "Archetypes",
+        "trame-generale": "General Framework"
+      },
+      "exercices": {
+        "placeholder": "The exercise catalog will be available here."
+      },
+      "correctifs": {
+        "placeholder": "Corrective exercise management will be available here."
+      },
+      "archetypes": {
+        "placeholder": "Archetype management will be available here."
+      },
+      "trame-generale": {
+        "placeholder": "General framework management will be available here."
+      }
+    }
+  },
   "exercice": {
     "total": "Total",
     "snatch": {

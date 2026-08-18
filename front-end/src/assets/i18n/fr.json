@@ -1,4 +1,41 @@
 {
+  "layout": {
+    "skip-to-content": "Aller au contenu principal",
+    "language": "Changer de langue",
+    "menu": "Navigation",
+    "main-navigation": "Navigation principale"
+  },
+  "nav": {
+    "athletes": "Athlètes",
+    "referentiel": "Référentiel"
+  },
+  "pages": {
+    "athletes": {
+      "title": "Athlètes",
+      "placeholder": "La gestion des athlètes sera disponible ici."
+    },
+    "referentiel": {
+      "title": "Référentiel",
+      "tabs": {
+        "exercices": "Exercices",
+        "correctifs": "Correctifs",
+        "archetypes": "Archétypes",
+        "trame-generale": "Trame générale"
+      },
+      "exercices": {
+        "placeholder": "Le catalogue des exercices sera disponible ici."
+      },
+      "correctifs": {
+        "placeholder": "La gestion des correctifs sera disponible ici."
+      },
+      "archetypes": {
+        "placeholder": "La gestion des archétypes sera disponible ici."
+      },
+      "trame-generale": {
+        "placeholder": "La gestion de la trame générale sera disponible ici."
+      }
+    }
+  },
   "exercice": {
     "total": "Total",
     "snatch": {

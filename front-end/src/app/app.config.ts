@@ -16,6 +16,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideTranslateService({
+      fallbackLang: 'en',
       loader: {
         provide: TranslateLoader,
         useClass: CustomTranslateLoader,
@@ -24,7 +25,3 @@ export const appConfig: ApplicationConfig = {
     })
   ]
 };
-
-
-
-
