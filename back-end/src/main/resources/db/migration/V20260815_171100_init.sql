@@ -1,3 +1,21 @@
+-- ============================================================
+-- SUPPRESSION DES TABLES (ordre inverse des dépendances)
+-- ============================================================
+DROP TABLE IF EXISTS ref_pulls;
+DROP TABLE IF EXISTS ref_squats;
+DROP TABLE IF EXISTS ref_plannings;
+DROP TABLE IF EXISTS ref_timelines;
+DROP TABLE IF EXISTS ref_archetypes;
+DROP TABLE IF EXISTS programme_trainings;
+DROP TABLE IF EXISTS programme_weeks;
+DROP TABLE IF EXISTS programmes;
+DROP TABLE IF EXISTS eval_details;
+DROP TABLE IF EXISTS eval_summaries;
+DROP TABLE IF EXISTS corrections;
+DROP TABLE IF EXISTS athletes;
+DROP TABLE IF EXISTS exercices;
+
+
 -- ------------------------------------------------------------
 -- EXERCICE
 -- Catalogue des exercices de référence
@@ -9,12 +27,12 @@ CREATE TABLE IF NOT EXISTS exercices
     type_exercice      VARCHAR(10) NOT NULL,
     categorie_exercice VARCHAR(10) NOT NULL,
     exercice_code      VARCHAR(50) NOT NULL,
-    estimate_value     NUMERIC(1, 2),
+    estimate_value     NUMERIC(4, 2),
     CONSTRAINT pk_exercices PRIMARY KEY (exercice_id),
     CONSTRAINT uq_exercices_1 UNIQUE (exercice_code),
     CONSTRAINT fk_exercices_1 FOREIGN KEY (exercice_ref) REFERENCES exercices (exercice_id),
-    CONSTRAINT chk_exercices_1 CHECK (type_exercice IN ('SQUAT', 'PULL', 'SNATCH', 'CLEAN', 'JERK', 'MUSCU')),
-    CONSTRAINT chk_exercices_2 CHECK (categorie_exercice IN ('TECH', 'COMBI', 'SEMI_LEGER', 'SEMI_LOURD', 'RENFO', 'GEN', 'LEG', 'POST', 'CORE', 'CARDIO', 'PLYO'))
+    CONSTRAINT chk_exercices_1 CHECK (type_exercice IN ('SQUAT', 'PULL', 'SNATCH', 'CLEAN', 'JERK')),
+    CONSTRAINT chk_exercices_2 CHECK (categorie_exercice IN ('TECH', 'COMBI', 'SEMI_LEGER', 'SEMI_LOURD', 'RENFO', 'CARDIO', 'PLYO', 'BACK', 'FRONT'))
 );
 
 COMMENT ON TABLE exercices IS 'Catalogue des exercices de référence';
@@ -77,7 +95,7 @@ CREATE TABLE IF NOT EXISTS ref_archetypes
     technique        VARCHAR(10)  NOT NULL,
     endurance        VARCHAR(10)  NOT NULL,
     CONSTRAINT pk_ref_archetypes PRIMARY KEY (ref_archetype_id),
-    CONSTRAINT uq_ref_archetypes_1 UNIQUE (archetype, strength_speed, technique, endurance),
+    CONSTRAINT uq_ref_archetypes_1 UNIQUE (strength_speed, technique, endurance),
     CONSTRAINT chk_ref_archetypes_1 CHECK (strength_speed IN ('STRENGTH', 'MID', 'SPEED')),
     CONSTRAINT chk_ref_archetypes_2 CHECK (technique IN ('LOW', 'MID', 'HIGH')),
     CONSTRAINT chk_ref_archetypes_3 CHECK (endurance IN ('LOW', 'MID', 'HIGH')),
@@ -208,7 +226,7 @@ CREATE TABLE IF NOT EXISTS programme_weeks
     start_date        DATE NOT NULL,
     end_date          DATE NOT NULL,
     week_type         VARCHAR(50) NOT NULL,
-    base_percent      NUMERIC(1,2) NOT NULL,
+    base_percent      NUMERIC(4,2) NOT NULL,
     snatch_goal       INTEGER NOT NULL,
     cj_goal           INTEGER NOT NULL,
     back_squat_goal   INTEGER NOT NULL,
@@ -220,7 +238,7 @@ CREATE TABLE IF NOT EXISTS programme_weeks
     CONSTRAINT chk_programme_weeks_1 CHECK (week_number BETWEEN 1 AND 16),
     CONSTRAINT chk_programme_weeks_2 CHECK (base_percent > 0),
     CONSTRAINT chk_programme_weeks_3 CHECK (end_date >= start_date),
-    CONSTRAINT chk_programme_weeks_4 CHECK (week_type IN ('VOLUME', 'TECH', 'STRENGTH', 'PEAK', 'DELOAD')),
+    CONSTRAINT chk_programme_weeks_4 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D', 'PC')),
     CONSTRAINT fk_programme_weeks_1 FOREIGN KEY (programme_id) REFERENCES programmes (programme_id)
 );
 
@@ -317,7 +335,7 @@ CREATE TABLE IF NOT EXISTS ref_plannings
     CONSTRAINT chk_ref_plannings_3 CHECK (set_number > 0),
     CONSTRAINT chk_ref_plannings_4 CHECK (rep_number > 0),
     CONSTRAINT chk_ref_plannings_5 CHECK (strength_weakness IN ('STRENGTH', 'WEAKNESS', NULL)),
-    CONSTRAINT chk_ref_plannings_6 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D'))
+    CONSTRAINT chk_ref_plannings_6 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D', 'PC'))
 );
 
 COMMENT ON TABLE ref_plannings IS 'Planning de référence associé à une timeline';
@@ -347,9 +365,9 @@ CREATE TABLE IF NOT EXISTS ref_squats
     set_number      INTEGER     NOT NULL,
     rep_number      INTEGER     NOT NULL,
     rep_label       VARCHAR(20),
-    estimate_value  NUMERIC(1, 2),
+    estimate_value  NUMERIC(4, 2),
     CONSTRAINT pk_ref_squats PRIMARY KEY (ref_squat_id),
-    CONSTRAINT chk_ref_squats_1 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D')),
+    CONSTRAINT chk_ref_squats_1 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D', 'PC')),
     CONSTRAINT chk_ref_squats_2 CHECK (training_number BETWEEN 1 AND 3),
     CONSTRAINT chk_ref_squats_3 CHECK (set_number > 0),
     CONSTRAINT chk_ref_squats_4 CHECK (rep_number > 0),
@@ -385,9 +403,9 @@ CREATE TABLE IF NOT EXISTS ref_pulls
     set_number      INTEGER     NOT NULL,
     rep_number      INTEGER     NOT NULL,
     rep_label       VARCHAR(20),
-    estimate_value  NUMERIC(1, 2),
+    estimate_value  NUMERIC(4, 2),
     CONSTRAINT pk_ref_pulls PRIMARY KEY (ref_pull_id),
-    CONSTRAINT chk_ref_pulls_1 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D')),
+    CONSTRAINT chk_ref_pulls_1 CHECK (week_type IN ('F', 'T', 'S', 'A', 'D', 'PC')),
     CONSTRAINT chk_ref_pulls_2 CHECK (training_number BETWEEN 1 AND 3),
     CONSTRAINT chk_ref_pulls_3 CHECK (set_number > 0),
     CONSTRAINT chk_ref_pulls_4 CHECK (rep_number > 0),
@@ -408,7 +426,6 @@ COMMENT ON COLUMN ref_pulls.rep_label IS 'Label des répétitions (si complexe, 
 COMMENT ON COLUMN ref_pulls.estimate_value IS 'Pourcentage de charge estimée par rapport à l''objectif de tirage';
 
 
-
 -- ============================================================
 -- DATA — EXERCICES
 -- IDs assignés manuellement (GENERATED BY DEFAULT)
@@ -416,6 +433,7 @@ COMMENT ON COLUMN ref_pulls.estimate_value IS 'Pourcentage de charge estimée pa
 -- exercice_ref = ID de l'exercice parent
 -- estimate_value = % de charge par rapport à l'exercice de référence
 -- ============================================================
+DELETE FROM exercices;
 
 -- Exercice Racine
 INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
@@ -479,16 +497,7 @@ INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_
 
 -- Tirages arraché (pull)
 INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
-(44, 'PULL', 'TECH', 'exercice.snatch.pull.simple',    2, 1.20),
-(45, 'PULL', 'TECH', 'exercice.snatch.pull.double',    44, 0.95),
-(46, 'PULL', 'TECH', 'exercice.snatch.pull.triple',    44, 0.90),
-(47, 'PULL', 'TECH', 'exercice.snatch.pull.high',      2, 1.00),
-(48, 'PULL', 'TECH', 'exercice.snatch.pull.high-hang', 47, 0.95),
-(49, 'PULL', 'TECH', 'exercice.snatch.pull.block',     44, NULL),
-(50, 'PULL', 'TECH', 'exercice.snatch.pull.deficit',   44, NULL),
-(51, 'PULL', 'TECH', 'exercice.snatch.pull.pause',     44, NULL),
-(52, 'PULL', 'TECH', 'exercice.snatch.pull.hip',       44, NULL),
-(53, 'PULL', 'TECH', 'exercice.snatch.pull.tng',       44, NULL);
+(44, 'PULL', 'TECH', 'exercice.snatch.pull.simple',    2, 1.20);
 
 -- Renforcement spécifique arraché (renfo)
 INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
@@ -552,14 +561,7 @@ INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_
 
 -- Tirages épaulé (pull)
 INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
-(96,  'PULL', 'TECH', 'exercice.clean.pull.simple',   60, 1.30),
-(97,  'PULL', 'TECH', 'exercice.clean.pull.double',   60, 1.24),
-(98,  'PULL', 'TECH', 'exercice.clean.pull.triple',   60, 1.17),
-(99,  'PULL', 'TECH', 'exercice.clean.pull.hip',      60, NULL),
-(100, 'PULL', 'TECH', 'exercice.clean.pull.block',    60, NULL),
-(101, 'PULL', 'TECH', 'exercice.clean.pull.deficit', 60, NULL),
-(102, 'PULL', 'TECH', 'exercice.clean.pull.pause',    60, NULL),
-(103, 'PULL', 'TECH', 'exercice.clean.pull.tng',      60, NULL);
+(96,  'PULL', 'TECH', 'exercice.clean.pull.simple',   60, 1.30);
 
 -- Renforcement spécifique épaulé (renfo)
 INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
@@ -570,19 +572,7 @@ INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_
 -- Squats (ref = épaulé ID 60, ratio vs épaulé)
 INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
 (107, 'SQUAT', 'BACK', 'exercice.squat.back.simple',          60, 1.35),
-(108, 'SQUAT', 'BACK', 'exercice.squat.back.double',          107, 0.95),
-(109, 'SQUAT', 'BACK', 'exercice.squat.back.triple',          107, 0.90),
-(110, 'SQUAT', 'BACK', 'exercice.squat.back.pause',           107, 0.85),
-(111, 'SQUAT', 'BACK', 'exercice.squat.back.eccentric',       107, 0.80),
-(112, 'SQUAT', 'BACK', 'exercice.squat.back.eccentric-pause', 107, 0.80),
-(113, 'SQUAT', 'BACK', 'exercice.squat.back.jump',            107, 0.35),
-
-(114, 'SQUAT', 'FRONT', 'exercice.squat.front.anderson',        115, 0.85),
-(115, 'SQUAT', 'FRONT', 'exercice.squat.front.simple',         60, 1.14),
-(116, 'SQUAT', 'FRONT', 'exercice.squat.front.double',         115, 0.95),
-(117, 'SQUAT', 'FRONT', 'exercice.squat.front.triple',         115, 0.90),
-(118, 'SQUAT', 'FRONT', 'exercice.squat.front.pause',          115, 0.85),
-(119, 'SQUAT', 'FRONT', 'exercice.squat.front.plus-back',      115, NULL);
+(115, 'SQUAT', 'FRONT', 'exercice.squat.front.simple',         60, 1.14);
 
 -- ============================================================
 -- JETÉ (ref = total ID 1, estimate = 0.56)
@@ -624,62 +614,9 @@ INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_
 (139, 'JERK', 'RENFO', 'exercice.jerk.renfo.bar-hold-renfo',         120, NULL);
 
 -- ============================================================
--- MUSCULATION (pas de parent)
--- ============================================================
-INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_code, exercice_ref, estimate_value) VALUES
--- Général
-(140, 'MUSCU', 'GEN',   'exercice.muscu.rdl-romanian',               NULL, NULL),
-(141, 'MUSCU', 'GEN',   'exercice.muscu.pull-ups',                   NULL, NULL),
-(142, 'MUSCU', 'GEN',   'exercice.muscu.push-ups',                   NULL, NULL),
-(143, 'MUSCU', 'GEN',   'exercice.muscu.lateral-raises',             NULL, NULL),
-(144, 'MUSCU', 'GEN',   'exercice.muscu.bench-row',                  NULL, NULL),
-(145, 'MUSCU', 'GEN',   'exercice.muscu.bosu-cj-pull',               NULL, NULL),
-(146, 'MUSCU', 'GEN',   'exercice.muscu.neck-pull-ups',              NULL, NULL),
-(147, 'MUSCU', 'GEN',   'exercice.muscu.bird-row',                   NULL, NULL),
-(148, 'MUSCU', 'GEN',   'exercice.muscu.pull-over',                  NULL, NULL),
--- Jambes
-(149, 'MUSCU', 'LEG',   'exercice.muscu.lunge-bulgarian',            NULL, NULL),
-(150, 'MUSCU', 'LEG',   'exercice.muscu.lunge-walking',              NULL, NULL),
-(151, 'MUSCU', 'LEG',   'exercice.muscu.lunge-box',                  NULL, NULL),
-(152, 'MUSCU', 'LEG',   'exercice.muscu.leg-extension-unilateral',   NULL, NULL),
-(153, 'MUSCU', 'LEG',   'exercice.muscu.leg-extension',              NULL, NULL),
-(154, 'MUSCU', 'LEG',   'exercice.muscu.sled-push',                  NULL, NULL),
-(155, 'MUSCU', 'LEG',   'exercice.muscu.goblet-squat',               NULL, NULL),
-(156, 'MUSCU', 'LEG',   'exercice.muscu.pistol-squat',               NULL, NULL),
-(157, 'MUSCU', 'LEG',   'exercice.muscu.sled-pull',                  NULL, NULL),
--- Chaîne postérieure
-(158, 'MUSCU', 'POST',  'exercice.muscu.rdl-unilateral',             NULL, NULL),
-(159, 'MUSCU', 'POST',  'exercice.muscu.single-leg-glute-bridge',    NULL, NULL),
-(160, 'MUSCU', 'POST',  'exercice.muscu.nordic-curl',                NULL, NULL),
-(161, 'MUSCU', 'POST',  'exercice.muscu.lower-back-prone',           NULL, NULL),
-(162, 'MUSCU', 'POST',  'exercice.muscu.superman',                   NULL, NULL),
-(163, 'MUSCU', 'POST',  'exercice.muscu.bent-over-row',              NULL, NULL),
-(164, 'MUSCU', 'POST',  'exercice.muscu.australian-row',             NULL, NULL),
-(165, 'MUSCU', 'POST',  'exercice.muscu.lumberjack-row',             NULL, NULL),
-(166, 'MUSCU', 'POST',  'exercice.muscu.leg-curl-swissball',         NULL, NULL),
-(167, 'MUSCU', 'POST',  'exercice.muscu.leg-curl-elastic-unilateral', NULL, NULL),
-(168, 'MUSCU', 'POST',  'exercice.muscu.hip-thrust-bar',             NULL, NULL),
-(169, 'MUSCU', 'POST',  'exercice.muscu.hip-extension-elastic',      NULL, NULL),
-(170, 'MUSCU', 'POST',  'exercice.muscu.kettlebell-swing',           NULL, NULL),
-(171, 'MUSCU', 'POST',  'exercice.muscu.good-morning',               NULL, NULL),
--- Core / Gainage
-(172, 'MUSCU', 'CORE',  'exercice.muscu.weighted-plank',             NULL, NULL),
-(173, 'MUSCU', 'CORE',  'exercice.muscu.dynamic-plank',              NULL, NULL),
-(174, 'MUSCU', 'CORE',  'exercice.muscu.swissball-plank',            NULL, NULL),
-(175, 'MUSCU', 'CORE',  'exercice.muscu.obliques-elastic',           NULL, NULL),
-(176, 'MUSCU', 'CORE',  'exercice.muscu.obliques-bar',               NULL, NULL),
-(177, 'MUSCU', 'CORE',  'exercice.muscu.russian-twist',              NULL, NULL),
-(178, 'MUSCU', 'CORE',  'exercice.muscu.bar-plank',                  NULL, NULL),
-(179, 'MUSCU', 'CORE',  'exercice.muscu.inclined-plank',             NULL, NULL),
-(180, 'MUSCU', 'CORE',  'exercice.muscu.snatch-squat-elastic-muscu', NULL, NULL),
--- Plyométrie / Cardio
-(181, 'MUSCU', 'PLYO',  'exercice.muscu.box-jump',                   NULL, NULL),
-(182, 'MUSCU', 'CARDIO','exercice.muscu.cardio-plyo',                NULL, NULL);
-
--- ============================================================
 -- DATA — CORRECTIONS
 -- ============================================================
-
+DELETE FROM corrections;
 INSERT INTO corrections (exercice_id, correction_id) VALUES
 -- Arraché flexion (ID 16) → correctifs
 (16, 5),    -- Combiné 1
@@ -884,3 +821,1157 @@ INSERT INTO corrections (exercice_id, correction_id) VALUES
 (128, 128), -- Jeté Force
 (128, 134), -- Développé Militaire
 (128, 139); -- Appel de Jeté ou Gainage Barre
+
+
+-- ============================================================
+-- DATA — REF_ARCHETYPES
+-- Correspondances profils → archétypes (source : Étude Profil Sportif)
+-- strength_speed : STRENGTH (Force), MID (Mixte), SPEED (Vitesse)
+-- technique      : LOW (Irrégulier), MID (Fiable), HIGH (Spécialiste)
+-- endurance      : LOW (Explosif), MID (Mixte), HIGH (Endurant)
+-- archetype      : MID (Mixte), ROUGH (Bourrin), TECH (Technicien), CYCLE (Cyclique), LEARN (Apprentissage)
+-- ============================================================
+DELETE FROM ref_archetypes;
+INSERT INTO ref_archetypes (archetype, strength_speed, technique, endurance) VALUES
+-- Mixte / Fiable / Mixte → MID
+('MID', 'MID', 'MID', 'MID'),
+-- Mixte / Fiable / Endurant → MID
+('MID', 'MID', 'MID', 'HIGH'),
+-- Mixte / Fiable / Explosif → CYCLE
+('CYCLE', 'MID', 'MID', 'LOW'),
+-- Mixte / Irrégulier / Mixte → MID
+('MID', 'MID', 'LOW', 'MID'),
+-- Mixte / Irrégulier / Endurant → LEARN
+('LEARN', 'MID', 'LOW', 'HIGH'),
+-- Mixte / Irrégulier / Explosif → CYCLE
+('CYCLE', 'MID', 'LOW', 'LOW'),
+-- Mixte / Spécialiste / Mixte → MID
+('MID', 'MID', 'HIGH', 'MID'),
+-- Mixte / Spécialiste / Endurant → LEARN
+('LEARN', 'MID', 'HIGH', 'HIGH'),
+-- Mixte / Spécialiste / Explosif → TECH
+('TECH', 'MID', 'HIGH', 'LOW'),
+-- Force / Fiable / Mixte → MID
+('MID', 'STRENGTH', 'MID', 'MID'),
+-- Force / Fiable / Endurant → ROUGH
+('ROUGH', 'STRENGTH', 'MID', 'HIGH'),
+-- Force / Fiable / Explosif → TECH
+('TECH', 'STRENGTH', 'MID', 'LOW'),
+-- Force / Irrégulier / Mixte → ROUGH
+('ROUGH', 'STRENGTH', 'LOW', 'MID'),
+-- Force / Irrégulier / Endurant → ROUGH
+('ROUGH', 'STRENGTH', 'LOW', 'HIGH'),
+-- Force / Irrégulier / Explosif → TECH
+('TECH', 'STRENGTH', 'LOW', 'LOW'),
+-- Force / Spécialiste / Mixte → MID
+('MID', 'STRENGTH', 'HIGH', 'MID'),
+-- Force / Spécialiste / Endurant → ROUGH
+('ROUGH', 'STRENGTH', 'HIGH', 'HIGH'),
+-- Force / Spécialiste / Explosif → TECH
+('TECH', 'STRENGTH', 'HIGH', 'LOW'),
+-- Vitesse / Fiable / Mixte → MID
+('MID', 'SPEED', 'MID', 'MID'),
+-- Vitesse / Fiable / Endurant → LEARN
+('LEARN', 'SPEED', 'MID', 'HIGH'),
+-- Vitesse / Fiable / Explosif → CYCLE
+('CYCLE', 'SPEED', 'MID', 'LOW'),
+-- Vitesse / Irrégulier / Mixte → LEARN
+('LEARN', 'SPEED', 'LOW', 'MID'),
+-- Vitesse / Irrégulier / Endurant → LEARN
+('LEARN', 'SPEED', 'LOW', 'HIGH'),
+-- Vitesse / Irrégulier / Explosif → TECH
+('TECH', 'SPEED', 'LOW', 'LOW'),
+-- Vitesse / Spécialiste / Mixte → CYCLE
+('CYCLE', 'SPEED', 'HIGH', 'MID'),
+-- Vitesse / Spécialiste / Endurant → MID
+('MID', 'SPEED', 'HIGH', 'HIGH'),
+-- Vitesse / Spécialiste / Explosif → TECH
+('TECH', 'SPEED', 'HIGH', 'LOW');
+
+-- ============================================================
+-- DATA — REF_TIMELINES
+-- Séquences de types de semaines par archétype et durée de programme
+-- (source : Étude Profil Sportif — Rythme d'entraînement global)
+-- Codes : F = Foncier (VOLUME), T = Technique (TECH), S = Surcharge (STRENGTH),
+--         A = Affûtage (PEAK), D = Deload (DELOAD), PC = Pré-Compétition
+-- La dernière semaine (PC) est ajoutée à chaque programme (7+1=8, 11+1=12, 15+1=16)
+-- ============================================================
+DELETE FROM ref_timelines;
+INSERT INTO ref_timelines (archetype, weeks, timeline) VALUES
+-- 8 semaines
+('MID',   8,  'F/F/T/T/S/S/A/PC'),
+('ROUGH', 8,  'F/F/S/F/S/S/A/PC'),
+('TECH',  8,  'F/T/S/T/S/T/A/PC'),
+('CYCLE', 8,  'F/T/S/F/T/S/A/PC'),
+('LEARN', 8,  'F/F/T/F/T/S/A/PC'),
+-- 12 semaines
+('MID',   12, 'F/F/T/T/S/S/D/T/F/S/A/PC'),
+('ROUGH', 12, 'F/F/T/S/S/F/F/T/S/S/A/PC'),
+('TECH',  12, 'F/F/T/T/S/D/T/S/T/S/A/PC'),
+('CYCLE', 12, 'F/T/S/F/T/S/D/F/T/S/A/PC'),
+('LEARN', 12, 'F/F/T/T/S/D/F/T/S/S/A/PC'),
+-- 16 semaines
+('MID',   16, 'F/F/T/T/S/S/A/D/T/F/D/T/S/S/A/PC'),
+('ROUGH', 16, 'F/F/T/S/F/S/S/A/D/F/F/T/S/S/A/PC'),
+('TECH',  16, 'F/T/T/S/A/D/F/T/T/S/D/T/S/S/A/PC'),
+('CYCLE', 16, 'F/T/S/F/T/S/A/D/F/T/S/D/T/S/A/PC'),
+('LEARN', 16, 'F/F/F/T/T/T/S/S/A/D/F/T/S/S/A/PC');
+
+-- ============================================================
+-- DATA — REF_SQUATS
+-- Protocole squat par archétype, objectif et type de semaine
+-- (source : Protocole Squat.pdf)
+-- goal : KEEP (Maintient), STRENGTH (Force), SPEED (Vitesse)
+-- week_type : F (Foncier), T (Technique), S (Surcharge), A (Affûtage), D (Deload)
+-- squat_type : BACK (Nuque), FRONT (Clavicule)
+-- estimate_value : % du max de squat (BACK ou FRONT selon squat_type)
+-- ============================================================
+
+DELETE FROM ref_squats;
+-- ============================================================
+-- FONCIER (F)
+-- ============================================================
+
+-- F / KEEP / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'F', 1, 'BACK', 'exercice.squat.back.simple', 4, 6, NULL, 0.75),
+('KEEP', 'CYCLE', 'F', 1, 'BACK', 'exercice.squat.back.simple', 4, 6, NULL, 0.75),
+('KEEP', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 8, NULL, 0.65),
+('KEEP', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('KEEP', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 4, NULL, 0.85),
+('KEEP', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('KEEP', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('KEEP', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('KEEP', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('KEEP', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('KEEP', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85);
+
+-- F / KEEP / Séance 2 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'F', 2, 'FRONT', 'exercice.squat.front.simple', 4, 5, NULL, 0.80),
+('KEEP', 'CYCLE', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 4, 5, NULL, 0.80),
+('KEEP', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 2, 6, NULL, 0.75),
+('KEEP', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 2, 5, NULL, 0.80),
+('KEEP', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 2, 4, NULL, 0.85),
+('KEEP', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.simple', 1, 6, NULL, 0.75),
+('KEEP', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.simple', 2, 5, NULL, 0.80),
+('KEEP', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.simple', 1, 4, NULL, 0.85),
+('KEEP', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 1, 6, NULL, 0.75),
+('KEEP', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 2, 5, NULL, 0.80),
+('KEEP', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.simple', 1, 4, NULL, 0.85);
+
+-- F / KEEP / Séance 3 — Flexion Nuque Excentrique Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 4, 4, NULL, 0.65),
+('KEEP', 'CYCLE', 'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 4, 4, NULL, 0.65),
+('KEEP', 'ROUGH', 'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 6, 4, NULL, 0.65),
+('KEEP', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 2, 4, NULL, 0.65),
+('KEEP', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 2, 3, NULL, 0.70),
+('KEEP', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 2, 4, NULL, 0.65),
+('KEEP', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 2, 3, NULL, 0.70);
+
+-- F / STRENGTH / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'F', 1, 'BACK', 'exercice.squat.back.simple', 4, 6, NULL, 0.75),
+('STRENGTH', 'CYCLE', 'F', 1, 'BACK', 'exercice.squat.back.simple', 4, 6, NULL, 0.75),
+('STRENGTH', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 8, NULL, 0.65),
+('STRENGTH', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('STRENGTH', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 4, NULL, 0.85),
+('STRENGTH', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('STRENGTH', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('STRENGTH', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('STRENGTH', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('STRENGTH', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('STRENGTH', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85);
+
+-- F / STRENGTH / Séance 2 — Flexion Clavicule + Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 4, 6, '3 + 3', 0.80),
+('STRENGTH', 'CYCLE', 'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 4, 6, '3 + 3', 0.80),
+('STRENGTH', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 5, 8, '3 + 5', 0.80),
+('STRENGTH', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 2, 6, '3 + 3', 0.80),
+('STRENGTH', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 2, 4, '2 + 2', 0.85),
+('STRENGTH', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 2, 6, '3 + 3', 0.80),
+('STRENGTH', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.plus-back', 2, 4, '2 + 2', 0.85);
+
+-- F / STRENGTH / Séance 3 — Flexion Nuque Excentrique
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'F', 3, 'BACK', 'exercice.squat.back.eccentric', 4, 4, NULL, 0.65),
+('STRENGTH', 'CYCLE', 'F', 3, 'BACK', 'exercice.squat.back.eccentric', 4, 4, NULL, 0.65),
+('STRENGTH', 'ROUGH', 'F', 3, 'BACK', 'exercice.squat.back.eccentric', 5, 5, NULL, 0.60),
+('STRENGTH', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 4, NULL, 0.65),
+('STRENGTH', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.70),
+('STRENGTH', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 4, NULL, 0.65),
+('STRENGTH', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.70);
+
+-- F / SPEED / Séance 1 — Flexion Nuque Excentrique + Box Jump
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 4, 4, '4 + 8', 0.65),
+('SPEED', 'CYCLE', 'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 4, 4, '4 + 8', 0.65),
+('SPEED', 'ROUGH', 'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 5, 5, '5 + 10', 0.60),
+('SPEED', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 4, '4 + 8', 0.65),
+('SPEED', 'TECH',  'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 3, '3 + 6', 0.70),
+('SPEED', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 4, '4 + 8', 0.65),
+('SPEED', 'LEARN', 'F', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 3, '3 + 6', 0.70);
+
+-- F / SPEED / Séance 2 — Flexion Clavicule Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'F', 2, 'FRONT', 'exercice.squat.front.pause', 4, 4, NULL, 0.70),
+('SPEED', 'CYCLE', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 4, 4, NULL, 0.70),
+('SPEED', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 2, 5, NULL, 0.65),
+('SPEED', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 2, 4, NULL, 0.70),
+('SPEED', 'ROUGH', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 2, 3, NULL, 0.75),
+('SPEED', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.pause', 1, 5, NULL, 0.65),
+('SPEED', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.pause', 2, 4, NULL, 0.70),
+('SPEED', 'TECH',  'F', 2, 'FRONT', 'exercice.squat.front.pause', 1, 3, NULL, 0.75),
+('SPEED', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 1, 5, NULL, 0.65),
+('SPEED', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 2, 4, NULL, 0.70),
+('SPEED', 'LEARN', 'F', 2, 'FRONT', 'exercice.squat.front.pause', 1, 3, NULL, 0.75);
+
+-- F / SPEED / Séance 3 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'F', 3, 'BACK', 'exercice.squat.back.simple', 4, 6, NULL, 0.75),
+('SPEED', 'CYCLE', 'F', 3, 'BACK', 'exercice.squat.back.simple', 4, 6, NULL, 0.75),
+('SPEED', 'ROUGH', 'F', 3, 'BACK', 'exercice.squat.back.simple', 2, 8, NULL, 0.65),
+('SPEED', 'ROUGH', 'F', 3, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('SPEED', 'ROUGH', 'F', 3, 'BACK', 'exercice.squat.back.simple', 2, 4, NULL, 0.85),
+('SPEED', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('SPEED', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('SPEED', 'TECH',  'F', 3, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('SPEED', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('SPEED', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.simple', 2, 6, NULL, 0.75),
+('SPEED', 'LEARN', 'F', 3, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85);
+
+-- ============================================================
+-- TECHNIQUE (T)
+-- ============================================================
+
+-- T / KEEP / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.simple', 4, 4, NULL, 0.85),
+('KEEP', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.simple', 4, 4, NULL, 0.85),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 6, NULL, 0.75),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 2, NULL, 0.90),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 6, NULL, 0.75),
+('KEEP', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 8, NULL, 0.65),
+('KEEP', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 5, NULL, 0.80),
+('KEEP', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('KEEP', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 5, NULL, 0.80),
+('KEEP', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90);
+
+-- T / KEEP / Séance 2 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'T', 2, 'FRONT', 'exercice.squat.front.simple', 2, 4, NULL, 0.85),
+('KEEP', 'MID',   'T', 2, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('KEEP', 'CYCLE', 'T', 2, 'FRONT', 'exercice.squat.front.simple', 2, 4, NULL, 0.85),
+('KEEP', 'CYCLE', 'T', 2, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('KEEP', 'ROUGH', 'T', 2, 'FRONT', 'exercice.squat.front.simple', 3, 4, NULL, 0.85),
+('KEEP', 'ROUGH', 'T', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('KEEP', 'TECH',  'T', 2, 'FRONT', 'exercice.squat.front.simple', 3, 4, NULL, 0.85),
+('KEEP', 'TECH',  'T', 2, 'FRONT', 'exercice.squat.front.simple', 1, 3, NULL, 0.90),
+('KEEP', 'LEARN', 'T', 2, 'FRONT', 'exercice.squat.front.simple', 3, 4, NULL, 0.85),
+('KEEP', 'LEARN', 'T', 2, 'FRONT', 'exercice.squat.front.simple', 1, 3, NULL, 0.90);
+
+-- T / KEEP / Séance 3 — Flexion Clavicule Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'T', 3, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75),
+('KEEP', 'CYCLE', 'T', 3, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75),
+('KEEP', 'ROUGH', 'T', 3, 'FRONT', 'exercice.squat.front.pause', 4, 3, NULL, 0.75),
+('KEEP', 'TECH',  'T', 3, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75),
+('KEEP', 'LEARN', 'T', 3, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75);
+
+-- T / STRENGTH / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('STRENGTH', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('STRENGTH', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 5, NULL, 0.80),
+('STRENGTH', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('STRENGTH', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 5, NULL, 0.80),
+('STRENGTH', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95);
+
+-- T / STRENGTH / Séance 2 — Anderson Squat
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'T', 2, 'FRONT', 'exercice.squat.front.anderson', 4, 3, NULL, 0.75),
+('STRENGTH', 'CYCLE', 'T', 2, 'FRONT', 'exercice.squat.front.anderson', 4, 3, NULL, 0.75),
+('STRENGTH', 'ROUGH', 'T', 2, 'FRONT', 'exercice.squat.front.anderson', 5, 4, NULL, 0.70),
+('STRENGTH', 'TECH',  'T', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 4, NULL, 0.70),
+('STRENGTH', 'TECH',  'T', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75),
+('STRENGTH', 'LEARN', 'T', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 4, NULL, 0.70),
+('STRENGTH', 'LEARN', 'T', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75);
+
+-- T / STRENGTH / Séance 3 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'T', 3, 'FRONT', 'exercice.squat.front.simple', 2, 4, NULL, 0.85),
+('STRENGTH', 'MID',   'T', 3, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'CYCLE', 'T', 3, 'FRONT', 'exercice.squat.front.simple', 2, 4, NULL, 0.85),
+('STRENGTH', 'CYCLE', 'T', 3, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'T', 3, 'FRONT', 'exercice.squat.front.simple', 3, 4, NULL, 0.85),
+('STRENGTH', 'ROUGH', 'T', 3, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('STRENGTH', 'TECH',  'T', 3, 'FRONT', 'exercice.squat.front.simple', 3, 4, NULL, 0.85),
+('STRENGTH', 'TECH',  'T', 3, 'FRONT', 'exercice.squat.front.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'LEARN', 'T', 3, 'FRONT', 'exercice.squat.front.simple', 3, 4, NULL, 0.85),
+('STRENGTH', 'LEARN', 'T', 3, 'FRONT', 'exercice.squat.front.simple', 1, 3, NULL, 0.90);
+
+-- T / SPEED / Séance 1 — Flexion Nuque Excentrique + Box Jump
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 4, 3, '3 + 6', 0.70),
+('SPEED', 'CYCLE', 'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 4, 3, '3 + 6', 0.70),
+('SPEED', 'ROUGH', 'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 5, 4, '4 + 8', 0.65),
+('SPEED', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 4, '4 + 8', 0.65),
+('SPEED', 'TECH',  'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 3, '3 + 6', 0.70),
+('SPEED', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 4, '4 + 8', 0.65),
+('SPEED', 'LEARN', 'T', 1, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 3, '3 + 6', 0.70);
+
+-- T / SPEED / Séance 2 — Flexion Clavicule Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'T', 2, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75),
+('SPEED', 'CYCLE', 'T', 2, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75),
+('SPEED', 'ROUGH', 'T', 2, 'FRONT', 'exercice.squat.front.pause', 4, 3, NULL, 0.75),
+('SPEED', 'TECH',  'T', 2, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75),
+('SPEED', 'LEARN', 'T', 2, 'FRONT', 'exercice.squat.front.pause', 3, 3, NULL, 0.75);
+
+-- T / SPEED / Séance 3 — Flexion Nuque Sautée
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'T', 3, 'BACK', 'exercice.squat.back.jump', 4, 5, NULL, 0.35),
+('SPEED', 'CYCLE', 'T', 3, 'BACK', 'exercice.squat.back.jump', 4, 5, NULL, 0.35),
+('SPEED', 'ROUGH', 'T', 3, 'BACK', 'exercice.squat.back.jump', 5, 8, NULL, 0.35),
+('SPEED', 'TECH',  'T', 3, 'BACK', 'exercice.squat.back.jump', 4, 6, NULL, 0.35),
+('SPEED', 'LEARN', 'T', 3, 'BACK', 'exercice.squat.back.jump', 4, 6, NULL, 0.35);
+
+-- ============================================================
+-- SURCHARGE (S)
+-- ============================================================
+
+-- S / KEEP / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'S', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('KEEP', 'MID',   'S', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95),
+('KEEP', 'CYCLE', 'S', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('KEEP', 'CYCLE', 'S', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 2, NULL, 0.95),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 1.00),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('KEEP', 'ROUGH', 'S', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('KEEP', 'TECH',  'S', 1, 'BACK', 'exercice.squat.back.simple', 3, 3, NULL, 0.90),
+('KEEP', 'TECH',  'S', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95),
+('KEEP', 'LEARN', 'S', 1, 'BACK', 'exercice.squat.back.simple', 3, 3, NULL, 0.90),
+('KEEP', 'LEARN', 'S', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95);
+
+-- S / KEEP / Séance 2 — Anderson Squat
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'S', 2, 'FRONT', 'exercice.squat.front.anderson', 4, 3, NULL, 0.75),
+('KEEP', 'CYCLE', 'S', 2, 'FRONT', 'exercice.squat.front.anderson', 4, 3, NULL, 0.75),
+('KEEP', 'ROUGH', 'S', 2, 'FRONT', 'exercice.squat.front.anderson', 5, 4, NULL, 0.70),
+('KEEP', 'TECH',  'S', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 4, NULL, 0.70),
+('KEEP', 'TECH',  'S', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75),
+('KEEP', 'LEARN', 'S', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 4, NULL, 0.70),
+('KEEP', 'LEARN', 'S', 2, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75);
+
+-- S / KEEP / Séance 3 — Flexion Nuque Excentrique
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'S', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.70),
+('KEEP', 'CYCLE', 'S', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.70),
+('KEEP', 'ROUGH', 'S', 3, 'BACK', 'exercice.squat.back.eccentric', 5, 3, NULL, 0.70),
+('KEEP', 'TECH',  'S', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.70),
+('KEEP', 'TECH',  'S', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.75),
+('KEEP', 'LEARN', 'S', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.70),
+('KEEP', 'LEARN', 'S', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.75);
+
+-- S / STRENGTH / Séance 1 — Anderson Squat
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'S', 1, 'FRONT', 'exercice.squat.front.anderson', 4, 3, NULL, 0.75),
+('STRENGTH', 'CYCLE', 'S', 1, 'FRONT', 'exercice.squat.front.anderson', 4, 3, NULL, 0.75),
+('STRENGTH', 'ROUGH', 'S', 1, 'FRONT', 'exercice.squat.front.anderson', 5, 4, NULL, 0.70),
+('STRENGTH', 'TECH',  'S', 1, 'FRONT', 'exercice.squat.front.anderson', 2, 4, NULL, 0.70),
+('STRENGTH', 'TECH',  'S', 1, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75),
+('STRENGTH', 'LEARN', 'S', 1, 'FRONT', 'exercice.squat.front.anderson', 2, 4, NULL, 0.70),
+('STRENGTH', 'LEARN', 'S', 1, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75);
+
+-- S / STRENGTH / Séance 2 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'S', 2, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'MID',   'S', 2, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95),
+('STRENGTH', 'CYCLE', 'S', 2, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'CYCLE', 'S', 2, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 5, NULL, 0.80),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 4, NULL, 0.85),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 2, NULL, 0.95),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 1.00),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.90),
+('STRENGTH', 'TECH',  'S', 2, 'BACK', 'exercice.squat.back.simple', 3, 3, NULL, 0.90),
+('STRENGTH', 'TECH',  'S', 2, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95),
+('STRENGTH', 'LEARN', 'S', 2, 'BACK', 'exercice.squat.back.simple', 3, 3, NULL, 0.90),
+('STRENGTH', 'LEARN', 'S', 2, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.95);
+
+-- S / STRENGTH / Séance 3 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'S', 3, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'MID',   'S', 3, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95),
+('STRENGTH', 'CYCLE', 'S', 3, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('STRENGTH', 'CYCLE', 'S', 3, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95),
+('STRENGTH', 'ROUGH', 'S', 3, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'S', 3, 'FRONT', 'exercice.squat.front.simple', 3, 2, NULL, 0.95),
+('STRENGTH', 'TECH',  'S', 3, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('STRENGTH', 'TECH',  'S', 3, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95),
+('STRENGTH', 'LEARN', 'S', 3, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('STRENGTH', 'LEARN', 'S', 3, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95);
+
+-- S / SPEED / Séance 1 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'S', 1, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('SPEED', 'MID',   'S', 1, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95),
+('SPEED', 'CYCLE', 'S', 1, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.90),
+('SPEED', 'CYCLE', 'S', 1, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95),
+('SPEED', 'ROUGH', 'S', 1, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('SPEED', 'ROUGH', 'S', 1, 'FRONT', 'exercice.squat.front.simple', 3, 2, NULL, 0.95),
+('SPEED', 'TECH',  'S', 1, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('SPEED', 'TECH',  'S', 1, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95),
+('SPEED', 'LEARN', 'S', 1, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.90),
+('SPEED', 'LEARN', 'S', 1, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.95);
+
+-- S / SPEED / Séance 2 — Flexion Nuque Excentrique
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'S', 2, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.70),
+('SPEED', 'CYCLE', 'S', 2, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.70),
+('SPEED', 'ROUGH', 'S', 2, 'BACK', 'exercice.squat.back.eccentric', 5, 3, NULL, 0.70),
+('SPEED', 'TECH',  'S', 2, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.70),
+('SPEED', 'TECH',  'S', 2, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.75),
+('SPEED', 'LEARN', 'S', 2, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.70),
+('SPEED', 'LEARN', 'S', 2, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.75);
+
+-- S / SPEED / Séance 3 — Flexion Clavicule Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'S', 3, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.80),
+('SPEED', 'CYCLE', 'S', 3, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.80),
+('SPEED', 'ROUGH', 'S', 3, 'FRONT', 'exercice.squat.front.pause', 4, 2, NULL, 0.80),
+('SPEED', 'TECH',  'S', 3, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.80),
+('SPEED', 'LEARN', 'S', 3, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.80);
+
+-- ============================================================
+-- AFFÛTAGE (A)
+-- ============================================================
+
+-- A / KEEP / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'A', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.85),
+('KEEP', 'MID',   'A', 1, 'BACK', 'exercice.squat.back.simple', 1, 2, NULL, 0.90),
+('KEEP', 'MID',   'A', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('KEEP', 'CYCLE', 'A', 1, 'BACK', 'exercice.squat.back.simple', 1, 3, NULL, 0.85),
+('KEEP', 'CYCLE', 'A', 1, 'BACK', 'exercice.squat.back.simple', 1, 2, NULL, 0.90),
+('KEEP', 'CYCLE', 'A', 1, 'BACK', 'exercice.squat.back.simple', 1, 1, NULL, 0.95),
+('KEEP', 'ROUGH', 'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.85),
+('KEEP', 'ROUGH', 'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.90),
+('KEEP', 'ROUGH', 'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 1, NULL, 0.95),
+('KEEP', 'TECH',  'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.85),
+('KEEP', 'TECH',  'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.90),
+('KEEP', 'LEARN', 'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 3, NULL, 0.85),
+('KEEP', 'LEARN', 'A', 1, 'BACK', 'exercice.squat.back.simple', 2, 2, NULL, 0.90);
+
+-- A / KEEP / Séance 2 — Flexion Clavicule Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'A', 2, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.75),
+('KEEP', 'CYCLE', 'A', 2, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.75),
+('KEEP', 'ROUGH', 'A', 2, 'FRONT', 'exercice.squat.front.pause', 4, 2, NULL, 0.75),
+('KEEP', 'TECH',  'A', 2, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.75),
+('KEEP', 'LEARN', 'A', 2, 'FRONT', 'exercice.squat.front.pause', 3, 2, NULL, 0.75);
+
+-- A / KEEP / Séance 3 — Flexion Nuque Excentrique + Box Jump
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 4, 2, '2 + 4', 0.70),
+('KEEP', 'CYCLE', 'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 4, 2, '2 + 4', 0.70),
+('KEEP', 'ROUGH', 'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 5, 3, '3 + 6', 0.65),
+('KEEP', 'TECH',  'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 3, '3 + 6', 0.65),
+('KEEP', 'TECH',  'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 2, '2 + 4', 0.70),
+('KEEP', 'LEARN', 'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 3, '3 + 6', 0.65),
+('KEEP', 'LEARN', 'A', 3, 'BACK', 'exercice.squat.back.eccentric-box-jump', 2, 2, '2 + 4', 0.70);
+
+-- A / STRENGTH / Séance 1 — Anderson Squat
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'A', 1, 'FRONT', 'exercice.squat.front.anderson', 1, 3, NULL, 0.75),
+('STRENGTH', 'MID',   'A', 1, 'FRONT', 'exercice.squat.front.anderson', 1, 2, NULL, 0.80),
+('STRENGTH', 'MID',   'A', 1, 'FRONT', 'exercice.squat.front.anderson', 1, 1, NULL, 0.85),
+('STRENGTH', 'CYCLE', 'A', 1, 'FRONT', 'exercice.squat.front.anderson', 1, 3, NULL, 0.75),
+('STRENGTH', 'CYCLE', 'A', 1, 'FRONT', 'exercice.squat.front.anderson', 1, 2, NULL, 0.80),
+('STRENGTH', 'CYCLE', 'A', 1, 'FRONT', 'exercice.squat.front.anderson', 1, 1, NULL, 0.85),
+('STRENGTH', 'ROUGH', 'A', 1, 'FRONT', 'exercice.squat.front.anderson', 2, 3, NULL, 0.75),
+('STRENGTH', 'ROUGH', 'A', 1, 'FRONT', 'exercice.squat.front.anderson', 2, 2, NULL, 0.80),
+('STRENGTH', 'TECH',  'A', 1, 'FRONT', 'exercice.squat.front.anderson', 3, 2, NULL, 0.80),
+('STRENGTH', 'LEARN', 'A', 1, 'FRONT', 'exercice.squat.front.anderson', 3, 2, NULL, 0.80);
+
+-- A / STRENGTH / Séance 2 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'A', 2, 'BACK', 'exercice.squat.back.simple', 3, 2, NULL, 0.90),
+('STRENGTH', 'CYCLE', 'A', 2, 'BACK', 'exercice.squat.back.simple', 3, 2, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'A', 2, 'BACK', 'exercice.squat.back.simple', 4, 2, NULL, 0.90),
+('STRENGTH', 'TECH',  'A', 2, 'BACK', 'exercice.squat.back.simple', 3, 2, NULL, 0.90),
+('STRENGTH', 'LEARN', 'A', 2, 'BACK', 'exercice.squat.back.simple', 3, 2, NULL, 0.90);
+
+-- A / STRENGTH / Séance 3 — Flexion Nuque Sautée
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'A', 3, 'BACK', 'exercice.squat.back.jump', 3, 3, NULL, 0.35),
+('STRENGTH', 'CYCLE', 'A', 3, 'BACK', 'exercice.squat.back.jump', 3, 3, NULL, 0.35),
+('STRENGTH', 'ROUGH', 'A', 3, 'BACK', 'exercice.squat.back.jump', 4, 4, NULL, 0.35),
+('STRENGTH', 'TECH',  'A', 3, 'BACK', 'exercice.squat.back.jump', 4, 3, NULL, 0.35),
+('STRENGTH', 'LEARN', 'A', 3, 'BACK', 'exercice.squat.back.jump', 4, 3, NULL, 0.35);
+
+-- A / SPEED / Séance 1 — Flexion Nuque Sautée
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'A', 1, 'BACK', 'exercice.squat.back.jump', 3, 3, NULL, 0.35),
+('SPEED', 'CYCLE', 'A', 1, 'BACK', 'exercice.squat.back.jump', 3, 3, NULL, 0.35),
+('SPEED', 'ROUGH', 'A', 1, 'BACK', 'exercice.squat.back.jump', 4, 4, NULL, 0.35),
+('SPEED', 'TECH',  'A', 1, 'BACK', 'exercice.squat.back.jump', 4, 3, NULL, 0.35),
+('SPEED', 'LEARN', 'A', 1, 'BACK', 'exercice.squat.back.jump', 4, 3, NULL, 0.35);
+
+-- A / SPEED / Séance 2 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'A', 2, 'FRONT', 'exercice.squat.front.simple', 1, 3, NULL, 0.85),
+('SPEED', 'MID',   'A', 2, 'FRONT', 'exercice.squat.front.simple', 1, 2, NULL, 0.90),
+('SPEED', 'MID',   'A', 2, 'FRONT', 'exercice.squat.front.simple', 1, 1, NULL, 0.95),
+('SPEED', 'CYCLE', 'A', 2, 'FRONT', 'exercice.squat.front.simple', 1, 3, NULL, 0.85),
+('SPEED', 'CYCLE', 'A', 2, 'FRONT', 'exercice.squat.front.simple', 1, 2, NULL, 0.90),
+('SPEED', 'CYCLE', 'A', 2, 'FRONT', 'exercice.squat.front.simple', 1, 1, NULL, 0.95),
+('SPEED', 'ROUGH', 'A', 2, 'FRONT', 'exercice.squat.front.simple', 2, 3, NULL, 0.85),
+('SPEED', 'ROUGH', 'A', 2, 'FRONT', 'exercice.squat.front.simple', 2, 2, NULL, 0.90),
+('SPEED', 'TECH',  'A', 2, 'FRONT', 'exercice.squat.front.simple', 3, 2, NULL, 0.90),
+('SPEED', 'LEARN', 'A', 2, 'FRONT', 'exercice.squat.front.simple', 3, 2, NULL, 0.90);
+
+-- A / SPEED / Séance 3 — Flexion Nuque Excentrique
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'A', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 2, NULL, 0.70),
+('SPEED', 'CYCLE', 'A', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 2, NULL, 0.70),
+('SPEED', 'ROUGH', 'A', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.65),
+('SPEED', 'ROUGH', 'A', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.70),
+('SPEED', 'TECH',  'A', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.65),
+('SPEED', 'TECH',  'A', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.70),
+('SPEED', 'LEARN', 'A', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 3, NULL, 0.65),
+('SPEED', 'LEARN', 'A', 3, 'BACK', 'exercice.squat.back.eccentric', 2, 2, NULL, 0.70);
+
+-- ============================================================
+-- DELOAD (D)
+-- ============================================================
+
+-- D / KEEP / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 4, NULL, 0.75),
+('KEEP', 'CYCLE', 'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 4, NULL, 0.75),
+('KEEP', 'ROUGH', 'D', 1, 'BACK', 'exercice.squat.back.simple', 4, 5, NULL, 0.70),
+('KEEP', 'TECH',  'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 5, NULL, 0.70),
+('KEEP', 'LEARN', 'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 5, NULL, 0.70);
+
+-- D / KEEP / Séance 2 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80),
+('KEEP', 'CYCLE', 'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80),
+('KEEP', 'ROUGH', 'D', 2, 'FRONT', 'exercice.squat.front.simple', 4, 4, NULL, 0.75),
+('KEEP', 'TECH',  'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80),
+('KEEP', 'LEARN', 'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80);
+
+-- D / KEEP / Séance 3 — Flexion Nuque Excentrique Pause
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'D', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 3, 3, NULL, 0.60),
+('KEEP', 'CYCLE', 'D', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 3, 3, NULL, 0.60),
+('KEEP', 'ROUGH', 'D', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 4, 4, NULL, 0.55),
+('KEEP', 'TECH',  'D', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 3, 3, NULL, 0.60),
+('KEEP', 'LEARN', 'D', 3, 'BACK', 'exercice.squat.back.eccentric-pause', 3, 3, NULL, 0.60);
+
+-- D / STRENGTH / Séance 1 — Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 4, NULL, 0.75),
+('STRENGTH', 'CYCLE', 'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 4, NULL, 0.75),
+('STRENGTH', 'ROUGH', 'D', 1, 'BACK', 'exercice.squat.back.simple', 4, 5, NULL, 0.70),
+('STRENGTH', 'TECH',  'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 5, NULL, 0.70),
+('STRENGTH', 'LEARN', 'D', 1, 'BACK', 'exercice.squat.back.simple', 3, 5, NULL, 0.70);
+
+-- D / STRENGTH / Séance 2 — Flexion Clavicule + Flexion Nuque
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'D', 2, 'FRONT', 'exercice.squat.front.plus-back', 3, 4, '2 + 2', 0.75),
+('STRENGTH', 'CYCLE', 'D', 2, 'FRONT', 'exercice.squat.front.plus-back', 3, 4, '2 + 2', 0.75),
+('STRENGTH', 'ROUGH', 'D', 2, 'FRONT', 'exercice.squat.front.plus-back', 4, 6, '3 + 3', 0.70),
+('STRENGTH', 'TECH',  'D', 2, 'FRONT', 'exercice.squat.front.plus-back', 3, 5, '2 + 3', 0.70),
+('STRENGTH', 'LEARN', 'D', 2, 'FRONT', 'exercice.squat.front.plus-back', 3, 5, '2 + 3', 0.70);
+
+-- D / STRENGTH / Séance 3 — Flexion Nuque Excentrique
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'D', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.60),
+('STRENGTH', 'CYCLE', 'D', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.60),
+('STRENGTH', 'ROUGH', 'D', 3, 'BACK', 'exercice.squat.back.eccentric', 4, 4, NULL, 0.55),
+('STRENGTH', 'TECH',  'D', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.60),
+('STRENGTH', 'LEARN', 'D', 3, 'BACK', 'exercice.squat.back.eccentric', 3, 3, NULL, 0.60);
+
+-- D / SPEED / Séance 1 — Flexion Nuque + Box Jump
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'D', 1, 'BACK', 'exercice.squat.back.simple-box-jump', 3, 3, '3 + 6', 0.80),
+('SPEED', 'CYCLE', 'D', 1, 'BACK', 'exercice.squat.back.simple-box-jump', 3, 3, '3 + 6', 0.80),
+('SPEED', 'ROUGH', 'D', 1, 'BACK', 'exercice.squat.back.simple-box-jump', 4, 4, '4 + 8', 0.75),
+('SPEED', 'TECH',  'D', 1, 'BACK', 'exercice.squat.back.simple-box-jump', 3, 3, '3 + 6', 0.80),
+('SPEED', 'LEARN', 'D', 1, 'BACK', 'exercice.squat.back.simple-box-jump', 3, 3, '3 + 6', 0.80);
+
+-- D / SPEED / Séance 2 — Flexion Clavicule
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80),
+('SPEED', 'CYCLE', 'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80),
+('SPEED', 'ROUGH', 'D', 2, 'FRONT', 'exercice.squat.front.simple', 4, 4, NULL, 0.75),
+('SPEED', 'TECH',  'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80),
+('SPEED', 'LEARN', 'D', 2, 'FRONT', 'exercice.squat.front.simple', 3, 3, NULL, 0.80);
+
+-- D / SPEED / Séance 3 — Flexion Nuque Sautée
+INSERT INTO ref_squats (goal, archetype, week_type, training_number, squat_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'D', 3, 'BACK', 'exercice.squat.back.jump', 3, 4, NULL, 0.35),
+('SPEED', 'CYCLE', 'D', 3, 'BACK', 'exercice.squat.back.jump', 3, 4, NULL, 0.35),
+('SPEED', 'ROUGH', 'D', 3, 'BACK', 'exercice.squat.back.jump', 4, 6, NULL, 0.35),
+('SPEED', 'TECH',  'D', 3, 'BACK', 'exercice.squat.back.jump', 3, 5, NULL, 0.35),
+('SPEED', 'LEARN', 'D', 3, 'BACK', 'exercice.squat.back.jump', 3, 5, NULL, 0.35);
+
+-- ============================================================
+-- DATA — REF_PULLS
+-- Protocole tirage par archétype, objectif et type de semaine
+-- (source : Protocole Tirage.pdf)
+-- goal : KEEP (Maintient), STRENGTH (Force), SPEED (Vitesse)
+-- week_type : F (Foncier), T (Technique), S (Surcharge), A (Affûtage), D (Deload)
+-- pull_type : SNATCH_PULL (tirage arraché), CJ_PULL (tirage épaulé)
+-- estimate_value : % du max (arraché pour SNATCH_PULL, épaulé pour CJ_PULL)
+-- ============================================================
+DELETE FROM ref_pulls;
+-- ============================================================
+-- FONCIER (F)
+-- ============================================================
+
+-- F / KEEP / Séance 1 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 4, 5, NULL, 0.96),
+('KEEP', 'CYCLE', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 4, 5, NULL, 0.96),
+('KEEP', 'ROUGH', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 6, NULL, 0.90),
+('KEEP', 'ROUGH', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 4, NULL, 1.02),
+('KEEP', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 6, NULL, 0.90),
+('KEEP', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 5, NULL, 0.96),
+('KEEP', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 4, NULL, 1.02),
+('KEEP', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 6, NULL, 0.90),
+('KEEP', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 5, NULL, 0.96),
+('KEEP', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 4, NULL, 1.02);
+
+-- F / KEEP / Séance 2 — Tirage Épaulé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 4, 5, NULL, 1.00),
+('KEEP', 'CYCLE', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 4, 5, NULL, 1.00),
+('KEEP', 'ROUGH', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 6, NULL, 0.93),
+('KEEP', 'ROUGH', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 4, NULL, 1.07),
+('KEEP', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 6, NULL, 0.93),
+('KEEP', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 5, NULL, 1.00),
+('KEEP', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07),
+('KEEP', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 6, NULL, 0.93),
+('KEEP', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 5, NULL, 1.00),
+('KEEP', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07);
+
+-- F / KEEP / Séance 3 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 4, NULL, 0.82),
+('KEEP', 'CYCLE', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 4, NULL, 0.82),
+('KEEP', 'ROUGH', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 5, 5, NULL, 0.76),
+('KEEP', 'TECH',  'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 5, NULL, 0.76),
+('KEEP', 'TECH',  'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 4, NULL, 0.82),
+('KEEP', 'LEARN', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 5, NULL, 0.76),
+('KEEP', 'LEARN', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 4, NULL, 0.82);
+
+-- F / STRENGTH / Séance 1 — Tirage Arraché Surélevé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 4, 4, NULL, 0.92),
+('STRENGTH', 'CYCLE', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 4, 4, NULL, 0.92),
+('STRENGTH', 'ROUGH', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 5, 5, NULL, 0.86),
+('STRENGTH', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 5, NULL, 0.86),
+('STRENGTH', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 4, NULL, 0.92),
+('STRENGTH', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 5, NULL, 0.86),
+('STRENGTH', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 4, NULL, 0.92);
+
+-- F / STRENGTH / Séance 2 — Tirage Épaulé T&G
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'F', 2, 'CJ_PULL', 'exercice.clean.pull.tng', 4, 4, NULL, 0.97),
+('STRENGTH', 'CYCLE', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.tng', 4, 4, NULL, 0.97),
+('STRENGTH', 'ROUGH', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.tng', 5, 4, NULL, 0.97),
+('STRENGTH', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.tng', 4, 4, NULL, 0.97),
+('STRENGTH', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.tng', 4, 4, NULL, 0.97);
+
+-- F / STRENGTH / Séance 3 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 4, 5, NULL, 0.96),
+('STRENGTH', 'CYCLE', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 4, 5, NULL, 0.96),
+('STRENGTH', 'ROUGH', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 6, NULL, 0.90),
+('STRENGTH', 'ROUGH', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 4, NULL, 1.02),
+('STRENGTH', 'TECH',  'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 6, NULL, 0.90),
+('STRENGTH', 'TECH',  'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 5, NULL, 0.96),
+('STRENGTH', 'TECH',  'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 4, NULL, 1.02),
+('STRENGTH', 'LEARN', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 6, NULL, 0.90),
+('STRENGTH', 'LEARN', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 5, NULL, 0.96),
+('STRENGTH', 'LEARN', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 4, NULL, 1.02);
+
+-- F / SPEED / Séance 1 — Tirage Haut Arraché + Tirage Haut Arraché Suspension
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 4, 4, '2 (1 + 1)', 0.82),
+('SPEED', 'CYCLE', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 4, 4, '2 (1 + 1)', 0.82),
+('SPEED', 'ROUGH', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 5, 6, '3 (1 + 1)', 0.70),
+('SPEED', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 6, '3 (1 + 1)', 0.70),
+('SPEED', 'TECH',  'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 4, '2 (1 + 1)', 0.82),
+('SPEED', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 6, '3 (1 + 1)', 0.70),
+('SPEED', 'LEARN', 'F', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 4, '2 (1 + 1)', 0.82);
+
+-- F / SPEED / Séance 2 — Tirage Épaulé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 4, 5, NULL, 1.00),
+('SPEED', 'CYCLE', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 4, 5, NULL, 1.00),
+('SPEED', 'ROUGH', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 6, NULL, 0.93),
+('SPEED', 'ROUGH', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 4, NULL, 1.07),
+('SPEED', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 6, NULL, 0.93),
+('SPEED', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 5, NULL, 1.00),
+('SPEED', 'TECH',  'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07),
+('SPEED', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 6, NULL, 0.93),
+('SPEED', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 5, NULL, 1.00),
+('SPEED', 'LEARN', 'F', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07);
+
+-- F / SPEED / Séance 3 — Tirage Arraché T&G
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 4, 4, NULL, 0.92),
+('SPEED', 'CYCLE', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 4, 4, NULL, 0.92),
+('SPEED', 'ROUGH', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 5, 4, NULL, 0.92),
+('SPEED', 'TECH',  'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 4, 4, NULL, 0.92),
+('SPEED', 'LEARN', 'F', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 4, 4, NULL, 0.92);
+
+-- ============================================================
+-- TECHNIQUE (T)
+-- ============================================================
+
+-- T / KEEP / Séance 1 — Tirage Arraché Pause
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 4, 3, NULL, 0.98),
+('KEEP', 'CYCLE', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 4, 3, NULL, 0.98),
+('KEEP', 'ROUGH', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 5, 4, NULL, 0.92),
+('KEEP', 'TECH',  'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 4, NULL, 0.92),
+('KEEP', 'TECH',  'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 3, NULL, 0.98),
+('KEEP', 'LEARN', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 4, NULL, 0.92),
+('KEEP', 'LEARN', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 3, NULL, 0.98);
+
+-- T / KEEP / Séance 2 — Tirage Épaulé Bassin
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 4, 3, NULL, 1.14),
+('KEEP', 'CYCLE', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 4, 3, NULL, 1.14),
+('KEEP', 'ROUGH', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 5, 4, NULL, 1.07),
+('KEEP', 'TECH',  'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 4, NULL, 1.07),
+('KEEP', 'TECH',  'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.14),
+('KEEP', 'LEARN', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 4, NULL, 1.07),
+('KEEP', 'LEARN', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.14);
+
+-- T / KEEP / Séance 3 — Tirage Haut Arraché + Tirage Haut Arraché Suspension
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 4, 4, '2 (1 + 1)', 0.82),
+('KEEP', 'CYCLE', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 4, 4, '2 (1 + 1)', 0.82),
+('KEEP', 'ROUGH', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 5, 6, '3 (1 + 1)', 0.70),
+('KEEP', 'TECH',  'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 6, '3 (1 + 1)', 0.70),
+('KEEP', 'TECH',  'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 4, '2 (1 + 1)', 0.82),
+('KEEP', 'LEARN', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 6, '3 (1 + 1)', 0.70),
+('KEEP', 'LEARN', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high-plus-hang', 2, 4, '2 (1 + 1)', 0.82);
+
+-- T / STRENGTH / Séance 1 — Tirage Épaulé Plot
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 4, 5, NULL, 1.15),
+('STRENGTH', 'CYCLE', 'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 4, 5, NULL, 1.15),
+('STRENGTH', 'ROUGH', 'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 5, 6, NULL, 1.08),
+('STRENGTH', 'TECH',  'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 6, NULL, 1.08),
+('STRENGTH', 'TECH',  'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 4, NULL, 1.22),
+('STRENGTH', 'LEARN', 'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 6, NULL, 1.08),
+('STRENGTH', 'LEARN', 'T', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 4, NULL, 1.22);
+
+-- T / STRENGTH / Séance 2 — Tirage Arraché Pause
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 4, 3, NULL, 0.98),
+('STRENGTH', 'CYCLE', 'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 4, 3, NULL, 0.98),
+('STRENGTH', 'ROUGH', 'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 5, 4, NULL, 0.92),
+('STRENGTH', 'TECH',  'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 4, NULL, 0.92),
+('STRENGTH', 'TECH',  'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 3, NULL, 0.98),
+('STRENGTH', 'LEARN', 'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 4, NULL, 0.92),
+('STRENGTH', 'LEARN', 'T', 2, 'SNATCH_PULL', 'exercice.snatch.pull.pause', 2, 3, NULL, 0.98);
+
+-- T / STRENGTH / Séance 3 — Soulevé de Terre Roumain
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'T', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 6, NULL, 0.93),
+('STRENGTH', 'CYCLE', 'T', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 6, NULL, 0.93),
+('STRENGTH', 'ROUGH', 'T', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 5, 8, NULL, 0.83),
+('STRENGTH', 'TECH',  'T', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 6, NULL, 0.93),
+('STRENGTH', 'LEARN', 'T', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 6, NULL, 0.93);
+
+-- T / SPEED / Séance 1 — Tirage Haut Arraché Plots
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 4, 4, NULL, 0.82),
+('SPEED', 'CYCLE', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 4, 4, NULL, 0.82),
+('SPEED', 'ROUGH', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 5, 5, NULL, 0.76),
+('SPEED', 'TECH',  'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 4, 4, NULL, 0.82),
+('SPEED', 'LEARN', 'T', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 4, 4, NULL, 0.82);
+
+-- T / SPEED / Séance 2 — Tirage Épaulé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 4, 4, NULL, 1.07),
+('SPEED', 'CYCLE', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 4, 4, NULL, 1.07),
+('SPEED', 'ROUGH', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 5, NULL, 1.00),
+('SPEED', 'ROUGH', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07),
+('SPEED', 'ROUGH', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('SPEED', 'TECH',  'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 5, NULL, 1.00),
+('SPEED', 'TECH',  'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07),
+('SPEED', 'TECH',  'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 3, NULL, 1.14),
+('SPEED', 'LEARN', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 5, NULL, 1.00),
+('SPEED', 'LEARN', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 4, NULL, 1.07),
+('SPEED', 'LEARN', 'T', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 1, 3, NULL, 1.14);
+
+-- T / SPEED / Séance 3 — Tirage Arraché T&G
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 4, NULL, 0.92),
+('SPEED', 'MID',   'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 3, NULL, 0.98),
+('SPEED', 'CYCLE', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 4, NULL, 0.92),
+('SPEED', 'CYCLE', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 3, NULL, 0.98),
+('SPEED', 'ROUGH', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 5, 4, NULL, 0.92),
+('SPEED', 'TECH',  'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 4, NULL, 0.92),
+('SPEED', 'TECH',  'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 3, NULL, 0.98),
+('SPEED', 'LEARN', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 4, NULL, 0.92),
+('SPEED', 'LEARN', 'T', 3, 'SNATCH_PULL', 'exercice.snatch.pull.tng', 2, 3, NULL, 0.98);
+
+-- ============================================================
+-- SURCHARGE (S)
+-- ============================================================
+
+-- S / KEEP / Séance 1 — Tirage Épaulé Plot
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 4, NULL, 1.27),
+('KEEP', 'MID',   'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 3, NULL, 1.34),
+('KEEP', 'CYCLE', 'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 4, NULL, 1.27),
+('KEEP', 'CYCLE', 'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 3, NULL, 1.34),
+('KEEP', 'ROUGH', 'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 5, 4, NULL, 1.27),
+('KEEP', 'TECH',  'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 3, 4, NULL, 1.27),
+('KEEP', 'TECH',  'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 3, NULL, 1.34),
+('KEEP', 'LEARN', 'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 3, 4, NULL, 1.27),
+('KEEP', 'LEARN', 'S', 1, 'CJ_PULL', 'exercice.clean.pull.block', 2, 3, NULL, 1.34);
+
+-- S / KEEP / Séance 2 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('KEEP', 'MID',   'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('KEEP', 'MID',   'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20),
+('KEEP', 'CYCLE', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('KEEP', 'CYCLE', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('KEEP', 'CYCLE', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20),
+('KEEP', 'ROUGH', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 3, NULL, 1.08),
+('KEEP', 'ROUGH', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 2, NULL, 1.14),
+('KEEP', 'TECH',  'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('KEEP', 'TECH',  'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('KEEP', 'TECH',  'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20),
+('KEEP', 'LEARN', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('KEEP', 'LEARN', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('KEEP', 'LEARN', 'S', 2, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20);
+
+-- S / KEEP / Séance 3 — Tirage Épaulé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('KEEP', 'MID',   'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('KEEP', 'MID',   'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30),
+('KEEP', 'CYCLE', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('KEEP', 'CYCLE', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('KEEP', 'CYCLE', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30),
+('KEEP', 'ROUGH', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 3, NULL, 1.14),
+('KEEP', 'ROUGH', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 2, NULL, 1.23),
+('KEEP', 'TECH',  'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('KEEP', 'TECH',  'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('KEEP', 'TECH',  'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30),
+('KEEP', 'LEARN', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('KEEP', 'LEARN', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('KEEP', 'LEARN', 'S', 3, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30);
+
+-- S / STRENGTH / Séance 1 — Tirage Arraché Surélevé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 3, NULL, 0.98),
+('STRENGTH', 'MID',   'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 2, NULL, 1.04),
+('STRENGTH', 'CYCLE', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 3, NULL, 0.98),
+('STRENGTH', 'CYCLE', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 2, NULL, 1.04),
+('STRENGTH', 'ROUGH', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 3, 3, NULL, 0.98),
+('STRENGTH', 'ROUGH', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 3, 2, NULL, 1.04),
+('STRENGTH', 'TECH',  'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 3, NULL, 0.98),
+('STRENGTH', 'TECH',  'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 3, 2, NULL, 1.04),
+('STRENGTH', 'LEARN', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 3, NULL, 0.98),
+('STRENGTH', 'LEARN', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 3, 2, NULL, 1.04);
+
+-- S / STRENGTH / Séance 2 — Tirage Épaulé Plot
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 4, 4, NULL, 1.27),
+('STRENGTH', 'CYCLE', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 4, 4, NULL, 1.27),
+('STRENGTH', 'ROUGH', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 5, 5, NULL, 1.20),
+('STRENGTH', 'TECH',  'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 2, 5, NULL, 1.20),
+('STRENGTH', 'TECH',  'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 2, 3, NULL, 1.34),
+('STRENGTH', 'LEARN', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 2, 5, NULL, 1.20),
+('STRENGTH', 'LEARN', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.block', 2, 3, NULL, 1.34);
+
+-- S / STRENGTH / Séance 3 — Soulevé de Terre Roumain
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'S', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 5, NULL, 1.00),
+('STRENGTH', 'CYCLE', 'S', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 5, NULL, 1.00),
+('STRENGTH', 'ROUGH', 'S', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 5, 6, NULL, 0.93),
+('STRENGTH', 'TECH',  'S', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 5, NULL, 1.00),
+('STRENGTH', 'LEARN', 'S', 3, 'CJ_PULL', 'exercice.muscu.rdl-romanian', 4, 5, NULL, 1.00);
+
+-- S / SPEED / Séance 1 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('SPEED', 'MID',   'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('SPEED', 'MID',   'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20),
+('SPEED', 'CYCLE', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('SPEED', 'CYCLE', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('SPEED', 'CYCLE', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20),
+('SPEED', 'ROUGH', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 3, NULL, 1.08),
+('SPEED', 'ROUGH', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 2, NULL, 1.14),
+('SPEED', 'TECH',  'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('SPEED', 'TECH',  'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('SPEED', 'TECH',  'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20),
+('SPEED', 'LEARN', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.08),
+('SPEED', 'LEARN', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.14),
+('SPEED', 'LEARN', 'S', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.20);
+
+-- S / SPEED / Séance 2 — Tirage Épaulé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('SPEED', 'MID',   'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('SPEED', 'MID',   'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30),
+('SPEED', 'CYCLE', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('SPEED', 'CYCLE', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('SPEED', 'CYCLE', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30),
+('SPEED', 'ROUGH', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 3, NULL, 1.14),
+('SPEED', 'ROUGH', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 3, 2, NULL, 1.23),
+('SPEED', 'TECH',  'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('SPEED', 'TECH',  'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('SPEED', 'TECH',  'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30),
+('SPEED', 'LEARN', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 3, NULL, 1.14),
+('SPEED', 'LEARN', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 2, NULL, 1.23),
+('SPEED', 'LEARN', 'S', 2, 'CJ_PULL', 'exercice.clean.pull.simple', 2, 1, NULL, 1.30);
+
+-- S / SPEED / Séance 3 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 3, NULL, 0.88),
+('SPEED', 'CYCLE', 'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 3, NULL, 0.88),
+('SPEED', 'ROUGH', 'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.88),
+('SPEED', 'ROUGH', 'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 2, NULL, 0.94),
+('SPEED', 'TECH',  'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.88),
+('SPEED', 'TECH',  'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.94),
+('SPEED', 'LEARN', 'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.88),
+('SPEED', 'LEARN', 'S', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.94);
+
+-- ============================================================
+-- AFFÛTAGE (A)
+-- ============================================================
+
+-- A / KEEP / Séance 1 — Tirage Arraché Surélevé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 4, 2, NULL, 0.99),
+('KEEP', 'CYCLE', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 4, 2, NULL, 0.99),
+('KEEP', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 3, 3, NULL, 0.87),
+('KEEP', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 3, 2, NULL, 0.99),
+('KEEP', 'TECH',  'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 3, NULL, 0.87),
+('KEEP', 'TECH',  'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 2, NULL, 0.99),
+('KEEP', 'LEARN', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 3, NULL, 0.87),
+('KEEP', 'LEARN', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.deficit', 2, 2, NULL, 0.99);
+
+-- A / KEEP / Séance 2 — Tirage Épaulé Bassin
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('KEEP', 'MID',   'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('KEEP', 'CYCLE', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('KEEP', 'CYCLE', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('KEEP', 'ROUGH', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 3, 3, NULL, 1.09),
+('KEEP', 'ROUGH', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 3, 2, NULL, 1.18),
+('KEEP', 'TECH',  'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('KEEP', 'TECH',  'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('KEEP', 'LEARN', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('KEEP', 'LEARN', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18);
+
+-- A / KEEP / Séance 3 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 2, NULL, 0.89),
+('KEEP', 'CYCLE', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 2, NULL, 0.89),
+('KEEP', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.83),
+('KEEP', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 2, NULL, 0.89),
+('KEEP', 'TECH',  'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.83),
+('KEEP', 'TECH',  'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.89),
+('KEEP', 'LEARN', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.83),
+('KEEP', 'LEARN', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.89);
+
+-- A / STRENGTH / Séance 1 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 3, NULL, 1.03),
+('STRENGTH', 'MID',   'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 2, NULL, 1.09),
+('STRENGTH', 'MID',   'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 1, NULL, 1.15),
+('STRENGTH', 'CYCLE', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 3, NULL, 1.03),
+('STRENGTH', 'CYCLE', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 2, NULL, 1.09),
+('STRENGTH', 'CYCLE', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 1, NULL, 1.15),
+('STRENGTH', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.03),
+('STRENGTH', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.09),
+('STRENGTH', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.15),
+('STRENGTH', 'TECH',  'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.03),
+('STRENGTH', 'TECH',  'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.09),
+('STRENGTH', 'LEARN', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.03),
+('STRENGTH', 'LEARN', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.09);
+
+-- A / STRENGTH / Séance 2 — Tirage Épaulé Bassin
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('STRENGTH', 'MID',   'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('STRENGTH', 'CYCLE', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('STRENGTH', 'CYCLE', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('STRENGTH', 'ROUGH', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 3, 3, NULL, 1.09),
+('STRENGTH', 'ROUGH', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 3, 2, NULL, 1.18),
+('STRENGTH', 'TECH',  'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('STRENGTH', 'TECH',  'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('STRENGTH', 'LEARN', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('STRENGTH', 'LEARN', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18);
+
+-- A / STRENGTH / Séance 3 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 2, NULL, 0.89),
+('STRENGTH', 'CYCLE', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 2, NULL, 0.89),
+('STRENGTH', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.83),
+('STRENGTH', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 2, NULL, 0.89),
+('STRENGTH', 'TECH',  'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.83),
+('STRENGTH', 'TECH',  'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.89),
+('STRENGTH', 'LEARN', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.83),
+('STRENGTH', 'LEARN', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.89);
+
+-- A / SPEED / Séance 1 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 2, NULL, 0.89),
+('SPEED', 'CYCLE', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 2, NULL, 0.89),
+('SPEED', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.83),
+('SPEED', 'ROUGH', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 2, NULL, 0.89),
+('SPEED', 'TECH',  'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.83),
+('SPEED', 'TECH',  'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.89),
+('SPEED', 'LEARN', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 3, NULL, 0.83),
+('SPEED', 'LEARN', 'A', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 2, 2, NULL, 0.89);
+
+-- A / SPEED / Séance 2 — Tirage Épaulé Bassin
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('SPEED', 'MID',   'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('SPEED', 'CYCLE', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('SPEED', 'CYCLE', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('SPEED', 'ROUGH', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 3, 3, NULL, 1.09),
+('SPEED', 'ROUGH', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 3, 2, NULL, 1.18),
+('SPEED', 'TECH',  'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('SPEED', 'TECH',  'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18),
+('SPEED', 'LEARN', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 3, NULL, 1.09),
+('SPEED', 'LEARN', 'A', 2, 'CJ_PULL', 'exercice.clean.pull.hip', 2, 2, NULL, 1.18);
+
+-- A / SPEED / Séance 3 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 3, NULL, 1.03),
+('SPEED', 'MID',   'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 2, NULL, 1.09),
+('SPEED', 'MID',   'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 1, NULL, 1.15),
+('SPEED', 'CYCLE', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 3, NULL, 1.03),
+('SPEED', 'CYCLE', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 2, NULL, 1.09),
+('SPEED', 'CYCLE', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 1, 1, NULL, 1.15),
+('SPEED', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.03),
+('SPEED', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.09),
+('SPEED', 'ROUGH', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 1, NULL, 1.15),
+('SPEED', 'TECH',  'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.03),
+('SPEED', 'TECH',  'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.09),
+('SPEED', 'LEARN', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 3, NULL, 1.03),
+('SPEED', 'LEARN', 'A', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 2, 2, NULL, 1.09);
+
+-- ============================================================
+-- DELOAD (D)
+-- ============================================================
+
+-- D / KEEP / Séance 1 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78),
+('KEEP', 'CYCLE', 'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78),
+('KEEP', 'ROUGH', 'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 3, NULL, 0.78),
+('KEEP', 'TECH',  'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78),
+('KEEP', 'LEARN', 'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78);
+
+-- D / KEEP / Séance 2 — Tirage Épaulé Surélevé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 4, NULL, 0.87),
+('KEEP', 'CYCLE', 'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 4, NULL, 0.87),
+('KEEP', 'ROUGH', 'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 4, 5, NULL, 0.80),
+('KEEP', 'TECH',  'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 5, NULL, 0.80),
+('KEEP', 'LEARN', 'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 5, NULL, 0.80);
+
+-- D / KEEP / Séance 3 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('KEEP', 'MID',   'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 4, NULL, 0.92),
+('KEEP', 'CYCLE', 'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 4, NULL, 0.92),
+('KEEP', 'ROUGH', 'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 4, 5, NULL, 0.86),
+('KEEP', 'TECH',  'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 5, NULL, 0.86),
+('KEEP', 'LEARN', 'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 5, NULL, 0.86);
+
+-- D / STRENGTH / Séance 1 — Tirage Épaulé Pause
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'D', 1, 'CJ_PULL', 'exercice.clean.pull.pause', 3, 3, NULL, 0.94),
+('STRENGTH', 'CYCLE', 'D', 1, 'CJ_PULL', 'exercice.clean.pull.pause', 3, 3, NULL, 0.94),
+('STRENGTH', 'ROUGH', 'D', 1, 'CJ_PULL', 'exercice.clean.pull.pause', 4, 4, NULL, 0.87),
+('STRENGTH', 'TECH',  'D', 1, 'CJ_PULL', 'exercice.clean.pull.pause', 3, 4, NULL, 0.87),
+('STRENGTH', 'LEARN', 'D', 1, 'CJ_PULL', 'exercice.clean.pull.pause', 3, 4, NULL, 0.87);
+
+-- D / STRENGTH / Séance 2 — Tirage Haut Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'D', 2, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78),
+('STRENGTH', 'CYCLE', 'D', 2, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78),
+('STRENGTH', 'ROUGH', 'D', 2, 'SNATCH_PULL', 'exercice.snatch.pull.high', 4, 3, NULL, 0.78),
+('STRENGTH', 'TECH',  'D', 2, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78),
+('STRENGTH', 'LEARN', 'D', 2, 'SNATCH_PULL', 'exercice.snatch.pull.high', 3, 3, NULL, 0.78);
+
+-- D / STRENGTH / Séance 3 — Tirage Épaulé Surélevé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('STRENGTH', 'MID',   'D', 3, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 4, NULL, 0.87),
+('STRENGTH', 'CYCLE', 'D', 3, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 4, NULL, 0.87),
+('STRENGTH', 'ROUGH', 'D', 3, 'CJ_PULL', 'exercice.clean.pull.deficit', 4, 5, NULL, 0.80),
+('STRENGTH', 'TECH',  'D', 3, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 5, NULL, 0.80),
+('STRENGTH', 'LEARN', 'D', 3, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 5, NULL, 0.80);
+
+-- D / SPEED / Séance 1 — Tirage Haut Arraché Plots
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 3, 4, NULL, 0.72),
+('SPEED', 'CYCLE', 'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 3, 4, NULL, 0.72),
+('SPEED', 'ROUGH', 'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 4, 5, NULL, 0.66),
+('SPEED', 'TECH',  'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 3, 5, NULL, 0.66),
+('SPEED', 'LEARN', 'D', 1, 'SNATCH_PULL', 'exercice.snatch.pull.block', 3, 5, NULL, 0.66);
+
+-- D / SPEED / Séance 2 — Tirage Épaulé Surélevé
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 4, NULL, 0.87),
+('SPEED', 'CYCLE', 'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 4, NULL, 0.87),
+('SPEED', 'ROUGH', 'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 4, 5, NULL, 0.80),
+('SPEED', 'TECH',  'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 5, NULL, 0.80),
+('SPEED', 'LEARN', 'D', 2, 'CJ_PULL', 'exercice.clean.pull.deficit', 3, 5, NULL, 0.80);
+
+-- D / SPEED / Séance 3 — Tirage Arraché
+INSERT INTO ref_pulls (goal, archetype, week_type, training_number, pull_type, exercice_code, set_number, rep_number, rep_label, estimate_value) VALUES
+('SPEED', 'MID',   'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 4, NULL, 0.92),
+('SPEED', 'CYCLE', 'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 4, NULL, 0.92),
+('SPEED', 'ROUGH', 'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 4, 5, NULL, 0.86),
+('SPEED', 'TECH',  'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 5, NULL, 0.86),
+('SPEED', 'LEARN', 'D', 3, 'SNATCH_PULL', 'exercice.snatch.pull.simple', 3, 5, NULL, 0.86);

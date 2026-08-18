@@ -56,6 +56,7 @@
         "triple": "Snatch pull (x3)",
         "high": "High pull snatch",
         "high-hang": "Hang high pull snatch",
+        "high-plus-hang": "High pull snatch + hang high pull snatch",
         "block": "Block high pull snatch",
         "deficit": "deficit snatch pull",
         "pause": "Snatch pull with pause",
@@ -171,15 +172,17 @@
         "pause": "Pause back squat",
         "eccentric": "Eccentric back squat",
         "eccentric-pause": "Eccentric pause back squat",
-        "jump": "Jump squat",
-        "anderson": "Anderson squat"
+        "eccentric-box-jump": "Eccentric back squat + box jump",
+        "simple-box-jump": "Back squat + box jump",
+        "jump": "Jump squat"
       },
       "front": {
         "simple": "Front squat",
         "double": "Front squat (x2)",
         "triple": "Front squat (x3)",
         "pause": "Pause front squat",
-        "plus-back": "Front squat + back squat"
+        "plus-back": "Front squat + back squat",
+        "anderson": "Anderson squat"
       }
     },
     "muscu": {

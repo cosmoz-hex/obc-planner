@@ -56,6 +56,7 @@
         "triple": "Tirage arraché (x3)",
         "high": "Tirage haut arraché",
         "high-hang": "Tirage haut arraché suspension",
+        "high-plus-hang": "Tirage haut arraché + tirage haut arraché suspension",
         "block": "Tirage haut arraché plots",
         "deficit": "Tirage arraché surélevé",
         "pause": "Tirage arraché pause",
@@ -171,6 +172,8 @@
         "pause": "Flexion nuque pause",
         "eccentric": "Flexion nuque excentrique",
         "eccentric-pause": "Flexion nuque excentrique pause",
+        "eccentric-box-jump": "Flexion nuque excentrique + box jump",
+        "simple-box-jump": "Flexion nuque + box jump",
         "jump": "Flexion nuque sautée"
       },
       "front": {

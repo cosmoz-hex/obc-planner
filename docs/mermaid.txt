@@ -35,13 +35,13 @@ classDiagram
         ENDURANCE
         SQUAT
         PULL
-        SNATCH_STRENTGH
+        SNATCH_STRENGTH
         SNATCH_WEAKNESS
-        CLEAN_STRENTGH
+        CLEAN_STRENGTH
         CLEAN_WEAKNESS
-        JERK_STRENTGH
+        JERK_STRENGTH
         JERK_WEAKNESS
-        PSYCHO_STRENTGH
+        PSYCHO_STRENGTH
         PSYCHO_WEAKNESS
     }
     class EVAL_DETAIL {
@@ -72,7 +72,7 @@ classDiagram
         DURATION
         START_DATE
         END_DATE
-        SNACHT_GOAL
+        SNATCH_GOAL
         CJ_GOAL
     }
     class PROG_WEEK {
