@@ -1,3 +1,8 @@
+---
+title: Architecture
+inclusion: always
+---
+
 # Architecture — OBC Planner
 
 > Ce fichier doit être mis à jour à chaque modification structurelle (libs, packages, tables, APIs).
