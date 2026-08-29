@@ -27,3 +27,13 @@ Kiro doit y consigner toute leçon apprise suite à une correction demandée par
 - **Contexte** : Le PDF note `4 x 2 (1 + 1)` pour un exercice composé (tirage haut + tirage haut suspension).
 - **Erreur initiale** : Interpréter `2 (1 + 1)` comme 2 reps au lieu de `2 × (1+1) = 4` reps.
 - **Bonne pratique** : `n (1 + 1)` est une notation mathématique. `2 (1 + 1) = 4` reps totales à la barre. `rep_label = '2 (1 + 1)'` pour l'affichage, `rep_number = 4` pour le volume réel.
+
+### 2026-08-30 — Toujours annoncer l'Agent/skill et suivre la pipeline de dev
+- **Contexte** : Sur plusieurs demandes (migration, refactor UI), Kiro a agi « en direct » sans nommer l'Agent incarné ni le skill appliqué, ni indiquer les étapes de pipeline sautées.
+- **Erreur initiale** : Exécuter la tâche sans traçabilité, privant l'utilisateur de la visibilité sur ce qui est fait et sur ce qui pourrait manquer.
+- **Bonne pratique** : À chaque demande impliquant du code, préciser en tête et à chaque bascule : l'Agent (Analyste/Développeur/Reviewer/Testeur/Documentaliste), le(s) skill(s) appliqué(s), les étapes volontairement sautées + justification (parcimonie), et les boucles de feedback. Pour une simple question de compréhension, l'indiquer explicitement comme « hors pipeline ». Ce comportement doit être automatique, sans que l'utilisateur ait à le redemander dans son prompt.
+
+### 2026-08-30 — Ne pas réduire src/webawesome.ts sans demande
+- **Contexte** : `src/webawesome.ts` enregistre volontairement tous les composants WebAwesome pour qu'ils soient disponibles partout sans redéclaration.
+- **Erreur initiale** : Réduire à répétition la liste aux seuls composants utilisés (optimisation bundle) sans accord — comportement jugé pénible par l'utilisateur.
+- **Bonne pratique** : Laisser la liste complète par défaut. Si un gain de bundle est nécessaire, ajuster le budget Angular plutôt que rogner la liste, ou proposer d'inclure les composants au niveau des écrans qui en ont besoin — mais uniquement après validation explicite.

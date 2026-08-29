@@ -1,6 +1,6 @@
 ---
 title: Development Practices - Frontend
-description: "Frontend development practices for Angular 20+"
+description: "Frontend development practices for Angular 22+"
 inclusionMode: "fileMatch"
 fileMatch:
   - "**/*.ts"
@@ -11,29 +11,51 @@ fileMatch:
   - "**/*.json"
 ---
 
-## Angular 20+
+## Angular 22+
 
 ### Conventions générales
 - **Standalone components** uniquement — pas de NgModule
-- **Signals** pour la gestion d'état local : `signal()`, `computed()`, `effect()`, `toSignal()`, `input()`, `output()`
+- **Signals** pour la gestion d'état local : `signal()`, `computed()`, `linkedSignal()`, `effect()`, `toSignal()`, `input()`, `output()`, `model()`
+  - `computed()` : état dérivé **en lecture seule**
+  - `linkedSignal()` : état dérivé **réinscriptible** — se recalcule quand sa source change mais reste modifiable par l'utilisateur (ex. sélection par défaut recalculée quand la liste change, tout en restant écrasable)
 - **`@if` / `@for` / `@switch` / `(model)`** (syntaxe de contrôle Angular 17+) — ne pas utiliser `*ngIf` / `*ngFor` / `*ngSwitch` / `[(ngModel)]`
-- Utiliser `@ViewChild` et `@ViewChildren` pour accéder aux éléments du DOM uniquement si nécessaire — préférer les signaux et les bindings
+- Pour accéder aux éléments du DOM, préférer les fonctions signal **`viewChild()` / `viewChildren()`** (et `contentChild()` / `contentChildren()`) plutôt que les décorateurs `@ViewChild` / `@ViewChildren` — et uniquement si un binding ne suffit pas
 - Typer **strictement** — éviter `any`
 - Nommer les fichiers en kebab-case : `athlete-list.component.ts`
 - Éviter au maximum le CSS inline ou les fichiers .css lors de la création de composants — préférer les classes Tailwind
 - Ne pas créer de fichiers spec.ts
-- Utiliser `@Injectable({ providedIn: 'root' })` pour les services
+- Utiliser le décorateur **`@Service()`** pour les services applicatifs standard (raccourci ergonomique et tree-shakable de `@Injectable({ providedIn: 'root' })`). Réserver `@Injectable()` aux cas avancés (scope non-root, options d'injection spécifiques) ; il reste supporté
 
 ### Gestion des formulaires
-- Préférer les **Reactive Forms** (`FormBuilder`, `FormGroup`, `FormControlName`) pour les formulaires et les filtres
-- Ajouter des règles de validation sur les champs de formulaire avec `Validators` et des messages d'erreur clairs
-- Bloquer les boutons de soumission tant que le formulaire est invalide
+- Utiliser les **Signal Forms** (`@angular/forms/signals`)
+- **Form model** : un `signal()` typé, source de vérité. Créer le formulaire avec `form(model, schemaFn?)`. Accès/écriture par champ : `monForm.email().value()` (lecture) et `.value.set(...)` (écriture).
+- **Validateurs intégrés** (dans la fonction de schéma) : `required`, `email`, `min`, `max`, `minLength`, `maxLength`, `pattern`, `minDate`, `maxDate`.
+- **Condition** : option `when` sur un validateur pour l'activer conditionnellement.
+- **Validateur spécifique** : `validate(path, ctx => …)` — retourne un objet `{ kind, message }` en cas d'erreur, `undefined` sinon (`ctx` expose `value()`, `valueOf(path)`).
+- **Remplacer l'erreur** : option `error` sur un validateur pour fournir l'objet d'erreur complet.
+- **Fonctions d'état** (dans le schéma) : `disabled`, `hidden`, `readonly` (avec option `when`). `hidden` ne masque pas le DOM — le retirer de la vue avec `@if`.
+- **Réutilisation** : `schema<T>()` pour définir un jeu de règles, appliqué via `apply` / `applyEach` / `applyWhen`.
+- **Template** : `[formField]` pour lier un champ, `[formRoot]` sur le `<form>`. Importer `FormField` et `FormRoot`.
+
+**Exemple minimal :**
+```ts
+import {form, required, email, minLength, validate} from '@angular/forms/signals';
+
+loginModel = signal({email: '', password: ''});
+
+loginForm = form(this.loginModel, (model) => {
+  required(model.email, {message: 'Email requis'});
+  email(model.email);
+  minLength(model.password, 8, {message: 'Au moins 8 caractères'});
+});
+```
 
 ### Appels HTTP et services
 - Séparer la logique dans des services — le composant gère uniquement l'état et les interactions UI
-- Utiliser `inject()` plutôt que l'injection par constructeur pour les standalone components :
+- Utiliser `inject()` plutôt que l'injection par constructeur
 - Centraliser dans des services dédiés — un service par domaine métier
-- Retourner des `Observable` et laisser le composant s'abonner via `pipe`, `subscribe` ou `catchError`
+- Pour la **récupération de données réactive**, préférer **`httpResource()` / `resource()`** : le statut et la réponse sont exposés en signals, ce qui limite les `Observable` et les `subscribe` manuels et s'intègre naturellement avec `computed`/`effect`/`linkedSignal`
+- Garder **`HttpClient` + RxJS** pour les cas non couverts (flux complexes, opérations impératives) **ou lorsqu'une interface tierce impose un `Observable`** (ex. `TranslateLoader` de ngx-translate)
 - Typer les réponses avec des interfaces (models) correspondant aux DTOs backend
 
 ### UI & Design
