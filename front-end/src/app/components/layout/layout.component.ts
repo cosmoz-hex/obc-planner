@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {RouterLink, RouterOutlet} from '@angular/router';
 
 /**
@@ -9,7 +9,6 @@ import {RouterLink, RouterOutlet} from '@angular/router';
   selector: 'app-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './layout.component.html'
 })

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
 import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {filter, map, startWith} from 'rxjs';
@@ -11,7 +11,6 @@ import {filter, map, startWith} from 'rxjs';
   selector: 'app-referentiel',
   standalone: true,
   imports: [RouterOutlet],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <wa-tab-group [attr.active]="activeTab()" (wa-tab-show)="onTabShow($event)">

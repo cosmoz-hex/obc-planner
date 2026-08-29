@@ -1,6 +1,6 @@
 import {ApplicationConfig} from '@angular/core';
 import {provideRouter} from '@angular/router';
-import {HttpClient, provideHttpClient, withXsrfConfiguration} from '@angular/common/http';
+import {HttpClient, provideHttpClient, withXsrfConfiguration, withXhr} from '@angular/common/http';
 import {provideTranslateService, TranslateLoader} from '@ngx-translate/core';
 import {CustomTranslateLoader} from './services/custom-translate.loader';
 
@@ -9,7 +9,7 @@ import {routes} from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(
+    provideHttpClient(withXhr(), 
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN'
