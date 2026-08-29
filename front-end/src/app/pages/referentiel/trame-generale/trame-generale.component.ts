@@ -1,11 +1,10 @@
-import {Component} from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 
 @Component({
   selector: 'app-trame-generale',
   standalone: true,
-  imports: [TranslatePipe],
-  template: `<p class="py-4 opacity-70">{{ 'pages.referentiel.trame-generale.placeholder' | translate }}</p>`
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<p>Trame générale</p>`
 })
 export class TrameGeneraleComponent {
 }

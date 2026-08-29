@@ -1,57 +1,14 @@
-<wa-page mobile-breakpoint="1024">
-  <!-- Skip to content -->
-  <span slot="skip-to-content">{{ 'layout.skip-to-content' | translate }}</span>
-
-  <!-- Header -->
+<wa-page mobile-breakpoint="920">
   <header slot="header">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded bg-brand-600 flex items-center justify-center text-white font-bold text-sm"
-           aria-hidden="true">
-        OBC
-      </div>
-      <h1 class="text-lg font-semibold m-0">OBC Planner</h1>
-    </div>
-
-    <div class="flex items-center gap-2">
-      <!-- Language selector -->
-      <wa-dropdown id="lang-dropdown" (wa-select)="onLanguageSelect($event)">
-        <wa-button slot="trigger" appearance="plain" with-caret aria-label="{{ 'layout.language' | translate }}">
-          <wa-icon name="globe" library="fa" slot="prefix"></wa-icon>
-          {{ currentLanguage().toUpperCase() }}
-        </wa-button>
-        @for (lang of availableLanguages; track lang.code) {
-          <wa-dropdown-item [attr.value]="lang.code" [attr.aria-current]="currentLanguage() === lang.code ? 'true' : null">
-            {{ lang.flag }} {{ lang.label }}
-          </wa-dropdown-item>
-        }
-      </wa-dropdown>
-    </div>
+    <strong>OBC Planner</strong>
   </header>
 
-  <!-- Navigation header -->
-  <div slot="navigation-header" class="p-4">
-    <span class="text-sm font-semibold uppercase tracking-wide opacity-70">{{ 'layout.menu' | translate }}</span>
-  </div>
-
-  <!-- Navigation links -->
-  <nav slot="navigation" aria-label="{{ 'layout.main-navigation' | translate }}">
-    <a routerLink="/athletes" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">
-      <wa-icon name="users" library="fa" class="nav-icon"></wa-icon>
-      <span>{{ 'nav.athletes' | translate }}</span>
-    </a>
-    <a routerLink="/referentiel" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">
-      <wa-icon name="book" library="fa" class="nav-icon"></wa-icon>
-      <span>{{ 'nav.referentiel' | translate }}</span>
-    </a>
+  <nav slot="navigation">
+    <a routerLink="/athletes" data-drawer="close">Athlètes</a>
+    <a routerLink="/referentiel" data-drawer="close">Référentiel</a>
   </nav>
 
-  <!-- Main content -->
   <main>
     <router-outlet></router-outlet>
   </main>
-
-  <!-- Footer -->
-  <footer slot="footer">
-    <span class="text-sm opacity-60">© {{ currentYear }} OBC Planner — v{{ appVersion() }}</span>
-  </footer>
 </wa-page>

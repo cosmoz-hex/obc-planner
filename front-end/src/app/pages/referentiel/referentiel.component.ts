@@ -1,50 +1,64 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal} from '@angular/core';
-import {Router, RouterOutlet, NavigationEnd} from '@angular/router';
-import {TranslatePipe} from '@ngx-translate/core';
-import {filter} from 'rxjs';
+import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, inject} from '@angular/core';
+import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {filter, map, startWith} from 'rxjs';
 
+/**
+ * Conteneur du référentiel : barre d'onglets (wa-tab-group) pilotant la
+ * navigation entre les sous-routes. L'onglet actif est déduit de l'URL courante.
+ */
 @Component({
   selector: 'app-referentiel',
   standalone: true,
-  imports: [RouterOutlet, TranslatePipe],
-  templateUrl: './referentiel.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
-})
-export class ReferentielComponent implements OnInit {
-  readonly #router = inject(Router);
-
-  activeTab = signal('exercices');
-
-  readonly tabs = [
-    {panel: 'exercices', route: '/referentiel/exercices', icon: 'dumbbell'},
-    {panel: 'correctifs', route: '/referentiel/correctifs', icon: 'wrench'},
-    {panel: 'archetypes', route: '/referentiel/archetypes', icon: 'shapes'},
-    {panel: 'trame-generale', route: '/referentiel/trame-generale', icon: 'calendar-days'}
-  ];
-
-  ngOnInit(): void {
-    this.#syncTabFromUrl(this.#router.url);
-    this.#router.events
-      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe(e => this.#syncTabFromUrl(e.urlAfterRedirects));
-  }
-
-  onTabChange(event: Event): void {
-    const detail = (event as CustomEvent).detail;
-    const tabName = detail?.name;
-    if (tabName) {
-      const tab = this.tabs.find(t => t.panel === tabName);
-      if (tab) {
-        this.activeTab.set(tabName);
-        this.#router.navigate([tab.route]);
+  imports: [RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <wa-tab-group [attr.active]="activeTab()" (wa-tab-show)="onTabShow($event)">
+      @for (tab of tabs; track tab.path) {
+        <wa-tab [attr.panel]="tab.path">{{ tab.label }}</wa-tab>
       }
+      @for (tab of tabs; track tab.path) {
+        <wa-tab-panel [attr.name]="tab.path">
+          @if (tab.path === activeTab()) {
+            <router-outlet></router-outlet>
+          }
+        </wa-tab-panel>
+      }
+    </wa-tab-group>
+  `
+})
+export class ReferentielComponent {
+  private readonly router = inject(Router);
+
+  protected readonly tabs = [
+    {path: 'exercices', label: 'Exercices'},
+    {path: 'correctifs', label: 'Correctifs'},
+    {path: 'archetypes', label: 'Archétypes'},
+    {path: 'trame-generale', label: 'Trame générale'}
+  ] as const;
+
+  /** Segment de route actif (ex. "exercices"), dérivé de l'URL courante. */
+  protected readonly activeTab = toSignal(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.extractActiveTab()),
+      startWith(this.extractActiveTab())
+    ),
+    {initialValue: this.extractActiveTab()}
+  );
+
+  /** Sélection d'un onglet WebAwesome : navigue vers la sous-route correspondante. */
+  protected onTabShow(event: Event): void {
+    const panel = (event as CustomEvent<{ name: string }>).detail?.name;
+    if (panel && panel !== this.activeTab()) {
+      void this.router.navigate(['/referentiel', panel]);
     }
   }
 
-  #syncTabFromUrl(url: string): void {
-    const tab = this.tabs.find(t => url.includes(t.panel));
-    if (tab) {
-      this.activeTab.set(tab.panel);
-    }
+  private extractActiveTab(): string {
+    const segments = this.router.url.split('/').filter(Boolean);
+    const referentielIndex = segments.indexOf('referentiel');
+    return referentielIndex >= 0 ? segments[referentielIndex + 1] ?? 'exercices' : 'exercices';
   }
 }

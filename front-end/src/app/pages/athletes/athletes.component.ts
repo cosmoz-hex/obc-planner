@@ -1,12 +1,10 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 
 @Component({
   selector: 'app-athletes',
   standalone: true,
-  imports: [TranslatePipe],
-  templateUrl: './athletes.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<p>Athlètes</p>`
 })
 export class AthletesComponent {
 }

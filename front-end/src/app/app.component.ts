@@ -1,4 +1,4 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -6,8 +6,7 @@ import {TranslateService} from '@ngx-translate/core';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   private readonly translate = inject(TranslateService);
