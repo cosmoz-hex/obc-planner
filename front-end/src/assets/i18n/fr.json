@@ -6,7 +6,10 @@
     "main-navigation": "Navigation principale"
   },
   "nav": {
+    "general": "Général",
     "athletes": "Athlètes",
+    "evaluations": "Evaluations",
+    "programmes": "Programmes",
     "referentiel": "Référentiel"
   },
   "pages": {

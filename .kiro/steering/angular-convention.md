@@ -60,7 +60,7 @@ loginForm = form(this.loginModel, (model) => {
 
 ### UI & Design
 - Utiliser les composants WebAwesome et FontAwesome pour les éléments UI ([documentation complète](node_modules/@awesome.me/webawesome/dist/skills/webawesome/SKILL.md))
-- Importer les composants nécessaires dans `main.ts` ou un fichier `webawesome.ts` dédié
+- **Enregistrer les composants WebAwesome au plus près de leur usage** : dans chaque composant qui utilise des balises `<wa-*>`, importer uniquement les composants nécessaires via des imports d'effet de bord (ex. `import '@awesome.me/webawesome/dist/components/select/select.js';`). Ne pas recréer d'enregistrement global centralisé (pas de `src/webawesome.ts` chargé dans `main.ts`) — cela alourdit le bundle initial et le temps de build.
 - Déclarer `CUSTOM_ELEMENTS_SCHEMA` dans chaque composant utilisant des balises `<wa-*>`
 - Utiliser Tailwind pour le layout et l'espacement
 - Éviter d'utiliser `title` pour les tooltips et utiliser le composant `<wa-tooltip>` à la place

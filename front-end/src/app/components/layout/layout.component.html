@@ -1,14 +1,74 @@
-<wa-page mobile-breakpoint="920">
-  <header slot="header">
-    <strong>OBC Planner</strong>
-  </header>
+<wa-page>
+	<div slot="navigation-header" class="min-w-3xs m-4">
+		OBC Planner
+	</div>
+	<div slot="navigation" class="flex flex-col m-4 gap-1">
+		<span class="uppercase text-[var(--wa-color-text-quiet)] text-xs mb-2">{{ 'nav.general' | translate }}</span>
+		<a routerLink="/athletes"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="person-running"></wa-icon>
+			<span>{{ 'nav.athletes' | translate }}</span>
+		</a>
+		<a routerLink="/evaluations"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="clipboard-check"></wa-icon>
+			<span>{{ 'nav.evaluations' | translate }}</span>
+		</a>
+		<a routerLink="/programmes"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="calendar-days"></wa-icon>
+			<span>{{ 'nav.programmes' | translate }}</span>
+		</a>
 
-  <nav slot="navigation">
-    <a routerLink="/athletes" data-drawer="close">Athlètes</a>
-    <a routerLink="/referentiel" data-drawer="close">Référentiel</a>
-  </nav>
+		<span>&nbsp;</span>
 
-  <main>
-    <router-outlet></router-outlet>
-  </main>
+		<span class="uppercase text-[var(--wa-color-text-quiet)] text-xs mb-2">{{ 'nav.referentiel' | translate }}</span>
+		<a routerLink="/referentiel/archetypes"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="chart-pie"></wa-icon>
+			<span>{{ 'pages.referentiel.tabs.archetypes' | translate }}</span>
+		</a>
+		<a routerLink="/referentiel/correctifs"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="screwdriver-wrench"></wa-icon>
+			<span>{{ 'pages.referentiel.tabs.correctifs' | translate }}</span>
+		</a>
+		<a routerLink="/referentiel/exercices"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="dumbbell"></wa-icon>
+			<span>{{ 'pages.referentiel.tabs.exercices' | translate }}</span>
+		</a>
+		<a routerLink="/referentiel/trame-generale"
+		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
+		   class="flex items-center gap-2 rounded px-2 py-1 hover:bg-[var(--wa-color-surface-raised)]">
+			<wa-icon name="table-list"></wa-icon>
+			<span>{{ 'pages.referentiel.tabs.trame-generale' | translate }}</span>
+		</a>
+
+	</div>
+	<div slot="navigation-footer" class="flex flex-col m-4 gap-2">
+		<wa-select size="s" [attr.label]="'layout.language' | translate"
+		           [attr.value]="currentLang()"
+		           (change)="onLanguageChange($event)">
+			@for (lang of languages; track lang.code) {
+			<wa-option [attr.value]="lang.code">
+				<span slot="start" class="inline-block w-6 m-2 [&>svg]:rounded-sm" [innerHTML]="lang.flag | sanitizeHtml"></span>
+				{{ lang.label }}
+			</wa-option>
+			}
+		</wa-select>
+		<span class="text-[var(--wa-color-text-quiet)] text-xs">v 0.0.1</span>
+	</div>
+
+	<main class="flex h-full py-4 pr-2">
+		<div class="flex flex-col flex-1 bg-[var(--wa-color-surface-raised)] rounded-md overflow-auto">
+			<router-outlet></router-outlet>
+		</div>
+	</main>
 </wa-page>
