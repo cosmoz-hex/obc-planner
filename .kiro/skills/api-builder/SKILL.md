@@ -1,6 +1,10 @@
 ---
 name: api-builder
-description: Créer ou faire évoluer une API REST dans OBC Planner (endpoint sous /api) en respectant l'architecture Controller → Service → Repository, les DTOs records, la sécurité JWT et la gestion d'erreurs centralisée. À utiliser quand le besoin porte spécifiquement sur l'exposition ou la modification d'un endpoint backend.
+description: "
+    Créer ou faire évoluer une API REST dans OBC Planner (endpoint sous /api) en respectant l'architecture Controller → Service → Repository, 
+    les DTOs records, la sécurité JWT et la gestion d'erreurs centralisée. 
+    À utiliser quand le besoin porte spécifiquement sur l'exposition ou la modification d'un endpoint backend.
+"
 allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
@@ -16,10 +20,9 @@ Conçoit et implémente un endpoint REST backend complet et conforme, de la couc
 
 ## Références obligatoires
 
-- `.kiro/steering/*-convention.md` — section Java/Spring : 3 couches, interfaces+impl, Lombok, DTOs records `*Request`/`*Response`, `@RestControllerAdvice`, format d'erreur, sécurité JWT, `@Transactional`, pagination `Pageable`.
+- `.kiro/steering/spring-convention.md` — section Java/Spring : 3 couches, interfaces+impl, Lombok, DTOs records `*Request`/`*Response`, `@RestControllerAdvice`, format d'erreur, sécurité JWT, `@Transactional`, pagination `Pageable`.
 - `.kiro/steering/architecture.md` — base URL `/api`, tableau des APIs (**à compléter**), packages `controllers/`, `services/`, `repositories/`, `dto/`, `entities/`.
 - `.kiro/steering/product.md` — sémantique métier de la ressource exposée.
-- Controllers et services existants dans `back-end/src/main/java/com/example/backend/` pour calquer le style.
 
 ## Contrat d'entrée
 
@@ -46,7 +49,6 @@ CONTRAT E/S    : <optionnel : forme attendue des requêtes/réponses>
 - Repository, service (interface + impl), DTOs, controller.
 - Ligne(s) ajoutée(s) au tableau des APIs de `architecture.md`.
 - Compte-rendu : contrat de l'endpoint (méthode, chemin, E/S, statuts), fichiers créés/modifiés, résultat de compilation.
-- Recommandation de test API idempotent (voir skill `test-api`).
 
 ## Critères de qualité
 
@@ -56,3 +58,4 @@ CONTRAT E/S    : <optionnel : forme attendue des requêtes/réponses>
 - Requêtes paramétrées ; pagination sur les listes volumineuses.
 - Sécurité et gestion d'erreurs conformes ; aucune fuite de stack trace.
 - Le backend compile ; `architecture.md` est à jour.
+- Respect des règles écrites dans `spring-convention.md`.

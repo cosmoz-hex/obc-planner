@@ -19,8 +19,7 @@ Chaque agent est **autonome** (invocable seul) et **coordonnable** par l'`orches
 |---|---|---|
 | [`analyste`](analyste.json) | Clarifier le besoin, cartographier l'existant, définir les axes de développement (aucun code). | `need-analyzer`, `code-explorer`, `dev-planner` |
 | [`developpeur`](developpeur.json) | Implémenter/corriger de bout en bout (back, front, migration), APIs, UI, SQL ; capitaliser les leçons. | `feature-builder`, `api-builder`, `ui-generator`, `sql-writer`, `bug-fixer`, `learning-logger` |
-| [`reviewer`](reviewer.json) | Revue qualité en lecture seule : diff, régressions, sécurité, performance, accessibilité, conventions. | `git-diff`, `check-regressions`, `check-security`, `check-performance`, `check-accessibility`, `check-conventions` |
-| [`testeur`](testeur.json) | Scénarios fonctionnels + tests API (JUnit), UI (Playwright), performance et sécurité. | `test-case`, `test-api`, `test-ui`, `test-performance`, `test-security` |
+| [`reviewer`](reviewer.json) | Revue qualité en lecture seule : diff, régressions, sécurité, performance, accessibilité, conventions. | `git-diff`, `code-review` |
 | [`documentaliste`](documentaliste.json) | Synchroniser la doc avec le code, rédiger le message de commit ; documenter a posteriori si besoin. | `git-diff`, `code-explorer`, `doc-writer`, `commit-message` |
 | [`orchestrator`](orchestrator.json) | Chef d'orchestre : fait dialoguer les agents pour réaliser un besoin, en élaguant le parcours. | tous (`skill://.kiro/skills/*/SKILL.md`) |
 
@@ -42,17 +41,16 @@ Basculer vers un agent dans une session Kiro :
 Pipeline **nominale**, systématiquement **élaguée** selon l'ampleur du changement :
 
 ```
-Analyste → Développeur → Reviewer → Testeur → Documentaliste
+Analyste → Développeur → Reviewer → Documentaliste
 ```
 
 L'orchestrator saute toute étape non indispensable et le justifie. Heuristiques de périmètre :
 
 | Nature du changement | Parcours typique (élagué) |
 |---|---|
-| Frontend seul | Dev (`ui-generator`) → Reviewer (`check-accessibility`, `check-conventions`) → Testeur (`test-ui` si parcours impacté) → doc front |
-| Backend / API | Dev (`api-builder`) → Reviewer (`check-security`/`check-performance`/`check-regressions`/`check-conventions` selon le code) → Testeur (`test-api`, + `test-security`/`test-performance` si pertinent) → doc (tableau des APIs) |
+| Backend / API | Dev (`api-builder`) → Reviewer (`git-diff` → `code-review`, axes sécurité/performance/régressions/conventions selon le code) → doc (tableau des APIs) |
 | Schéma / BD | Dev (`sql-writer`, migration Flyway) → Reviewer (perf/régressions) → doc (schéma des tables) |
-| Correctif ciblé | Dev (`bug-fixer`) → test de non-régression ciblé → `learning-logger` si leçon → commit |
+| Correctif ciblé | Dev (`bug-fixer`) → `learning-logger` si leçon → `commit-message` |
 | Question / compréhension | Analyste (`code-explorer`) uniquement, aucune implémentation |
 
 ## Communication bidirectionnelle
@@ -60,7 +58,6 @@ L'orchestrator saute toute étape non indispensable et le justifie. Heuristiques
 Les échanges entre agents sont à double sens ; les boucles de feedback sont pilotées par l'orchestrator :
 
 - **Reviewer → Développeur** : toute anomalie bloquante repart au développeur pour correction ciblée, puis re-contrôle du seul périmètre concerné (boucle jusqu'à zéro anomalie bloquante, avec garde-fou anti-boucle infinie).
-- **Testeur → Développeur** : un test en échec repart au développeur avec le scénario et le comportement attendu.
 - **Analyste → Utilisateur** : toute ambiguïté bloquante est remontée à l'utilisateur **avant** de briefer le développeur ; aucune hypothèse silencieuse (la pipeline est suspendue en attente de réponse).
 - **Documentaliste / Développeur → Analyste / Utilisateur** : toute incohérence de conception détectée est remontée plutôt que contournée.
 

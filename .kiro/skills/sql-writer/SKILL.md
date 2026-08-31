@@ -1,6 +1,10 @@
 ---
 name: sql-writer
-description: Rédiger ou optimiser des requêtes SQL / JPA et des scripts de migration Flyway pour OBC Planner (PostgreSQL 17), en respectant le nommage, la sécurité anti-injection, l'indexation et la performance. À utiliser pour concevoir une requête, diagnostiquer une lenteur ou écrire une migration.
+description: "
+    Rédiger ou optimiser des requêtes SQL / JPA et des scripts de migration Flyway pour OBC Planner (PostgreSQL 17), 
+    en respectant le nommage, la sécurité anti-injection, l'indexation et la performance. 
+    À utiliser pour concevoir une requête, diagnostiquer une lenteur ou écrire une migration.
+"
 allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
@@ -54,3 +58,4 @@ TYPE         : <lecture JPA/SQL | vue | migration schéma | migration données>
 - Colonnes de filtre/tri/jointure indexées ; pas de requête dans une boucle.
 - Migrations Flyway idempotentes, nommées correctement, avec rollback ; aucun script commité modifié.
 - Cohérence stricte avec le schéma réel des tables.
+- Respect des règles écrites dans `postgre-convention.md`

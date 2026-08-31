@@ -6,7 +6,8 @@ allowed-tools: Read, Grep, Glob
 
 # Synthétiser le besoin
 
-Prend une demande brute (souvent incomplète) et la transforme en un besoin fonctionnel clair, cohérent avec le produit OBC Planner. Le skill **pose des questions** tant que des zones d'ombre bloquantes subsistent, puis **fige une synthèse** validable.
+Prend une demande brute (souvent incomplète) et la transforme en un besoin fonctionnel clair, cohérent avec le produit OBC Planner. 
+Le skill **pose des questions** tant que des zones d'ombre bloquantes subsistent, puis **fige une synthèse** validable.
 
 ## Quand l'utiliser
 
