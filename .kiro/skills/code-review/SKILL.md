@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Revue de code complète d'une Pull Request Bitbucket sur n'importe quel repository Git ou sur la branche en cours. Utiliser quand l'utilisateur demande une revue de PR ou un code review.
+description: Revue de code complète d'un changement Git — sur la branche en cours (diff local) ou sur une Pull Request identifiée par son numéro. La récupération du diff se fait uniquement via des commandes git en lecture seule. Utiliser quand l'utilisateur demande une revue de PR ou un code review.
 ---
 
 # Skill : Revue de Code PR
@@ -10,42 +10,62 @@ description: Revue de code complète d'une Pull Request Bitbucket sur n'importe 
 Deux modes d'utilisation :
 
 1. **Avec PR** : L'utilisateur fournit un numéro de PR (ex: `PR #42`, `review la PR 42`).
-   Dans le cas d'une URL, le `owner` et le `repo` sont extraits directement de l'URL.
+   Le diff est récupéré via `git fetch origin pull/{pr_id}/head` (voir étape 2).
 
 2. **Sans PR (diff locale)** : Aucun numéro de PR n'est précisé. La review se fait sur le diff
-   de la branche courante par rapport à la branche cible (develop ou master).
-   Utiliser `git --no-pager diff develop...HEAD` (ou `master...HEAD`) pour obtenir le diff.
+   de la branche courante par rapport à la branche cible (branche par défaut du remote, ex. `main`).
 
 ## Procédure
 
-### 1. Identifier le projet et le repository
+### 1. Déterminer la branche cible (base de comparaison)
 
-Exécuter la commande suivante pour récupérer l'URL du remote origin :
+Toutes les récupérations de diff se font en local via git. Déterminer la branche cible :
+
+```bash
+git symbolic-ref --quiet refs/remotes/origin/HEAD
+```
+
+- Si elle renvoie une valeur (ex. `refs/remotes/origin/main`), en extraire la branche cible (`origin/main`).
+- Sinon, essayer successivement : `origin/main`, `origin/master`, `main`, `master`.
+
+Le remote reste utile uniquement pour `git fetch` en mode PR :
 
 ```bash
 git remote get-url origin
 ```
 
-Parser l'URL pour extraire le **owner** et le **repo** :
-- Format HTTPS : `https://github.com/{owner}/{repo}.git`
-
-Exemples :
-- `https://github.com/cosmoz-hex/obc-planner.git` → owner=`cosmoz-hex`, repo=`obc-planner`
-
 ### 2. Récupérer le diff à analyser
 
-**Mode PR (numéro ou URL fourni) :**
-- Utiliser `get_pull_request` avec le `project_key` et `repo_slug` détectés, et le `pr_id` fourni
-- Utiliser `get_pull_request_diff` pour obtenir le diff complet
-- Utiliser `get_pull_request_changed_files` pour la liste des fichiers modifiés
+Le diff est récupéré **exclusivement via des commandes git en lecture seule** (aucun MCP externe). Déterminer d'abord la branche cible (base de comparaison) :
 
-> **⚠️ Limitation :** Pour les grosses PR, le diff retourné par l'API Bitbucket est paginé. Si la PR contient beaucoup de fichiers modifiés, plusieurs appels successifs à `get_pull_request_diff` avec le paramètre `path` sur chaque fichier peuvent être nécessaires pour couvrir l'ensemble des changements.
+```bash
+# Branche par défaut du remote (ex. origin/main) ; fallback sur main puis master
+git symbolic-ref --quiet refs/remotes/origin/HEAD
+# ou, si absent, essayer successivement : origin/main, origin/master, main, master
+```
+
+**Mode PR (numéro fourni) :**
+- Récupérer la ref de la PR GitHub sans changer de branche :
+  ```bash
+  git fetch origin pull/{pr_id}/head:pr-{pr_id}
+  ```
+- Obtenir le diff complet de la PR par rapport à la branche cible :
+  ```bash
+  git --no-pager diff {branche_cible}...pr-{pr_id}
+  ```
+- Lister les fichiers modifiés :
+  ```bash
+  git --no-pager diff --name-only {branche_cible}...pr-{pr_id}
+  ```
+- Nettoyer la ref temporaire après la revue : `git branch -D pr-{pr_id}`.
+
+> **Note :** si `git fetch origin pull/{pr_id}/head` échoue (remote non-GitHub, PR privée sans accès), signaler la limitation à l'utilisateur et proposer le mode diff locale.
 
 **Mode diff locale (pas de PR précisée) :**
-- Déterminer la branche cible : `git symbolic-ref refs/remotes/origin/HEAD` ou essayer `develop` puis `master`
 - Obtenir le diff : `git --no-pager diff {branche_cible}...HEAD`
 - Lister les fichiers modifiés : `git --no-pager diff --name-only {branche_cible}...HEAD`
-- Les commentaires de review sont retournés directement dans le chat (pas de commentaires inline possibles sans PR)
+
+Dans les deux modes, les commentaires de revue sont **retournés directement dans le chat** (pas de commentaires inline).
 
 ### 3. Analyser le code selon les axes suivants
 

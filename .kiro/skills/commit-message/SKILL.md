@@ -1,12 +1,16 @@
 ---
 name: commit-message
-description: "Rédiger un message de commit conforme à la convention OBC Planner à partir d'un changement de code (diff, staged, ou PR). Sortie silencieuse : uniquement le bloc de message, sans analyse ni commentaire."
+description: "
+    Rédiger un message de commit conforme à la convention OBC Planner à partir d'un changement de code (diff, staged, ou PR). 
+    Sortie silencieuse : uniquement le bloc de message, sans analyse ni commentaire.
+"
 allowed-tools: Read, Grep, Glob, Shell
 ---
 
 # Rédiger un message de commit
 
-Produit un message de commit conforme à la convention Git du projet, dérivé de l'analyse du changement. Le skill **rédige le message** ; il ne crée pas le commit (sauf demande explicite de l'utilisateur).
+Produit un message de commit conforme à la convention Git du projet, dérivé de l'analyse du changement. 
+Le skill **rédige le message** ; il ne crée pas le commit (sauf demande explicite de l'utilisateur).
 
 ## Quand l'utiliser
 
@@ -15,7 +19,7 @@ Produit un message de commit conforme à la convention Git du projet, dérivé d
 
 ## Références obligatoires
 
-- `.kiro/steering/*-convention.md` — **convention de commit** (section Git) :
+- `.kiro/steering/git-convention.md` — **convention de commit** (section Git) :
   ```
   {type}({scope}): {reference} - {title}
 
@@ -39,7 +43,7 @@ INTENTION    : <objectif fonctionnel du changement>
 
 L'analyse est menée **en interne**, sans la restituer à l'utilisateur.
 
-1. **Analyser le changement** : déterminer la nature dominante (fonctionnalité, correctif, doc, perf, sécurité, refactor, style) → `type`. Lire l'état via `git diff`/`git diff --staged`/`git status` (lecture seule).
+1. **Analyser le changement** : déterminer la nature dominante (fonctionnalité, correctif, doc, perf, sécurité, refactor, style) → `type`. Lire les modifications en utilisant le skill `.kiro/skills/git-diff`.
 2. **Déterminer le scope** : module ou fonctionnalité principale impacté (ex. `athletes`, `evaluations`, `programme`, `referentiel`, `securite`).
 3. **Déduire la référence** : depuis l'entrée, ou depuis le nom de la branche courante (`git rev-parse --abbrev-ref HEAD`) si elle suit la convention (`story/S...`, `feature/F...`, `bugfix/B...`).
 4. **Rédiger** :
