@@ -1,6 +1,9 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal} from '@angular/core';
-import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, effect, inject, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {Title} from '@angular/platform-browser';
 import {TranslateService, TranslatePipe} from '@ngx-translate/core';
+import {filter, map, startWith} from 'rxjs';
 import {FR, GB} from 'country-flag-icons/string/3x2';
 import {SanitizeHtmlPipe} from '../../pipes/sanitize-html.pipe';
 
@@ -29,7 +32,9 @@ import '@awesome.me/webawesome/dist/components/option/option.js';
   host: {class: 'block h-dvh'},
   styles: `
     wa-page::part(base),
-    wa-page::part(body) {
+    wa-page::part(body),
+    wa-page::part(main),
+    wa-page::part(main-content) {
       min-height: 0;
       height: 100%;
     }
@@ -37,6 +42,44 @@ import '@awesome.me/webawesome/dist/components/option/option.js';
 })
 export class LayoutComponent {
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
+
+  /**
+   * Clé i18n du titre de l'écran courant, lue dans `data.title` de la route
+   * active la plus profonde. Recalculée à chaque navigation.
+   */
+  protected readonly currentTitleKey = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      startWith(null),
+      map(() => this.deepestTitle())
+    ),
+    {initialValue: this.deepestTitle()}
+  );
+
+  constructor() {
+    // Synchronise le titre de l'onglet du navigateur avec l'écran courant.
+    effect(() => {
+      const key = this.currentTitleKey();
+      const screen = key ? this.translate.instant(key) : '';
+      this.titleService.setTitle(screen ? `${screen} — OBC Planner` : 'OBC Planner');
+    });
+  }
+
+  /** Parcourt l'arbre des routes actives et renvoie le `data.title` le plus profond. */
+  private deepestTitle(): string | null {
+    let route = this.activatedRoute.snapshot;
+    let title: string | null = null;
+    while (route) {
+      if (route.data?.['title']) {
+        title = route.data['title'] as string;
+      }
+      route = route.firstChild!;
+    }
+    return title;
+  }
 
   /** Langues disponibles proposées dans le sélecteur du footer (avec drapeau SVG). */
   protected readonly languages = [

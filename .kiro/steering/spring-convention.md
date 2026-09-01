@@ -24,6 +24,7 @@ fileMatch:
 - Utiliser `@GeneratedValue(strategy = GenerationType.IDENTITY)` pour les IDs
 - Nommer les colonnes explicitement avec `@Column(name = "nom_snake_case")`
 - Éviter `FetchType.EAGER` — préférer `LAZY` et charger explicitement si besoin
+- Utiliser `@Data` (Lombok) sur les entités (getters/setters/`toString`/`equals`/`hashCode`). Sur une entité **sans relation**, `@Data` seul suffit. Sur une entité **avec relation(s)** (`@ManyToOne`/`@OneToMany`…), exclure les relations de `equals`/`hashCode`/`toString` via `@EqualsAndHashCode.Exclude` + `@ToString.Exclude` pour éviter le chargement des relations lazy et les récursions infinies.
 
 ### DTOs
 - Utiliser des **DTOs** pour les échanges avec le frontend — jamais exposer les entités JPA directement

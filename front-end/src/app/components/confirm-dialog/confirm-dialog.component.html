@@ -1,0 +1,15 @@
+<wa-dialog [attr.open]="open() ? true : null"
+           [attr.label]="titleKey() | translate"
+           (wa-after-hide)="onDialogHide($event)">
+
+	<p>{{ messageKey() | translate }}</p>
+
+	<div slot="footer" class="flex justify-end">
+		<wa-button appearance="plain" type="button" (click)="onCancel()">
+			{{ 'common.actions.cancel' | translate }}
+		</wa-button>
+		<wa-button [attr.variant]="confirmVariant()" type="button" (click)="onConfirm()">
+			{{ confirmKey() | translate }}
+		</wa-button>
+	</div>
+</wa-dialog>

@@ -32,3 +32,14 @@ Kiro doit y consigner toute leçon apprise suite à une correction demandée par
 - **Contexte** : Sur plusieurs demandes (migration, refactor UI), Kiro a agi « en direct » sans nommer l'Agent incarné ni le skill appliqué, ni indiquer les étapes de pipeline sautées.
 - **Erreur initiale** : Exécuter la tâche sans traçabilité, privant l'utilisateur de la visibilité sur ce qui est fait et sur ce qui pourrait manquer.
 - **Bonne pratique** : À chaque demande impliquant du code, préciser en tête et à chaque bascule : l'Agent (Analyste/Développeur/Reviewer/Documentaliste), le(s) skill(s) appliqué(s), les étapes volontairement sautées + justification (parcimonie), et les boucles de feedback. Pour une simple question de compréhension, l'indiquer explicitement comme « hors pipeline ». Ce comportement doit être automatique, sans que l'utilisateur ait à le redemander dans son prompt.
+
+### 2026-09-01 — `@Data` sur les entités JPA + garde-fou sur les relations
+- **Contexte** : Simplification des entités (`Athlete`, `EvalSummary`) avec `@Data` à la place de `@Getter`/`@Setter`.
+- **Point d'attention** : `@Data` génère `equals`/`hashCode`/`toString` sur **tous** les champs. Sur une relation lazy (`@ManyToOne`), cela peut déclencher un chargement inattendu ou une récursion infinie.
+- **Bonne pratique** : Utiliser `@Data` sur les entités ; sur les champs de **relation**, ajouter `@EqualsAndHashCode.Exclude` et `@ToString.Exclude`. Entité sans relation (`Athlete`) : `@Data` seul. Entité avec relation (`EvalSummary.athlete`) : `@Data` + exclusions.
+
+
+### 2026-09-02 — Web components à état interne : property binding, pas `[attr.*]`
+- **Contexte** : `<wa-pagination>` paginait de travers (clic « suivant » sans effet, puis sauts/retours 1 → 1 → 2 → 1).
+- **Cause** : binding via `[attr.page]`/`[attr.total]`/`[attr.page-size]` alors que le composant gère son état via ses **propriétés JS** ; la réécriture de l'attribut au re-render entrait en conflit avec la propriété interne (désynchronisation).
+- **Bonne pratique** : pour un web component qui maintient un état interne (pagination, etc.), utiliser le **property binding** (`[page]`, `[total]`, `[pageSize]`) et non `[attr.*]`. Réserver `[attr.*]` aux attributs sans propriété JS correspondante ou purement déclaratifs (ex. `label`, `placeholder`).

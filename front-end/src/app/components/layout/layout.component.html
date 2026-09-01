@@ -1,8 +1,8 @@
-<wa-page>
-	<div slot="navigation-header" class="min-w-3xs m-4">
+<wa-page class="block h-full">
+	<div slot="navigation-header">
 		OBC Planner
 	</div>
-	<div slot="navigation" class="flex flex-col m-4 gap-1">
+	<div slot="navigation" class="flex flex-col gap-1">
 		<span class="uppercase text-[var(--wa-color-text-quiet)] text-xs mb-2">{{ 'nav.general' | translate }}</span>
 		<a routerLink="/athletes"
 		   routerLinkActive="bg-[var(--wa-color-surface-raised)]"
@@ -52,13 +52,13 @@
 		</a>
 
 	</div>
-	<div slot="navigation-footer" class="flex flex-col m-4 gap-2">
+	<div slot="navigation-footer" class="flex flex-col gap-2">
 		<wa-select size="s" [attr.label]="'layout.language' | translate"
 		           [attr.value]="currentLang()"
 		           (change)="onLanguageChange($event)">
 			@for (lang of languages; track lang.code) {
 			<wa-option [attr.value]="lang.code">
-				<span slot="start" class="inline-block w-6 m-2 [&>svg]:rounded-sm" [innerHTML]="lang.flag | sanitizeHtml"></span>
+				<span slot="start" class="inline-block w-6 mr-2 [&>svg]:rounded-sm" [innerHTML]="lang.flag | sanitizeHtml"></span>
 				{{ lang.label }}
 			</wa-option>
 			}
@@ -66,8 +66,12 @@
 		<span class="text-[var(--wa-color-text-quiet)] text-xs">v 0.0.1</span>
 	</div>
 
-	<main class="flex h-full py-4 pr-2">
-		<div class="flex flex-col flex-1 bg-[var(--wa-color-surface-raised)] rounded-md overflow-auto">
+	<div slot="main-header" class="px-1">
+		<h1 class="text-2xl font-semibold">{{ currentTitleKey() ? (currentTitleKey()! | translate) : '' }}</h1>
+	</div>
+
+	<main class="flex h-full pl-0 pt-0 pr-4 pb-4">
+		<div class="flex flex-col flex-1 bg-[var(--wa-color-surface-raised)] rounded-md overflow-auto py-2">
 			<router-outlet></router-outlet>
 		</div>
 	</main>

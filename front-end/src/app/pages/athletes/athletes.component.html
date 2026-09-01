@@ -1,0 +1,104 @@
+<section class="flex flex-1 min-h-0 flex-col gap-4 p-4">
+
+	<div class="flex flex-wrap items-end gap-3">
+		<div role="group" [attr.aria-label]="'athletes.filters.label' | translate"
+		     class="flex flex-wrap items-end gap-3">
+			<wa-select size="s" with-clear [formField]="filtersForm.sexe"
+			           [attr.label]="'athletes.filters.sexe' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (sexe of sexes; track sexe) {
+					<wa-option [attr.value]="sexe">{{ 'athletes.enums.sexe.' + sexe | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.ageCategorie"
+			           [attr.label]="'athletes.filters.ageCategorie' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (age of ageCategories; track age) {
+					<wa-option [attr.value]="age">{{ 'athletes.enums.ageCategorie.' + age | translate }}</wa-option>
+				}
+			</wa-select>
+		</div>
+
+		<wa-button variant="brand" class="ml-auto" (click)="openCreate()">
+			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+			{{ 'athletes.actions.add' | translate }}
+		</wa-button>
+	</div>
+
+	@if (errorMessage()) {
+		<wa-callout variant="danger" role="alert" aria-live="assertive">
+			<wa-icon slot="icon" name="triangle-exclamation" aria-hidden="true"></wa-icon>
+			{{ errorMessage()! | translate }}
+		</wa-callout>
+	}
+
+	<app-data-grid
+		[rows]="rows()"
+		[columns]="columns()"
+		[loading]="loading()"
+		[caption]="'athletes.table.caption'"
+		[rowId]="rowId"
+		[page]="page()"
+		[pageSize]="pageSize()"
+		[totalElements]="totalElements()"
+		[sort]="sort()"
+		(pageChange)="onPageChange($event)"
+		(pageSizeChange)="onPageSizeChange($event)"
+		(sortChange)="onSortChange($event)"
+		(cellClick)="onCellClick($event)">
+	</app-data-grid>
+</section>
+
+<!-- Templates de cellule -->
+
+<ng-template #sexeCell let-athlete>
+	<wa-icon role="img" class="text-xl"
+	         [attr.name]="athlete.sexe === 'M' ? 'mars' : 'venus'"
+	         [attr.aria-label]="t('athletes.enums.sexe.' + athlete.sexe)"></wa-icon>
+</ng-template>
+
+<ng-template #ageCell let-athlete>
+	@if (athlete.ageCategorie) {
+		<wa-tag variant="brand">{{ 'athletes.enums.ageCategorie.' + athlete.ageCategorie | translate }}</wa-tag>
+	}
+</ng-template>
+
+<ng-template #levelCell let-athlete>
+	@if (athlete.compLevel) {
+		<wa-tag variant="success">{{ 'athletes.enums.compLevel.' + athlete.compLevel | translate }}</wa-tag>
+	}
+</ng-template>
+
+<ng-template #actionsCell let-athlete>
+	<wa-dropdown (wa-select)="onRowAction(athlete, $event)">
+		<wa-button slot="trigger" appearance="plain" size="s"
+		           [attr.aria-label]="t('common.actions.menu')">
+			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
+		</wa-button>
+		<wa-dropdown-item value="delete" variant="danger">
+			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.delete' | translate }}
+		</wa-dropdown-item>
+	</wa-dropdown>
+</ng-template>
+
+<!-- Modale de gestion -->
+<app-athlete-form-dialog
+	[open]="dialogOpen()"
+	[mode]="dialogMode()"
+	[athlete]="selectedAthlete()"
+	(save)="onSave($event)"
+	(requestEdit)="switchToEdit()"
+	(close)="closeDialog()">
+</app-athlete-form-dialog>
+
+<!-- Confirmation de suppression -->
+<app-confirm-dialog
+	[open]="confirmOpen()"
+	titleKey="athletes.delete.title"
+	messageKey="athletes.delete.message"
+	confirmKey="common.actions.delete"
+	(confirmed)="confirmDelete()"
+	(cancelled)="cancelDelete()">
+</app-confirm-dialog>

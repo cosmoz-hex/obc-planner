@@ -1,8 +1,17 @@
-@import "tailwindcss";
+/* Définition de l'ordre des couches */
+@layer theme, base, components, utilities;
 
-/* Reset recommandé pour <wa-page> (voir doc WebAwesome) */
-html, body {
-  min-height: 100%;
-  padding: 0;
-  margin: 0;
+/* Importation exclusive du thème et des utilitaires de génération */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/*
+ * Normalisations minimales conservées après le retrait de Preflight.
+ * On n'ajoute PAS de reset margin/padding/border sur `*` (ce qui casserait les
+ * composants WebAwesome) : uniquement box-sizing, sûr et sans effet de bord.
+ */
+@layer base {
+  *, ::before, ::after {
+    box-sizing: border-box;
+  }
 }

@@ -12,6 +12,102 @@
     "programmes": "Programmes",
     "referentiel": "Référentiel"
   },
+  "common": {
+    "loading": "Chargement…",
+    "empty": "Aucun résultat.",
+    "filters": {
+      "all": "Tous"
+    },
+    "actions": {
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "confirm": "Confirmer",
+      "menu": "Actions"
+    },
+    "confirm": {
+      "title": "Confirmation",
+      "message": "Confirmez-vous cette action ?"
+    },
+    "pagination": {
+      "pageSize": "Par page",
+      "label": "Pagination"
+    }
+  },
+  "athletes": {
+    "title": "Athlètes",
+    "actions": {
+      "add": "Ajouter un athlète"
+    },
+    "filters": {
+      "label": "Filtres",
+      "sexe": "Sexe",
+      "ageCategorie": "Catégorie d'âge"
+    },
+    "table": {
+      "caption": "Liste des athlètes"
+    },
+    "fields": {
+      "name": "Nom & prénom",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "sexe": "Sexe",
+      "ageCategorie": "Catégorie d'âge",
+      "weightCategorie": "Catégorie de poids",
+      "compLevel": "Niveau",
+      "lastEvaluation": "Dernière évaluation",
+      "actions": "Actions"
+    },
+    "enums": {
+      "sexe": {
+        "M": "Masculin",
+        "F": "Féminin"
+      },
+      "ageCategorie": {
+        "U15": "U15",
+        "U17": "U17",
+        "U20": "U20",
+        "SEN": "Senior",
+        "MASTER": "Master"
+      },
+      "compLevel": {
+        "DEB": "Débutant",
+        "DPT": "Départemental",
+        "REG": "Régional",
+        "IRG": "Interrégional",
+        "HON": "Honneur",
+        "NAT": "National",
+        "EUR": "Européen",
+        "MON": "Mondial"
+      },
+      "weightOpen": "+ (supérieur)"
+    },
+    "form": {
+      "title": {
+        "create": "Nouvel athlète",
+        "edit": "Modifier l'athlète",
+        "view": "Fiche athlète"
+      },
+      "errors": {
+        "firstName": "Le prénom est obligatoire.",
+        "lastName": "Le nom est obligatoire.",
+        "sexe": "Le sexe est obligatoire.",
+        "ageCategorie": "La catégorie d'âge est obligatoire.",
+        "weightCategorie": "La catégorie de poids est obligatoire.",
+        "compLevel": "Le niveau est obligatoire.",
+        "global": "Veuillez corriger les champs en erreur."
+      }
+    },
+    "delete": {
+      "title": "Supprimer l'athlète",
+      "message": "Cette action est irréversible. Confirmez-vous la suppression de cet athlète ?"
+    },
+    "errors": {
+      "save": "L'enregistrement a échoué. Veuillez réessayer.",
+      "delete": "La suppression a échoué. Veuillez réessayer."
+    }
+  },
   "pages": {
     "athletes": {
       "title": "Athlètes",
