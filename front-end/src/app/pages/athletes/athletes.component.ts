@@ -5,7 +5,6 @@ import {
 	CUSTOM_ELEMENTS_SCHEMA,
 	effect,
 	inject,
-	linkedSignal,
 	signal,
 	TemplateRef,
 	viewChild
@@ -14,18 +13,19 @@ import {DatePipe} from '@angular/common';
 import {FormField, form} from '@angular/forms/signals';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {DataGridComponent} from '../../components/data-grid/data-grid.component';
-import {CellClickEvent, ColumnDef, SortState} from '../../components/data-grid/data-grid.types';
+import {CellClickEvent, ColumnDef, GridFilter, SortState} from '../../models/data-grid.model';
 import {AthleteFormDialogComponent, AthleteFormMode} from './athlete-form-dialog/athlete-form-dialog.component';
 import {ConfirmDialogComponent} from '../../components/confirm-dialog/confirm-dialog.component';
-import {WaSelectControlDirective} from '../../components/wa-forms/wa-select-control.directive';
+import {WaSelectControlDirective} from '../../directives/wa-forms/wa-select-control.directive';
 import {AthleteService} from '../../services/athlete.service';
-import {AGE_CATEGORIES, Athlete, AthleteQuery, AthleteRequest, PageResponse, SEXES} from '../../models/athlete.model';
+import {AGE_CATEGORIES, AgeCategorie, Athlete, AthleteFilter, AthleteRequest, Sexe, SEXES} from '../../models/athlete.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/option/option.js';
 import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
+import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
 import '@awesome.me/webawesome/dist/components/badge/badge.js';
 import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
 import '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js';
@@ -60,8 +60,8 @@ export class AthletesComponent {
 
   // --- Critères de recherche (pilotent la ressource HTTP) ---
 
-  /** Modèle des filtres (chaînes vides = pas de filtre). */
-  private readonly filtersModel = signal({sexe: '', ageCategorie: ''});
+  /** Filtre métier (chaînes vides = pas de filtre). */
+  private readonly filtersModel = signal<{ sexe: Sexe | ''; ageCategorie: AgeCategorie | '' }>({sexe: '', ageCategorie: ''});
   /** Formulaire de filtres (Signal Forms) — sans validation, source des critères. */
   protected readonly filtersForm = form(this.filtersModel);
 
@@ -69,33 +69,33 @@ export class AthletesComponent {
   protected readonly pageSize = signal(10);
   protected readonly sort = signal<SortState | null>({key: 'lastName', direction: 'asc'});
 
-  protected readonly query = computed<AthleteQuery>(() => {
+  /** Filtre métier normalisé (chaînes vides → null). */
+  private readonly athleteFilter = computed<AthleteFilter>(() => {
     const {sexe, ageCategorie} = this.filtersModel();
     return {
-      sexe: (sexe || null) as AthleteQuery['sexe'],
-      ageCategorie: (ageCategorie || null) as AthleteQuery['ageCategorie'],
-      page: this.page(),
-      size: this.pageSize(),
-      sort: this.sort() ? `${this.sort()!.key},${this.sort()!.direction}` : null
+      sexe: sexe || null,
+      ageCategorie: ageCategorie || null
     };
   });
 
+  /** Filtre de grille (pagination + tri). */
+  private readonly gridFilter = computed<GridFilter>(() => ({
+    page: this.page(),
+    size: this.pageSize(),
+    sort: this.sort() ? `${this.sort()!.key},${this.sort()!.direction}` : null
+  }));
+
+  /** Requête complète : combinaison du filtre métier et du filtre de grille. */
+  protected readonly query = computed<AthleteFilter & GridFilter>(() => ({
+    ...this.athleteFilter(),
+    ...this.gridFilter()
+  }));
+
   /** Ressource réactive : se recharge automatiquement quand `query` change. */
-  protected readonly athletesResource = this.athleteService.createListResource(this.query);
+  protected readonly athletesResource = this.athleteService.getAll(this.query);
 
-  /**
-   * Dernière page reçue, conservée pendant les rechargements. `httpResource`
-   * repasse `value()` à `undefined` durant le fetch : on garde la valeur
-   * précédente pour éviter que `totalElements` retombe à 0 (ce qui reclamperait
-   * la pagination à la page 1 et empêcherait de naviguer).
-   */
-  private readonly lastPage = linkedSignal<PageResponse<Athlete> | undefined, PageResponse<Athlete> | undefined>({
-    source: () => this.athletesResource.value(),
-    computation: (value, previous) => value ?? previous?.value
-  });
-
-  protected readonly rows = computed<readonly Athlete[]>(() => this.lastPage()?.content ?? []);
-  protected readonly totalElements = computed(() => this.lastPage()?.totalElements ?? 0);
+  protected readonly rows = computed<readonly Athlete[]>(() => this.athletesResource.value()?.content ?? []);
+  protected readonly totalElements = computed(() => this.athletesResource.value()?.totalElements ?? 0);
   protected readonly loading = computed(() => this.athletesResource.isLoading());
 
   // --- Modale de formulaire ---
@@ -155,12 +155,8 @@ export class AthletesComponent {
   }
 
   // --- Pagination / tri (server-side) ---
-  protected onPageChange(page: number): void {
-    this.page.set(page);
-  }
-
-  protected onPageSizeChange(size: number): void {
-    this.pageSize.set(size);
+  protected onPageSizeChange(): void {
+    // Le grid a déjà mis à jour `pageSize` (double binding) ; on revient page 1.
     this.page.set(0);
   }
 
@@ -176,21 +172,17 @@ export class AthletesComponent {
     this.dialogOpen.set(true);
   }
 
-  protected openView(athlete: Athlete): void {
+  protected openEdit(athlete: Athlete): void {
     this.selectedAthlete.set(athlete);
-    this.dialogMode.set('view');
+    this.dialogMode.set('edit');
     this.dialogOpen.set(true);
   }
 
-  /** Ouvre la fiche en consultation lors d'un clic sur la cellule « nom & prénom ». */
+  /** Ouvre la fiche en modification lors d'un clic sur la cellule « nom & prénom ». */
   protected onCellClick(event: CellClickEvent<Athlete>): void {
     if (event.column.key === 'lastName') {
-      this.openView(event.row);
+      this.openEdit(event.row);
     }
-  }
-
-  protected switchToEdit(): void {
-    this.dialogMode.set('edit');
   }
 
   protected closeDialog(): void {

@@ -2,66 +2,46 @@
            [attr.label]="title() | translate"
            (wa-after-hide)="onDialogHide($event)">
 
-	<form class="flex flex-col gap-4" (submit)="$event.preventDefault(); onSubmit()">
+	<form class="flex flex-col gap-2" (submit)="$event.preventDefault(); onSubmit()">
 
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-			<wa-input [formField]="athleteForm.firstName"
-			          [attr.label]="'athletes.fields.firstName' | translate"></wa-input>
-
-			<wa-input [formField]="athleteForm.lastName"
-			          [attr.label]="'athletes.fields.lastName' | translate"></wa-input>
-
-			<wa-select [formField]="athleteForm.sexe"
-			           [attr.label]="'athletes.fields.sexe' | translate">
+		<div class="grid grid-cols-1 gap-1 sm:grid-cols-2">
+			<wa-input [formField]="athleteForm.firstName" [attr.label]="'athletes.fields.firstName' | translate"></wa-input>
+			<wa-input [formField]="athleteForm.lastName" [attr.label]="'athletes.fields.lastName' | translate"></wa-input>
+			<wa-select [formField]="athleteForm.sexe" [attr.label]="'athletes.fields.sexe' | translate">
 				@for (sexe of sexes; track sexe) {
-					<wa-option [attr.value]="sexe">{{ 'athletes.enums.sexe.' + sexe | translate }}</wa-option>
+				<wa-option [attr.value]="sexe">{{ 'athletes.enums.sexe.' + sexe | translate }}</wa-option>
 				}
 			</wa-select>
 
-			<wa-select [formField]="athleteForm.ageCategorie"
-			           [attr.label]="'athletes.fields.ageCategorie' | translate">
+			<wa-select [formField]="athleteForm.ageCategorie" [attr.label]="'athletes.fields.ageCategorie' | translate">
 				@for (age of ageCategories; track age) {
-					<wa-option [attr.value]="age">{{ 'athletes.enums.ageCategorie.' + age | translate }}</wa-option>
+				<wa-option [attr.value]="age">{{ 'athletes.enums.ageCategorie.' + age | translate }}</wa-option>
 				}
 			</wa-select>
 
-			<wa-select [formField]="athleteForm.weightCategorie"
-			           [attr.label]="'athletes.fields.weightCategorie' | translate">
+			<wa-select [formField]="athleteForm.weightCategorie" [attr.label]="'athletes.fields.weightCategorie' | translate">
 				@for (weight of weightOptions(); track weight) {
-					<wa-option [attr.value]="weight.toString()">
-						{{ weight === 999 ? ('athletes.enums.weightOpen' | translate) : weight + ' kg' }}
-					</wa-option>
+				<wa-option [attr.value]="weight.toString()">
+					{{ weight === 999 ? ('athletes.enums.weightOpen' | translate) : weight + ' kg' }}
+				</wa-option>
 				}
 			</wa-select>
 
-			<wa-select [formField]="athleteForm.compLevel"
-			           [attr.label]="'athletes.fields.compLevel' | translate">
+			<wa-select [formField]="athleteForm.compLevel" [attr.label]="'athletes.fields.compLevel' | translate">
 				@for (level of compLevels; track level) {
-					<wa-option [attr.value]="level">{{ 'athletes.enums.compLevel.' + level | translate }}</wa-option>
+				<wa-option [attr.value]="level">{{ 'athletes.enums.compLevel.' + level | translate }}</wa-option>
 				}
 			</wa-select>
 		</div>
 
-		@if (athleteForm().touched() && athleteForm().invalid()) {
-			<p class="text-sm text-[var(--wa-color-danger-fill-loud)]" role="alert" aria-live="polite">
-				{{ 'athletes.form.errors.global' | translate }}
-			</p>
-		}
-
-		<div slot="footer" class="flex justify-end gap-2">
+		<div slot="footer" class="flex justify-end gap-1">
 			<wa-button appearance="plain" type="button" (click)="onClose()">
 				{{ 'common.actions.cancel' | translate }}
 			</wa-button>
 
-			@if (readonlyMode()) {
-				<wa-button variant="brand" type="button" (click)="onEdit()">
-					{{ 'common.actions.edit' | translate }}
-				</wa-button>
-			} @else {
-				<wa-button variant="brand" type="submit">
-					{{ 'common.actions.save' | translate }}
-				</wa-button>
-			}
+			<wa-button variant="brand" type="submit" [attr.disabled]="athleteForm().invalid() ? true : null">
+				{{ 'common.actions.save' | translate }}
+			</wa-button>
 		</div>
 	</form>
 </wa-dialog>

@@ -15,3 +15,32 @@
     box-sizing: border-box;
   }
 }
+
+/*
+ * État d'erreur des champs de formulaire (Signal Forms).
+ * Les classes de statut (.ng-invalid, .ng-touched, …) sont posées automatiquement
+ * sur tout champ lié via [formField] grâce à provideSignalFormsConfig (voir
+ * app.config.ts). On colore label, champ et hint en couleur "danger" WebAwesome
+ * uniquement quand le champ est à la fois invalide ET touché — global, sans code
+ * par champ ni par écran. Cible les CSS parts exposés par <wa-input> / <wa-select>.
+ */
+wa-input.ng-invalid.ng-touched,
+wa-select.ng-invalid.ng-touched,
+wa-textarea.ng-invalid.ng-touched {
+  --wa-form-control-border-color: var(--wa-color-danger-border-loud);
+}
+
+wa-input.ng-invalid.ng-touched::part(form-control-label),
+wa-select.ng-invalid.ng-touched::part(form-control-label),
+wa-textarea.ng-invalid.ng-touched::part(form-control-label),
+wa-input.ng-invalid.ng-touched::part(hint),
+wa-select.ng-invalid.ng-touched::part(hint),
+wa-textarea.ng-invalid.ng-touched::part(hint) {
+  color: var(--wa-color-danger-fill-loud);
+}
+
+wa-input.ng-invalid.ng-touched::part(input-wrapper),
+wa-textarea.ng-invalid.ng-touched::part(input-wrapper),
+wa-select.ng-invalid.ng-touched::part(combobox) {
+  border-color: var(--wa-color-danger-border-loud);
+}

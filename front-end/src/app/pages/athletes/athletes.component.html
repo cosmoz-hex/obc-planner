@@ -39,12 +39,11 @@
 		[loading]="loading()"
 		[caption]="'athletes.table.caption'"
 		[rowId]="rowId"
-		[page]="page()"
-		[pageSize]="pageSize()"
+		[(page)]="page"
+		[(pageSize)]="pageSize"
 		[totalElements]="totalElements()"
 		[sort]="sort()"
-		(pageChange)="onPageChange($event)"
-		(pageSizeChange)="onPageSizeChange($event)"
+		(pageSizeChange)="onPageSizeChange()"
 		(sortChange)="onSortChange($event)"
 		(cellClick)="onCellClick($event)">
 	</app-data-grid>
@@ -53,9 +52,12 @@
 <!-- Templates de cellule -->
 
 <ng-template #sexeCell let-athlete>
-	<wa-icon role="img" class="text-xl"
+	<wa-icon [id]="'sexe-icon-' + athlete.athleteId" role="img" class="text-xl"
 	         [attr.name]="athlete.sexe === 'M' ? 'mars' : 'venus'"
 	         [attr.aria-label]="t('athletes.enums.sexe.' + athlete.sexe)"></wa-icon>
+	<wa-tooltip [attr.for]="'sexe-icon-' + athlete.athleteId">
+		{{ 'athletes.enums.sexe.' + athlete.sexe | translate }}
+	</wa-tooltip>
 </ng-template>
 
 <ng-template #ageCell let-athlete>
@@ -89,7 +91,6 @@
 	[mode]="dialogMode()"
 	[athlete]="selectedAthlete()"
 	(save)="onSave($event)"
-	(requestEdit)="switchToEdit()"
 	(close)="closeDialog()">
 </app-athlete-form-dialog>
 

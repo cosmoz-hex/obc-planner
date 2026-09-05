@@ -12,8 +12,9 @@ import {
 } from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {FormField, disabled, form, readonly, required} from '@angular/forms/signals';
-import {WaInputControlDirective} from '../../../components/wa-forms/wa-input-control.directive';
-import {WaSelectControlDirective} from '../../../components/wa-forms/wa-select-control.directive';
+import {WaInputControlDirective} from '../../../directives/wa-forms/wa-input-control.directive';
+import {WaSelectControlDirective} from '../../../directives/wa-forms/wa-select-control.directive';
+import {WaFieldErrorDirective} from '../../../directives/wa-forms/wa-field-error.directive';
 import {
   AGE_CATEGORIES,
   Athlete,
@@ -32,7 +33,7 @@ import '@awesome.me/webawesome/dist/components/option/option.js';
 import '@awesome.me/webawesome/dist/components/button/button.js';
 
 /** Mode d'affichage de la modale. */
-export type AthleteFormMode = 'create' | 'view' | 'edit';
+export type AthleteFormMode = 'create' | 'edit';
 
 /**
  * Modèle interne du formulaire. Toutes les valeurs sont des chaînes pour
@@ -50,7 +51,10 @@ interface AthleteFormModel {
 
 /**
  * Modale unique de gestion d'un athlète, pilotée par un {@link AthleteFormMode} :
- * création, consultation (lecture seule) ou modification.
+ * création ou modification.
+ *
+ * En modification, l'identité (nom, prénom, sexe) est verrouillée ; seuls la
+ * catégorie d'âge, la catégorie de poids et le niveau sont modifiables.
  *
  * Les champs sont liés au formulaire Signal Forms via `[formField]`, grâce aux
  * value accessors {@link WaInputControlDirective} / {@link WaSelectControlDirective}.
@@ -59,7 +63,7 @@ interface AthleteFormModel {
 @Component({
   selector: 'app-athlete-form-dialog',
   standalone: true,
-  imports: [TranslatePipe, FormField, WaInputControlDirective, WaSelectControlDirective],
+  imports: [TranslatePipe, FormField, WaInputControlDirective, WaSelectControlDirective, WaFieldErrorDirective],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './athlete-form-dialog.component.html'
@@ -74,7 +78,6 @@ export class AthleteFormDialogComponent {
 
   readonly save = output<AthleteRequest>();
   readonly close = output<void>();
-  readonly requestEdit = output<void>();
 
   protected readonly sexes = SEXES;
   protected readonly ageCategories = AGE_CATEGORIES;
@@ -83,10 +86,13 @@ export class AthleteFormDialogComponent {
   /** Source de vérité du formulaire. */
   protected readonly model = signal<AthleteFormModel>(this.emptyModel());
 
-  /** Formulaire Signal Forms : tous les champs sont requis. En consultation,
-   * les inputs passent en readonly et les selects en disabled (pilotés par Field). */
+  /** Formulaire Signal Forms : tous les champs sont requis.
+   * - En modification (edit) : l'identité (nom, prénom, sexe) est verrouillée ;
+   *   seuls la catégorie d'âge, la catégorie de poids et le niveau sont modifiables.
+   * - En création (create) : tous les champs sont modifiables. */
   protected readonly athleteForm = form(this.model, (path) => {
-    const isView = () => this.mode() === 'view';
+    // Identité non modifiable après création (verrouillée en edit).
+    const isEdit = () => this.mode() === 'edit';
 
     required(path.firstName, {message: 'athletes.form.errors.firstName'});
     required(path.lastName, {message: 'athletes.form.errors.lastName'});
@@ -95,26 +101,15 @@ export class AthleteFormDialogComponent {
     required(path.weightCategorie, {message: 'athletes.form.errors.weightCategorie'});
     required(path.compLevel, {message: 'athletes.form.errors.compLevel'});
 
-    readonly(path.firstName, isView);
-    readonly(path.lastName, isView);
-    disabled(path.sexe, isView);
-    disabled(path.ageCategorie, isView);
-    disabled(path.weightCategorie, () => isView() || !this.model().sexe);
-    disabled(path.compLevel, isView);
+		disabled(path.firstName, {when: isEdit});
+		disabled(path.lastName, {when: isEdit});
+    disabled(path.sexe, {when: isEdit});
+    disabled(path.weightCategorie, {when: () => !this.model().sexe});
   });
 
-  protected readonly readonlyMode = computed(() => this.mode() === 'view');
-
-  protected readonly title = computed(() => {
-    switch (this.mode()) {
-      case 'create':
-        return 'athletes.form.title.create';
-      case 'edit':
-        return 'athletes.form.title.edit';
-      default:
-        return 'athletes.form.title.view';
-    }
-  });
+  protected readonly title = computed(() =>
+    this.mode() === 'create' ? 'athletes.form.title.create' : 'athletes.form.title.edit'
+  );
 
   /**
    * Catégories de poids disponibles, recalculées quand le sexe change tout en
@@ -177,10 +172,6 @@ export class AthleteFormDialogComponent {
     if (event.target === event.currentTarget) {
       this.onClose();
     }
-  }
-
-  protected onEdit(): void {
-    this.requestEdit.emit();
   }
 
   private emptyModel(): AthleteFormModel {

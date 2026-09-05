@@ -36,20 +36,8 @@ export interface AthleteRequest {
   compLevel: CompLevel;
 }
 
-/** Enveloppe de pagination renvoyée par l'API (PageResponse). */
-export interface PageResponse<T> {
-  readonly content: T[];
-  readonly page: number;
-  readonly size: number;
-  readonly totalElements: number;
-  readonly totalPages: number;
-}
-
-/** Critères de recherche envoyés au backend. */
-export interface AthleteQuery {
+/** Critères de recherche métier des athlètes (hors pagination/tri). */
+export interface AthleteFilter {
   sexe: Sexe | null;
   ageCategorie: AgeCategorie | null;
-  page: number;
-  size: number;
-  sort: string | null;
 }

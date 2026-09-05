@@ -1,7 +1,8 @@
 import {inject, Injectable, Signal} from '@angular/core';
 import {HttpClient, httpResource, HttpResourceRef} from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
-import {Athlete, AthleteQuery, AthleteRequest, PageResponse} from '../models/athlete.model';
+import {Athlete, AthleteFilter, AthleteRequest} from '../models/athlete.model';
+import {GridFilter, PageResponse} from '../models/data-grid.model';
 
 /** Base de l'API athlètes (routée vers le backend via proxy en dev, context-path /api). */
 const ATHLETES_URL = '/api/athletes';
@@ -19,9 +20,10 @@ export class AthleteService {
 
   /**
    * Crée une ressource réactive listant les athlètes selon les critères fournis.
-   * @param query signal des critères de recherche (filtres, pagination, tri).
+   * @param query signal combinant le filtre métier ({@link AthleteFilter}) et le
+   *              filtre de grille ({@link GridFilter} : pagination et tri).
    */
-  createListResource(query: Signal<AthleteQuery>): HttpResourceRef<PageResponse<Athlete> | undefined> {
+  getAll(query: Signal<AthleteFilter & GridFilter>): HttpResourceRef<PageResponse<Athlete> | undefined> {
     return httpResource<PageResponse<Athlete>>(() => {
       const q = query();
       const params: Record<string, string> = {

@@ -43,8 +43,31 @@ export interface SortState {
   readonly direction: SortDirection;
 }
 
+/**
+ * Critères de pagination et de tri d'un data-grid, réutilisables quel que soit
+ * le domaine métier. Se combine avec un filtre métier dédié pour former la
+ * requête complète envoyée au backend.
+ */
+export interface GridFilter {
+  /** Numéro de page 0-based (comme Spring Data). */
+  page: number;
+  /** Nombre d'éléments par page. */
+  size: number;
+  /** Tri au format Spring `clé,direction` (ex. `lastName,asc`) ou null. */
+  sort: string | null;
+}
+
 /** Événement de clic sur une cellule. */
 export interface CellClickEvent<T = unknown> {
   readonly row: T;
   readonly column: ColumnDef<T>;
+}
+
+/** Enveloppe de pagination renvoyée par l'API (PageResponse). */
+export interface PageResponse<T> {
+  readonly content: T[];
+  readonly page: number;
+  readonly size: number;
+  readonly totalElements: number;
+  readonly totalPages: number;
 }

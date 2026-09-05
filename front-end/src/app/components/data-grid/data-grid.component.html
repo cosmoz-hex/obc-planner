@@ -90,10 +90,10 @@
 		<wa-pagination
 			format="compact"
 			with-summary
-			[total]="totalElements()"
+			[total]="stableTotal()"
 			[pageSize]="pageSize()"
 			[page]="page() + 1"
 			[attr.label]="(caption() ? (caption() | translate) : ('common.pagination.label' | translate))"
-			(wa-page-change)="onWaPageChange($event)"></wa-pagination>
+			(wa-page-change)="onPageChange($event)"></wa-pagination>
 	</div>
 </div>

@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, input, linkedSignal, model, output} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
-import {CellClickEvent, ColumnDef, SortDirection, SortState} from './data-grid.types';
+import {CellClickEvent, ColumnDef, SortDirection, SortState} from '../../models/data-grid.model';
 
 // Composants WebAwesome utilisés par ce grid (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
@@ -39,14 +39,30 @@ export class DataGridComponent<T> {
   /** Indique un chargement en cours. */
   readonly loading = input<boolean>(false);
 
-  /** Numéro de page courant (0-based, comme Spring). */
-  readonly page = input<number>(0);
-  /** Taille de page courante. */
-  readonly pageSize = input<number>(10);
+  /** Numéro de page courant (0-based, comme Spring). Double binding : le grid le met à jour lui-même. */
+  readonly page = model<number>(0);
+  /** Taille de page courante. Double binding : le grid la met à jour lui-même. */
+  readonly pageSize = model<number>(10);
   /** Options de taille de page. */
   readonly pageSizeOptions = input<readonly number[]>([10, 25, 50]);
   /** Nombre total d'éléments (toutes pages). */
   readonly totalElements = input<number>(0);
+
+  /**
+   * Total « stable » utilisé pour la pagination. Le parent peut faire retomber
+   * `totalElements` à 0 pendant un rechargement (ex. `httpResource` repasse sa
+   * valeur à `undefined` durant le fetch). Ce 0 transitoire ferait recalculer le
+   * nombre de pages à `<wa-pagination>`, qui reclamperait sa page interne à 1 et
+   * émettrait un `wa-page-change` parasite ramenant à la première page.
+   *
+   * Tant que `loading()` est vrai, on conserve donc la dernière valeur connue ;
+   * dès la fin du chargement on prend la valeur réelle (y compris 0 pour une
+   * recherche sans résultat). Interne à la grille : transparent pour les écrans.
+   */
+  protected readonly stableTotal = linkedSignal<{ total: number; loading: boolean }, number>({
+    source: () => ({total: this.totalElements(), loading: this.loading()}),
+    computation: (curr, previous) => (curr.loading ? (previous?.value ?? curr.total) : curr.total)
+  });
 
   /** État de tri courant (ou null). */
   readonly sort = input<SortState | null>(null);
@@ -61,10 +77,6 @@ export class DataGridComponent<T> {
   /** Identité d'une ligne pour le suivi du rendu (défaut : index). */
   readonly rowId = input<(row: T, index: number) => unknown>((_, index) => index);
 
-  /** Émis lors d'un changement de page (nouvelle page 0-based). */
-  readonly pageChange = output<number>();
-  /** Émis lors d'un changement de taille de page. */
-  readonly pageSizeChange = output<number>();
   /** Émis lors d'un changement de tri. */
   readonly sortChange = output<SortState>();
   /** Émis lors d'un clic sur une ligne. */
@@ -113,12 +125,13 @@ export class DataGridComponent<T> {
   }
 
   /** Convertit l'événement de pagination WebAwesome (page 1-based) en page 0-based. */
-  protected onWaPageChange(event: Event): void {
+  protected onPageChange(event: Event): void {
     const detail = (event as CustomEvent<{ page: number }>).detail;
     if (detail && Number.isFinite(detail.page)) {
       const zeroBased = detail.page - 1;
       if (zeroBased !== this.page()) {
-        this.pageChange.emit(zeroBased);
+        // Double binding : set() met à jour le parent et émet `pageChange`.
+        this.page.set(zeroBased);
       }
     }
   }
@@ -128,7 +141,8 @@ export class DataGridComponent<T> {
     const raw = Array.isArray(value) ? value[0] : value;
     const size = Number(raw);
     if (size && size !== this.pageSize()) {
-      this.pageSizeChange.emit(size);
+      // Double binding : set() met à jour le parent et émet `pageSizeChange`.
+      this.pageSize.set(size);
     }
   }
 
