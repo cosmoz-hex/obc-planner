@@ -1,0 +1,120 @@
+<section class="flex flex-1 min-h-0 flex-col gap-4 px-4">
+
+	<div class="flex flex-wrap items-end gap-3">
+		<div role="group" [attr.aria-label]="'archetypes.filters.label' | translate"
+		     class="flex flex-wrap items-end gap-3">
+			<wa-select size="s" with-clear [formField]="filtersForm.archetype"
+			           [attr.label]="'archetypes.filters.archetype' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of archetypes; track value) {
+				<wa-option [attr.value]="value">{{ 'archetypes.enums.archetype.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.strengthSpeed"
+			           [attr.label]="'archetypes.filters.strengthSpeed' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of strengthSpeeds; track value) {
+				<wa-option [attr.value]="value">{{ 'archetypes.enums.strengthSpeed.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.technique"
+			           [attr.label]="'archetypes.filters.technique' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of techniques; track value) {
+				<wa-option [attr.value]="value">{{ 'archetypes.enums.technique.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.endurance"
+			           [attr.label]="'archetypes.filters.endurance' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of endurances; track value) {
+				<wa-option [attr.value]="value">{{ 'archetypes.enums.endurance.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+		</div>
+
+		<wa-button variant="brand" class="ml-auto" (click)="openCreate()">
+			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+			{{ 'archetypes.actions.add' | translate }}
+		</wa-button>
+	</div>
+
+	@if (errorMessage()) {
+	<wa-callout variant="danger" role="alert" aria-live="assertive">
+		<wa-icon slot="icon" name="triangle-exclamation" aria-hidden="true"></wa-icon>
+		{{ errorMessage()! | translate }}
+	</wa-callout>
+	}
+
+	<app-data-grid
+		[rows]="rows()"
+		[columns]="columns()"
+		[loading]="loading()"
+		[caption]="'archetypes.table.caption'"
+		[rowId]="rowId"
+		[pageable]="true"
+		[(page)]="page"
+		[(pageSize)]="pageSize"
+		[totalElements]="totalElements()"
+		[sort]="sort()"
+		(pageSizeChange)="onPageSizeChange()"
+		(sortChange)="onSortChange($event)"
+		(cellClick)="onCellClick($event)">
+	</app-data-grid>
+</section>
+
+<!-- Templates de cellule -->
+
+<ng-template #strengthSpeedCell let-row>
+	<wa-tag variant="neutral">{{ 'archetypes.enums.strengthSpeed.' + row.strengthSpeed | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #techniqueCell let-row>
+	<wa-tag variant="neutral">{{ 'archetypes.enums.technique.' + row.technique | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #enduranceCell let-row>
+	<wa-tag variant="neutral">{{ 'archetypes.enums.endurance.' + row.endurance | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #archetypeCell let-row>
+	<wa-tag variant="brand">{{ 'archetypes.enums.archetype.' + row.archetype | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #actionsCell let-row>
+	<wa-dropdown (wa-select)="onRowAction(row, $event)">
+		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
+			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
+		</wa-button>
+		<wa-dropdown-item value="edit">
+			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.edit' | translate }}
+		</wa-dropdown-item>
+		<wa-dropdown-item value="delete" variant="danger">
+			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.delete' | translate }}
+		</wa-dropdown-item>
+	</wa-dropdown>
+</ng-template>
+
+<!-- Modale de gestion -->
+<app-archetype-form-dialog
+	[open]="dialogOpen()"
+	[mode]="dialogMode()"
+	[archetypeRow]="selectedRow()"
+	(save)="onSave($event)"
+	(close)="closeDialog()">
+</app-archetype-form-dialog>
+
+<!-- Confirmation de suppression -->
+<app-confirm-dialog
+	[open]="confirmOpen()"
+	titleKey="archetypes.delete.title"
+	messageKey="archetypes.delete.message"
+	confirmKey="common.actions.delete"
+	(confirmed)="confirmDelete()"
+	(cancelled)="cancelDelete()">
+</app-confirm-dialog>

@@ -35,6 +35,16 @@ Base URL: `/api`
 
 | Méthode | Endpoint | Java Class | Description |
 |---|---|---|---|
+| `GET` | `/athletes` | `AthleteController` | Liste paginée, filtrée (sexe, catégorie d'âge) et triée. `size=0` désactive la pagination |
+| `GET` | `/athletes/{id}` | `AthleteController` | Consultation d'un athlète |
+| `POST` | `/athletes` | `AthleteController` | Création (catégorie de poids cohérente avec le sexe — 409 sinon) |
+| `PUT` | `/athletes/{id}` | `AthleteController` | Modification (cohérence poids/sexe contrôlée) |
+| `DELETE` | `/athletes/{id}` | `AthleteController` | Suppression d'un athlète (évaluations/programmes liés supprimés en cascade) |
+| `GET` | `/ref-archetypes` | `RefArchetypeController` | Liste paginée, filtrée (archétype, force-vitesse, technique, endurance) et triée. `size=0` désactive la pagination |
+| `GET` | `/ref-archetypes/{id}` | `RefArchetypeController` | Consultation d'un archétype de référence |
+| `POST` | `/ref-archetypes` | `RefArchetypeController` | Création (combinaison de profils unique — 409 sinon) |
+| `PUT` | `/ref-archetypes/{id}` | `RefArchetypeController` | Modification (unicité de la combinaison contrôlée) |
+| `DELETE` | `/ref-archetypes/{id}` | `RefArchetypeController` | Suppression d'un archétype de référence |
 
 ---
 

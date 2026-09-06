@@ -7,7 +7,7 @@
 			           [attr.label]="'athletes.filters.sexe' | translate"
 			           [attr.placeholder]="'common.filters.all' | translate">
 				@for (sexe of sexes; track sexe) {
-					<wa-option [attr.value]="sexe">{{ 'athletes.enums.sexe.' + sexe | translate }}</wa-option>
+				<wa-option [attr.value]="sexe">{{ 'athletes.enums.sexe.' + sexe | translate }}</wa-option>
 				}
 			</wa-select>
 
@@ -15,7 +15,7 @@
 			           [attr.label]="'athletes.filters.ageCategorie' | translate"
 			           [attr.placeholder]="'common.filters.all' | translate">
 				@for (age of ageCategories; track age) {
-					<wa-option [attr.value]="age">{{ 'athletes.enums.ageCategorie.' + age | translate }}</wa-option>
+				<wa-option [attr.value]="age">{{ 'athletes.enums.ageCategorie.' + age | translate }}</wa-option>
 				}
 			</wa-select>
 		</div>
@@ -27,10 +27,10 @@
 	</div>
 
 	@if (errorMessage()) {
-		<wa-callout variant="danger" role="alert" aria-live="assertive">
-			<wa-icon slot="icon" name="triangle-exclamation" aria-hidden="true"></wa-icon>
-			{{ errorMessage()! | translate }}
-		</wa-callout>
+	<wa-callout variant="danger" role="alert" aria-live="assertive">
+		<wa-icon slot="icon" name="triangle-exclamation" aria-hidden="true"></wa-icon>
+		{{ errorMessage()! | translate }}
+	</wa-callout>
 	}
 
 	<app-data-grid
@@ -63,20 +63,19 @@
 
 <ng-template #ageCell let-athlete>
 	@if (athlete.ageCategorie) {
-		<wa-tag variant="brand">{{ 'athletes.enums.ageCategorie.' + athlete.ageCategorie | translate }}</wa-tag>
+	<wa-tag variant="brand">{{ 'athletes.enums.ageCategorie.' + athlete.ageCategorie | translate }}</wa-tag>
 	}
 </ng-template>
 
 <ng-template #levelCell let-athlete>
 	@if (athlete.compLevel) {
-		<wa-tag variant="success">{{ 'athletes.enums.compLevel.' + athlete.compLevel | translate }}</wa-tag>
+	<wa-tag variant="success">{{ 'athletes.enums.compLevel.' + athlete.compLevel | translate }}</wa-tag>
 	}
 </ng-template>
 
 <ng-template #actionsCell let-athlete>
 	<wa-dropdown (wa-select)="onRowAction(athlete, $event)">
-		<wa-button slot="trigger" appearance="plain" size="s"
-		           [attr.aria-label]="t('common.actions.menu')">
+		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
 			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
 		</wa-button>
 		<wa-dropdown-item value="delete" variant="danger">

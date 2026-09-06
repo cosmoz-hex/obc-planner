@@ -113,6 +113,74 @@
       "delete": "Deletion failed. Please try again."
     }
   },
+  "archetypes": {
+    "actions": {
+      "add": "Add an archetype"
+    },
+    "filters": {
+      "label": "Filters",
+      "strengthSpeed": "Strength-Speed",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "archetype": "Archetype"
+    },
+    "table": {
+      "caption": "Archetype list"
+    },
+    "fields": {
+      "strengthSpeed": "Strength-Speed",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "archetype": "Archetype",
+      "actions": "Actions"
+    },
+    "enums": {
+      "strengthSpeed": {
+        "STRENGTH": "Strength",
+        "MID": "Mixed",
+        "SPEED": "Speed"
+      },
+      "technique": {
+        "LOW": "Inconsistent",
+        "MID": "Reliable",
+        "HIGH": "Technician"
+      },
+      "endurance": {
+        "LOW": "Load",
+        "MID": "Mixed",
+        "HIGH": "Endurant"
+      },
+      "archetype": {
+        "MID": "Mixed",
+        "ROUGH": "Bruiser",
+        "TECH": "Technician",
+        "CYCLE": "Cyclic",
+        "LEARN": "Learning"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "New archetype",
+        "edit": "Edit archetype"
+      },
+      "profilesLegend": "Athlete profiles",
+      "errors": {
+        "strengthSpeed": "The strength-speed profile is required.",
+        "technique": "The technique profile is required.",
+        "endurance": "The endurance profile is required.",
+        "archetype": "The archetype is required."
+      }
+    },
+    "delete": {
+      "title": "Delete archetype",
+      "message": "This action cannot be undone. Do you confirm the deletion of this archetype?"
+    },
+    "errors": {
+      "save": "Saving failed. Please try again.",
+      "delete": "Deletion failed. Please try again.",
+      "duplicate": "This profile combination is already associated with an archetype."
+    }
+  },
   "pages": {
     "athletes": {
       "title": "Athletes",

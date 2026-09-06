@@ -1,0 +1,41 @@
+<wa-dialog [attr.open]="open() ? true : null" [attr.label]="title() | translate" (wa-after-hide)="onDialogHide($event)">
+
+	<form class="flex flex-col gap-1" (submit)="$event.preventDefault(); onSubmit()">
+
+		<wa-select [formField]="archetypeForm.strengthSpeed" [attr.label]="'archetypes.fields.strengthSpeed' | translate">
+			@for (value of strengthSpeeds; track value) {
+			<wa-option [attr.value]="value">{{ 'archetypes.enums.strengthSpeed.' + value | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<wa-select [formField]="archetypeForm.technique" [attr.label]="'archetypes.fields.technique' | translate">
+			@for (value of techniques; track value) {
+			<wa-option [attr.value]="value">{{ 'archetypes.enums.technique.' + value | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<wa-select [formField]="archetypeForm.endurance" [attr.label]="'archetypes.fields.endurance' | translate">
+			@for (value of endurances; track value) {
+			<wa-option [attr.value]="value">{{ 'archetypes.enums.endurance.' + value | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Archétype résultant, en bas -->
+		<wa-select [formField]="archetypeForm.archetype"
+		           [attr.label]="'archetypes.fields.archetype' | translate">
+			@for (value of archetypes; track value) {
+			<wa-option [attr.value]="value">{{ 'archetypes.enums.archetype.' + value | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<div slot="footer" class="flex justify-end gap-1">
+			<wa-button appearance="plain" type="button" (click)="onClose()">
+				{{ 'common.actions.cancel' | translate }}
+			</wa-button>
+
+			<wa-button variant="brand" type="submit" [attr.disabled]="archetypeForm().invalid() ? true : null">
+				{{ 'common.actions.save' | translate }}
+			</wa-button>
+		</div>
+	</form>
+</wa-dialog>

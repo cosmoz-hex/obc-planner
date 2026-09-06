@@ -113,6 +113,74 @@
       "delete": "La suppression a échoué. Veuillez réessayer."
     }
   },
+  "archetypes": {
+    "actions": {
+      "add": "Ajouter un archétype"
+    },
+    "filters": {
+      "label": "Filtres",
+      "strengthSpeed": "Force-Vitesse",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "archetype": "Archétype"
+    },
+    "table": {
+      "caption": "Liste des archétypes"
+    },
+    "fields": {
+      "strengthSpeed": "Force-Vitesse",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "archetype": "Archétype",
+      "actions": "Actions"
+    },
+    "enums": {
+      "strengthSpeed": {
+        "STRENGTH": "Force",
+        "MID": "Mixte",
+        "SPEED": "Vitesse"
+      },
+      "technique": {
+        "LOW": "Irrégulier",
+        "MID": "Fiable",
+        "HIGH": "Technicien"
+      },
+      "endurance": {
+        "LOW": "Charge",
+        "MID": "Mixte",
+        "HIGH": "Endurant"
+      },
+      "archetype": {
+        "MID": "Mixte",
+        "ROUGH": "Bourrin",
+        "TECH": "Technicien",
+        "CYCLE": "Cyclique",
+        "LEARN": "Apprentissage"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "Nouvel archétype",
+        "edit": "Modifier l'archétype"
+      },
+      "profilesLegend": "Profils de l'athlète",
+      "errors": {
+        "strengthSpeed": "Le profil force-vitesse est obligatoire.",
+        "technique": "Le profil technique est obligatoire.",
+        "endurance": "Le profil endurance est obligatoire.",
+        "archetype": "L'archétype est obligatoire."
+      }
+    },
+    "delete": {
+      "title": "Supprimer l'archétype",
+      "message": "Cette action est irréversible. Confirmez-vous la suppression de cet archétype ?"
+    },
+    "errors": {
+      "save": "L'enregistrement a échoué. Veuillez réessayer.",
+      "delete": "La suppression a échoué. Veuillez réessayer.",
+      "duplicate": "Cette combinaison de profils est déjà associée à un archétype."
+    }
+  },
   "pages": {
     "athletes": {
       "title": "Athlètes",

@@ -130,19 +130,19 @@ export class AthletesComponent {
     }
     return [
       {key: 'lastName', headerLabel: 'athletes.fields.name', sortable: true, hideable: false, cellClass: 'cursor-pointer', formatter: (a) => `${a.firstName} ${a.lastName}`},
-      {key: 'sexe', headerLabel: 'athletes.fields.sexe', sortable: true, align: 'center', width: '90px', cellTemplate: sexe},
-      {key: 'ageCategorie', headerLabel: 'athletes.fields.ageCategorie', sortable: true, align: 'center', width: '120px', cellTemplate: age},
-      {key: 'compLevel', headerLabel: 'athletes.fields.compLevel', sortable: true, align: 'center', width: '120px', cellTemplate: level},
+      {key: 'sexe', headerLabel: 'athletes.fields.sexe', sortable: true, align: 'center', width: '15%', cellTemplate: sexe},
+      {key: 'ageCategorie', headerLabel: 'athletes.fields.ageCategorie', sortable: true, align: 'center', width: '15%', cellTemplate: age},
+      {key: 'compLevel', headerLabel: 'athletes.fields.compLevel', sortable: true, align: 'center', width: '15%', cellTemplate: level},
       {
         key: 'lastEvaluationDate',
         headerLabel: 'athletes.fields.lastEvaluation',
         align: 'center',
-        width: '160px',
+        width: '15%',
         formatter: (a) => a.lastEvaluationDate
           ? (this.datePipe.transform(a.lastEvaluationDate, 'mediumDate') ?? '—')
           : '—'
       },
-      {key: 'actions', headerLabel: 'athletes.fields.actions', hideable: false, align: 'end', width: '80px', cellTemplate: actions}
+      {key: 'actions', headerLabel: 'athletes.fields.actions',hideable: false,  align: 'end', width: '5%', cellTemplate: actions}
     ];
   });
 
