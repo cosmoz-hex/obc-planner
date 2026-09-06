@@ -24,12 +24,22 @@ public class AthleteController {
 
     private final AthleteService athleteService;
 
+    /**
+     * Liste paginée des athlètes.
+     *
+     * <p>Le paramètre {@code size=0} désactive la pagination et retourne tous les
+     * résultats. Spring Data refuse une taille de page nulle (le resolver la
+     * remplace par la valeur par défaut) : on intercepte donc ce cas ici en
+     * transmettant un {@link Pageable} non paginé, tout en conservant le tri.</p>
+     */
     @GetMapping
     public PageResponse<AthleteResponse> list(
             @RequestParam(required = false) Sexe sexe,
             @RequestParam(required = false) AgeCategorie ageCategorie,
+            @RequestParam(name = "size", required = false) Integer size,
             Pageable pageable) {
-        return athleteService.findAll(sexe, ageCategorie, pageable);
+        Pageable effective = (size == null || size == 0) ? Pageable.unpaged(pageable.getSort()) : pageable;
+        return athleteService.findAll(sexe, ageCategorie, effective);
     }
 
     @GetMapping("/{athleteId}")

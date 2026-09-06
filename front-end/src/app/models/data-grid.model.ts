@@ -21,6 +21,14 @@ export interface ColumnDef<T = unknown> {
   readonly align?: ColumnAlign;
   /** Colonne triable côté serveur (défaut : false). */
   readonly sortable?: boolean;
+  /** Colonne masquée par défaut dans le tableau (défaut : false). */
+  readonly hidden?: boolean;
+  /**
+   * Colonne dont la visibilité peut être basculée par l'utilisateur via le
+   * sélecteur de colonnes (défaut : true). Mettre à false pour une colonne
+   * toujours affichée et non listée dans le sélecteur.
+   */
+  readonly hideable?: boolean;
   /**
    * Classe(s) CSS appliquée(s) à chaque cellule de la colonne.
    * Valeur statique (`string`/`string[]`) ou fonction évaluée par ligne pour un
@@ -51,7 +59,10 @@ export interface SortState {
 export interface GridFilter {
   /** Numéro de page 0-based (comme Spring Data). */
   page: number;
-  /** Nombre d'éléments par page. */
+  /**
+   * Nombre d'éléments par page. La valeur `0` désactive la pagination : le
+   * backend retourne alors tous les résultats (voir data-grid `pageable=false`).
+   */
   size: number;
   /** Tri au format Spring `clé,direction` (ex. `lastName,asc`) ou null. */
   sort: string | null;

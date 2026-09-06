@@ -32,7 +32,12 @@
     },
     "pagination": {
       "pageSize": "Per page",
-      "label": "Pagination"
+      "label": "Pagination",
+      "total": "{{count}} result(s)"
+    },
+    "columns": {
+      "label": "Columns",
+      "placeholder": "Displayed columns"
     }
   },
   "athletes": {

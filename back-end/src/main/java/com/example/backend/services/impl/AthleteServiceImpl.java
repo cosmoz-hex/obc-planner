@@ -92,6 +92,10 @@ public class AthleteServiceImpl implements AthleteService {
     /**
      * Nettoie le {@link Pageable} : borne la taille de page et ne conserve que les
      * tris sur des champs autorisés (sinon tri par défaut par nom).
+     *
+     * <p>Un {@link Pageable} non paginé (déclenché par {@code size=0} côté API)
+     * est conservé tel quel — tous les résultats sont retournés — avec un tri
+     * assaini.</p>
      */
     private Pageable sanitizeSort(Pageable pageable) {
         Sort sanitized = Sort.by(pageable.getSort().stream()
@@ -99,6 +103,9 @@ public class AthleteServiceImpl implements AthleteService {
                 .toList());
         if (sanitized.isUnsorted()) {
             sanitized = Sort.by(Sort.Direction.ASC, "lastName", "firstName");
+        }
+        if (pageable.isUnpaged()) {
+            return Pageable.unpaged(sanitized);
         }
         int size = Math.clamp(pageable.getPageSize(), 1, MAX_PAGE_SIZE);
         return PageRequest.of(pageable.getPageNumber(), size, sanitized);

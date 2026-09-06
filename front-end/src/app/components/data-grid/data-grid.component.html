@@ -3,7 +3,7 @@
 		<table class="w-full border-collapse text-sm" [attr.aria-label]="caption() ? (caption() | translate) : null">
 			<thead>
 			<tr class="border-b border-[var(--wa-color-surface-border)]">
-				@for (column of columns(); track columnKey($index, column)) {
+				@for (column of displayedColumns(); track columnKey($index, column)) {
 				<th scope="col"
 				    class="px-3 py-2 align-middle font-semibold text-[var(--wa-color-text-normal)] text-sm"
 				    [ngClass]="headerClass(column)"
@@ -32,14 +32,14 @@
 			<tbody>
 			@if (loading()) {
 			<tr>
-				<td [attr.colspan]="columns().length" class="px-3 py-8 text-center">
+				<td [attr.colspan]="displayedColumns().length" class="px-3 py-8 text-center">
 					<wa-spinner class="text-2xl"></wa-spinner>
 					<span class="sr-only">{{ 'common.loading' | translate }}</span>
 				</td>
 			</tr>
 			} @else if (rows().length === 0) {
 			<tr>
-				<td [attr.colspan]="columns().length"
+				<td [attr.colspan]="displayedColumns().length"
 				    class="px-3 py-8 text-center text-[var(--wa-color-text-quiet)]">
 					{{ 'common.empty' | translate }}
 				</td>
@@ -53,7 +53,7 @@
 				[attr.tabindex]="rowInteractive() ? 0 : null"
 				(click)="onRowClick(row)"
 				(keydown)="onRowKeydown(row, $event)">
-				@for (column of columns(); track columnKey($index, column)) {
+				@for (column of displayedColumns(); track columnKey($index, column)) {
 				<td class="px-3 py-2 align-middle"
 				    [ngClass]="cellClass(row, column)"
 				    [class.text-center]="column.align === 'center'"
@@ -74,8 +74,10 @@
 		</table>
 	</div>
 
+	@if (pageable() || hasHideableColumns()) {
 	<div class="flex flex-wrap items-center justify-between gap-2 px-1">
 		<div class="flex items-center gap-2">
+			@if (pageable()) {
 			<label [attr.for]="'grid-page-size'" class="text-sm text-[var(--wa-color-text-quiet)]">
 				{{ 'common.pagination.pageSize' | translate }}
 			</label>
@@ -85,8 +87,24 @@
 				<wa-option [attr.value]="option.toString()">{{ option }}</wa-option>
 				}
 			</wa-select>
+			}
+
+			@if (hasHideableColumns()) {
+			<label [attr.for]="'grid-columns'" class="text-sm text-[var(--wa-color-text-quiet)]">
+				{{ 'common.columns.label' | translate }}
+			</label>
+			<wa-select id="grid-columns" size="s" multiple with-clear class="w-60" max-options-visible="1"
+			           [attr.placeholder]="'common.columns.placeholder' | translate"
+			           [value]="visibleKeys()"
+			           (change)="onColumnsVisibilityChange($event)">
+				@for (column of hideableColumns(); track columnKey($index, column)) {
+				<wa-option [attr.value]="column.key">{{ column.headerLabel | translate }}</wa-option>
+				}
+			</wa-select>
+			}
 		</div>
 
+		@if (pageable()) {
 		<wa-pagination
 			format="compact"
 			with-summary
@@ -95,5 +113,11 @@
 			[page]="page() + 1"
 			[attr.label]="(caption() ? (caption() | translate) : ('common.pagination.label' | translate))"
 			(wa-page-change)="onPageChange($event)"></wa-pagination>
+		} @else {
+		<span class="text-sm text-[var(--wa-color-text-quiet)]" aria-live="polite">
+			{{ 'common.pagination.total' | translate: {count: stableTotal()} }}
+		</span>
+		}
 	</div>
+	}
 </div>

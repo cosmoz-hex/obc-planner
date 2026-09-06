@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, input, linkedSignal, model, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, effect, input, linkedSignal, model, output} from '@angular/core';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
 import {CellClickEvent, ColumnDef, SortDirection, SortState} from '../../models/data-grid.model';
@@ -49,6 +49,14 @@ export class DataGridComponent<T> {
   readonly totalElements = input<number>(0);
 
   /**
+   * Active la pagination (défaut : true). Quand `false`, les contrôles de
+   * pagination et de taille de page sont masqués et le grid impose
+   * `page = 0` / `pageSize = 0`. Par convention avec le backend, `pageSize = 0`
+   * signifie « retourner tous les résultats » (pas de découpage).
+   */
+  readonly pageable = input<boolean>(true);
+
+  /**
    * Total « stable » utilisé pour la pagination. Le parent peut faire retomber
    * `totalElements` à 0 pendant un rechargement (ex. `httpResource` repasse sa
    * valeur à `undefined` durant le fetch). Ce 0 transitoire ferait recalculer le
@@ -66,6 +74,47 @@ export class DataGridComponent<T> {
 
   /** État de tri courant (ou null). */
   readonly sort = input<SortState | null>(null);
+
+  /**
+   * Clés des colonnes actuellement visibles. Initialisé depuis la config des
+   * colonnes (toute colonne dont `hidden !== true`) et recalculé si la liste des
+   * colonnes change, tout en restant modifiable par l'utilisateur via le
+   * sélecteur de colonnes (`linkedSignal`).
+   */
+  protected readonly visibleKeys = linkedSignal<readonly ColumnDef<T>[], string[]>({
+    source: () => this.columns(),
+    computation: (columns) => columns.filter((column) => column.hidden !== true).map((column) => column.key)
+  });
+
+  /** Colonnes réellement rendues dans le tableau (visibles). */
+  protected readonly displayedColumns = computed<readonly ColumnDef<T>[]>(() => {
+    const visible = new Set(this.visibleKeys());
+    return this.columns().filter((column) => visible.has(column.key));
+  });
+
+  /** Colonnes proposées dans le sélecteur d'affichage (`hideable !== false`). */
+  protected readonly hideableColumns = computed<readonly ColumnDef<T>[]>(() =>
+    this.columns().filter((column) => column.hideable !== false)
+  );
+
+  /** Indique si au moins une colonne peut être masquée/affichée. */
+  protected readonly hasHideableColumns = computed<boolean>(() => this.hideableColumns().length > 0);
+
+  constructor() {
+    // Pagination désactivée : imposer page=0 / pageSize=0 (le backend interprète
+    // pageSize=0 comme « tous les résultats »). Le double binding propage la
+    // valeur au parent qui construit la requête serveur.
+    effect(() => {
+      if (!this.pageable()) {
+        if (this.page() !== 0) {
+          this.page.set(0);
+        }
+        if (this.pageSize() !== 0) {
+          this.pageSize.set(0);
+        }
+      }
+    });
+  }
 
   /**
    * Rend les lignes interactives (cliquables + navigables au clavier) et émet
@@ -144,6 +193,21 @@ export class DataGridComponent<T> {
       // Double binding : set() met à jour le parent et émet `pageSizeChange`.
       this.pageSize.set(size);
     }
+  }
+
+  /**
+   * Met à jour les colonnes visibles depuis le sélecteur multiple. La `value`
+   * d'un `<wa-select multiple>` est un tableau des valeurs sélectionnées. Les
+   * colonnes non « hideable » ne figurent pas dans le sélecteur : on préserve
+   * donc leur visibilité courante en plus des clés cochées.
+   */
+  protected onColumnsVisibilityChange(event: Event): void {
+    const value = (event.target as { value?: string | string[] | null }).value;
+    const selected = Array.isArray(value) ? value : value ? [value] : [];
+    const alwaysVisible = this.columns()
+      .filter((column) => column.hideable === false && this.visibleKeys().includes(column.key))
+      .map((column) => column.key);
+    this.visibleKeys.set([...new Set([...alwaysVisible, ...selected])]);
   }
 
   protected onRowClick(row: T): void {

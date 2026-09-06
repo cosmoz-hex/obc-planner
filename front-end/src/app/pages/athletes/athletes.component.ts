@@ -129,7 +129,7 @@ export class AthletesComponent {
       return [];
     }
     return [
-      {key: 'lastName', headerLabel: 'athletes.fields.name', sortable: true, cellClass: 'cursor-pointer', formatter: (a) => `${a.firstName} ${a.lastName}`},
+      {key: 'lastName', headerLabel: 'athletes.fields.name', sortable: true, hideable: false, cellClass: 'cursor-pointer', formatter: (a) => `${a.firstName} ${a.lastName}`},
       {key: 'sexe', headerLabel: 'athletes.fields.sexe', sortable: true, align: 'center', width: '90px', cellTemplate: sexe},
       {key: 'ageCategorie', headerLabel: 'athletes.fields.ageCategorie', sortable: true, align: 'center', width: '120px', cellTemplate: age},
       {key: 'compLevel', headerLabel: 'athletes.fields.compLevel', sortable: true, align: 'center', width: '120px', cellTemplate: level},
@@ -142,7 +142,7 @@ export class AthletesComponent {
           ? (this.datePipe.transform(a.lastEvaluationDate, 'mediumDate') ?? '—')
           : '—'
       },
-      {key: 'actions', headerLabel: 'athletes.fields.actions', align: 'end', width: '80px', cellTemplate: actions}
+      {key: 'actions', headerLabel: 'athletes.fields.actions', hideable: false, align: 'end', width: '80px', cellTemplate: actions}
     ];
   });
 
