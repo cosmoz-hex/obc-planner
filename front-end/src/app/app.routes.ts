@@ -13,6 +13,11 @@ export const routes: Routes = [
 				data: {title: 'athletes.title'}
 			},
 			{
+				path: 'evaluations',
+				loadComponent: () => import('./pages/evaluations/evaluations.component').then(m => m.EvaluationsComponent),
+				data: {title: 'evaluations.title'}
+			},
+			{
 				path: 'referentiel',
 				loadComponent: () => import('./pages/referentiel/referentiel.component').then(m => m.ReferentielComponent),
 				data: {title: 'pages.referentiel.title'},

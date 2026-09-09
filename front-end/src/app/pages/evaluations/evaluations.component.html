@@ -1,0 +1,74 @@
+<section class="flex flex-1 min-h-0 flex-col gap-4 p-4">
+
+	<div class="flex flex-wrap items-end gap-3">
+		<!-- Bouton volontairement inerte : le wizard d'ajout d'évaluation sera livré ultérieurement. -->
+		<wa-button variant="brand" class="ml-auto">
+			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+			{{ 'evaluations.actions.add' | translate }}
+		</wa-button>
+	</div>
+
+	<app-data-grid
+		[rows]="rows()"
+		[columns]="columns()"
+		[loading]="loading()"
+		[caption]="'evaluations.table.caption'"
+		[rowId]="rowId"
+		[pageable]="true"
+		[(page)]="page"
+		[(pageSize)]="pageSize"
+		[totalElements]="totalElements()"
+		[sort]="sort()"
+		(pageSizeChange)="onPageSizeChange()"
+		(sortChange)="onSortChange($event)">
+	</app-data-grid>
+</section>
+
+<!-- Templates de cellule -->
+
+<ng-template #archetypeCell let-evaluation>
+	@if (evaluation.archetype) {
+	<wa-tag variant="warning">{{ 'evaluations.enums.archetype.' + evaluation.archetype | translate }}</wa-tag>
+	} @else {
+	<span aria-hidden="true">—</span>
+	}
+</ng-template>
+
+<ng-template #strengthSpeedCell let-evaluation>
+	@if (evaluation.strengthSpeed) {
+	<wa-tag variant="neutral">{{ 'evaluations.enums.strengthSpeed.' + evaluation.strengthSpeed | translate }}</wa-tag>
+	} @else {
+	<span aria-hidden="true">—</span>
+	}
+</ng-template>
+
+<ng-template #techniqueCell let-evaluation>
+	@if (evaluation.technique) {
+	<wa-tag variant="neutral">{{ 'evaluations.enums.technique.' + evaluation.technique | translate }}</wa-tag>
+	} @else {
+	<span aria-hidden="true">—</span>
+	}
+</ng-template>
+
+<ng-template #enduranceCell let-evaluation>
+	@if (evaluation.endurance) {
+	<wa-tag variant="neutral">{{ 'evaluations.enums.endurance.' + evaluation.endurance | translate }}</wa-tag>
+	} @else {
+	<span aria-hidden="true">—</span>
+	}
+</ng-template>
+
+<!-- Psychologique : point fort (vert/success) + point faible (rouge/danger) dans la même cellule. -->
+<ng-template #psychoCell let-evaluation>
+	<div class="flex flex-wrap items-center justify-center gap-1">
+		@if (evaluation.psychoStrength) {
+		<wa-tag variant="success">{{ 'evaluations.enums.psychoStrength.' + evaluation.psychoStrength | translate }}</wa-tag>
+		}
+		@if (evaluation.psychoWeakness) {
+		<wa-tag variant="danger">{{ 'evaluations.enums.psychoWeakness.' + evaluation.psychoWeakness | translate }}</wa-tag>
+		}
+		@if (!evaluation.psychoStrength && !evaluation.psychoWeakness) {
+		<span aria-hidden="true">—</span>
+		}
+	</div>
+</ng-template>

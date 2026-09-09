@@ -471,7 +471,7 @@ INSERT INTO exercices (exercice_id, type_exercice, categorie_exercice, exercice_
 (19, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.hang',                2, 0.95),
 (20, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.no-feet',             2, 0.92),
 (21, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.balance',              2, 1.00),
-(22, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.pause',               2, 0.80),
+(22, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.pause',               2, 0.90),
 (23, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.hip',                 2, 0.90),
 (24, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.deficit',             2, 0.95),
 (25, 'SNATCH', 'SEMI_LOURD', 'exercice.snatch.heavy.slow-start',          2, 0.85),

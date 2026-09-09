@@ -181,6 +181,66 @@
       "duplicate": "This profile combination is already associated with an archetype."
     }
   },
+  "evaluations": {
+    "title": "Evaluations",
+    "actions": {
+      "add": "Add an evaluation"
+    },
+    "table": {
+      "caption": "Evaluation list"
+    },
+    "fields": {
+      "name": "Name",
+      "evaluationDate": "Evaluation date",
+      "archetype": "Archetype",
+      "strengthSpeed": "Strength-Speed",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "psycho": "Psychological"
+    },
+    "enums": {
+      "archetype": {
+        "MID": "Mixed",
+        "ROUGH": "Bruiser",
+        "TECH": "Technician",
+        "CYCLE": "Cyclic",
+        "LEARN": "Learning"
+      },
+      "strengthSpeed": {
+        "STRENGTH": "Strength",
+        "MID": "Mixed",
+        "SPEED": "Speed"
+      },
+      "technique": {
+        "LOW": "Inconsistent",
+        "MID": "Reliable",
+        "HIGH": "Technician"
+      },
+      "endurance": {
+        "LOW": "Load",
+        "MID": "Mixed",
+        "HIGH": "Endurant"
+      },
+      "psychoStrength": {
+        "CALM": "Calm",
+        "CONFIDENT": "Confident",
+        "MOTIVATED": "Motivated",
+        "FOCUSED": "Focused",
+        "COMPETITIVE": "Competitive",
+        "CHALLENGER": "Challenger",
+        "INDEPENDANT": "Independent"
+      },
+      "psychoWeakness": {
+        "EMOTIONAL": "Emotional",
+        "ANXIOUS": "Anxious",
+        "INDIFFERENT": "Indifferent",
+        "DISTRACTED": "Distracted",
+        "HEDONISTIC": "Hedonistic",
+        "PRAGMATIC": "Pragmatic",
+        "RULE": "Rule-bound"
+      }
+    }
+  },
   "pages": {
     "athletes": {
       "title": "Athletes",

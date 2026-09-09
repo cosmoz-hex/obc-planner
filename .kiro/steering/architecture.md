@@ -45,6 +45,7 @@ Base URL: `/api`
 | `POST` | `/ref-archetypes` | `RefArchetypeController` | Création (combinaison de profils unique — 409 sinon) |
 | `PUT` | `/ref-archetypes/{id}` | `RefArchetypeController` | Modification (unicité de la combinaison contrôlée) |
 | `DELETE` | `/ref-archetypes/{id}` | `RefArchetypeController` | Suppression d'un archétype de référence |
+| `GET` | `/evaluations` | `EvaluationController` | Liste paginée et triée des évaluations (lecture seule, une ligne par évaluation ; tri par défaut date décroissante). `size=0` désactive la pagination |
 
 ---
 
@@ -61,6 +62,7 @@ src/app/
 │   └── layout/         # Shell principal : header, sidebar (wa-page), footer, sélecteur de langue
 ├── pages/              # Pages principales
 │   ├── athletes/       # Gestion des athlètes
+│   ├── evaluations/    # Consultation des évaluations (lecture seule)
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── exercices/
 │       ├── correctifs/
@@ -76,6 +78,7 @@ src/app/
 |---|---|---|
 | `/` | redirect → `/athletes` | Redirection par défaut |
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
+| `/evaluations` | `EvaluationsComponent` | Consultation des évaluations (lecture seule) |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
 | `/referentiel/exercices` | `ExercicesComponent` | Catalogue des exercices |
 | `/referentiel/correctifs` | `CorrectifsComponent` | Exercices correctifs |

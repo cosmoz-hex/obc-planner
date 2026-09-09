@@ -9,7 +9,6 @@ import {
 	TemplateRef,
 	viewChild
 } from '@angular/core';
-import {DatePipe} from '@angular/common';
 import {FormField, form} from '@angular/forms/signals';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {DataGridComponent} from '../../components/data-grid/data-grid.component';
@@ -18,6 +17,7 @@ import {AthleteFormDialogComponent, AthleteFormMode} from './athlete-form-dialog
 import {ConfirmDialogComponent} from '../../components/confirm-dialog/confirm-dialog.component';
 import {WaSelectControlDirective} from '../../directives/wa-forms/wa-select-control.directive';
 import {AthleteService} from '../../services/athlete.service';
+import {LocalizedDatePipe} from '../../pipes/localized-date.pipe';
 import {AGE_CATEGORIES, AgeCategorie, Athlete, AthleteFilter, AthleteRequest, Sexe, SEXES} from '../../models/athlete.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
@@ -39,13 +39,13 @@ import '@awesome.me/webawesome/dist/components/callout/callout.js';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './athletes.component.html',
   host: {class: 'flex flex-1 min-h-0'},
-  providers: [DatePipe]
+  providers: [LocalizedDatePipe]
 })
 export class AthletesComponent {
 
   private readonly athleteService = inject(AthleteService);
   private readonly translate = inject(TranslateService);
-  private readonly datePipe = inject(DatePipe);
+  private readonly localizedDatePipe = inject(LocalizedDatePipe);
 
   protected readonly sexes = SEXES;
   protected readonly ageCategories = AGE_CATEGORIES;
@@ -121,6 +121,8 @@ export class AthletesComponent {
    * que les templates ne sont pas disponibles (premier rendu).
    */
   protected readonly columns = computed<readonly ColumnDef<Athlete>[]>(() => {
+    // Recrée les formatters lorsque la langue active change.
+    this.localizedDatePipe.currentLocale();
     const sexe = this.sexeTpl();
     const age = this.ageTpl();
     const level = this.levelTpl();
@@ -139,7 +141,7 @@ export class AthletesComponent {
         align: 'center',
         width: '15%',
         formatter: (a) => a.lastEvaluationDate
-          ? (this.datePipe.transform(a.lastEvaluationDate, 'mediumDate') ?? '—')
+          ? (this.localizedDatePipe.transform(a.lastEvaluationDate, 'mediumDate') ?? '—')
           : '—'
       },
       {key: 'actions', headerLabel: 'athletes.fields.actions',hideable: false,  align: 'end', width: '5%', cellTemplate: actions}

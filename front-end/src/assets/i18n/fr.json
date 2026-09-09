@@ -181,6 +181,66 @@
       "duplicate": "Cette combinaison de profils est déjà associée à un archétype."
     }
   },
+  "evaluations": {
+    "title": "Evaluations",
+    "actions": {
+      "add": "Ajouter une évaluation"
+    },
+    "table": {
+      "caption": "Liste des évaluations"
+    },
+    "fields": {
+      "name": "Nom & prénom",
+      "evaluationDate": "Date d'évaluation",
+      "archetype": "Archétype",
+      "strengthSpeed": "Force-Vitesse",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "psycho": "Psychologique"
+    },
+    "enums": {
+      "archetype": {
+        "MID": "Mixte",
+        "ROUGH": "Bourrin",
+        "TECH": "Technicien",
+        "CYCLE": "Cyclique",
+        "LEARN": "Apprentissage"
+      },
+      "strengthSpeed": {
+        "STRENGTH": "Force",
+        "MID": "Mixte",
+        "SPEED": "Vitesse"
+      },
+      "technique": {
+        "LOW": "Irrégulier",
+        "MID": "Fiable",
+        "HIGH": "Technicien"
+      },
+      "endurance": {
+        "LOW": "Charge",
+        "MID": "Mixte",
+        "HIGH": "Endurant"
+      },
+      "psychoStrength": {
+        "CALM": "Calme",
+        "CONFIDENT": "Confiant",
+        "MOTIVATED": "Motivé",
+        "FOCUSED": "Concentré",
+        "COMPETITIVE": "Compétitif",
+        "CHALLENGER": "Challenger",
+        "INDEPENDANT": "Autonome"
+      },
+      "psychoWeakness": {
+        "EMOTIONAL": "Émotif",
+        "ANXIOUS": "Anxieux",
+        "INDIFFERENT": "Indifférent",
+        "DISTRACTED": "Distrait",
+        "HEDONISTIC": "Hédoniste",
+        "PRAGMATIC": "Pragmatique",
+        "RULE": "Référentiel"
+      }
+    }
+  },
   "pages": {
     "athletes": {
       "title": "Athlètes",
