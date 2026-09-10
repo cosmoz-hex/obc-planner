@@ -49,7 +49,7 @@ Base URL: `/api`
 
 ---
 
-## Frontend — Angular 20
+## Frontend — Angular 22
 
 ### Structure des modules
 
@@ -59,7 +59,11 @@ src/app/
 ├── app.config.ts       # Configuration standalone (providers, i18n, HTTP)
 ├── app.routes.ts       # Définition des routes (lazy-loaded)
 ├── components/         # Composants communs / réutilisables
-│   └── layout/         # Shell principal : header, sidebar (wa-page), footer, sélecteur de langue
+│   ├── layout/         # Shell principal : header, sidebar (wa-page), footer, sélecteur de langue
+│   ├── data-grid/      # Grille générique (pagination/tri côté serveur, colonnes projetables)
+│   ├── confirm-dialog/ # Modale de confirmation générique
+│   └── wizard/         # Wizard à étapes générique : contenu projeté (app-wizard-step),
+│                       # avancement (barre + compteur), navigation précédent/suivant/valider
 ├── pages/              # Pages principales
 │   ├── athletes/       # Gestion des athlètes
 │   ├── evaluations/    # Consultation des évaluations (lecture seule)

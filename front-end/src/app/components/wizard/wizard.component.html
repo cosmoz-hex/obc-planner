@@ -1,0 +1,58 @@
+<!-- Indicateur d'avancement -->
+<div class="flex flex-col gap-1">
+  <div class="flex items-center justify-between text-md">
+    @if (currentLabel()) {
+      <span class="font-medium">{{ currentLabel() | translate }}</span>
+    } @else {
+      <span></span>
+    }
+    <span class="opacity-70">
+      {{ 'wizard.stepCounter' | translate: {current: displayIndex(), total: totalSteps()} }}
+    </span>
+  </div>
+  <wa-progress-bar
+    [value]="progress()"
+    [attr.aria-label]="'wizard.progress' | translate"
+    [attr.aria-valuenow]="progress()"
+    aria-valuemin="0"
+    aria-valuemax="100">
+  </wa-progress-bar>
+</div>
+
+<!-- Contenu des étapes (projeté). Toutes les étapes sont empilées dans la même
+     cellule de grille : la hauteur reste celle de l'étape la plus haute et ne
+     change donc pas d'une étape à l'autre. Seule l'étape courante est visible. -->
+<div class="grid grid-cols-1">
+  <ng-content />
+</div>
+
+<!-- Navigation -->
+<div class="flex items-center justify-between gap-2">
+  @if (!isFirst()) {
+    <wa-button appearance="plain" type="button" (click)="previous()">
+      {{ 'wizard.previous' | translate }}
+    </wa-button>
+  } @else {
+    <span></span>
+  }
+
+  <div class="flex gap-2">
+    @if (!isLast()) {
+      <wa-button
+        variant="brand"
+        type="button"
+        [attr.disabled]="currentValid() ? null : true"
+        (click)="next()">
+        {{ 'wizard.next' | translate }}
+      </wa-button>
+    } @else {
+      <wa-button
+        variant="brand"
+        type="button"
+        [attr.disabled]="currentValid() ? null : true"
+        (click)="onValidate()">
+        {{ 'wizard.validate' | translate }}
+      </wa-button>
+    }
+  </div>
+</div>

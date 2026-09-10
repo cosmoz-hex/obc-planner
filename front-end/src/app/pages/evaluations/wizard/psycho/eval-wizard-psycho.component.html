@@ -1,0 +1,6 @@
+<section class="flex flex-1 min-h-0 flex-col gap-3 p-2">
+  <p class="opacity-70">{{ 'evaluations.wizard.placeholder' | translate }}</p>
+  <wa-switch [attr.checked]="valid() ? true : null" (change)="onToggle($event)">
+    {{ 'evaluations.wizard.markValid' | translate }}
+  </wa-switch>
+</section>

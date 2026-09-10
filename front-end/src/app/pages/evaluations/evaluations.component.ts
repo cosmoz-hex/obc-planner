@@ -13,6 +13,7 @@ import {DataGridComponent} from '../../components/data-grid/data-grid.component'
 import {ColumnDef, GridFilter, SortState} from '../../models/data-grid.model';
 import {EvaluationService} from '../../services/evaluation.service';
 import {LocalizedDatePipe} from '../../pipes/localized-date.pipe';
+import {EvaluationWizardDialogComponent} from './wizard/evaluation-wizard-dialog.component';
 import {Evaluation} from '../../models/evaluation.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
@@ -24,7 +25,7 @@ import '@awesome.me/webawesome/dist/components/badge/badge.js';
 @Component({
   selector: 'app-evaluations',
   standalone: true,
-  imports: [TranslatePipe, DataGridComponent],
+  imports: [TranslatePipe, DataGridComponent, EvaluationWizardDialogComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './evaluations.component.html',
@@ -115,5 +116,22 @@ export class EvaluationsComponent {
   protected onSortChange(sort: SortState): void {
     this.sort.set(sort);
     this.page.set(0);
+  }
+
+  // --- Wizard d'ajout d'évaluation ---
+  protected readonly wizardOpen = signal(false);
+
+  protected openWizard(): void {
+    this.wizardOpen.set(true);
+  }
+
+  protected closeWizard(): void {
+    this.wizardOpen.set(false);
+  }
+
+  protected onWizardValidated(): void {
+    // Placeholder : la persistance sera branchée quand les étapes porteront un
+    // vrai formulaire. Pour l'instant on ferme simplement la modale.
+    this.wizardOpen.set(false);
   }
 }

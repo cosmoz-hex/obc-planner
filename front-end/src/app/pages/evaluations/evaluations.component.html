@@ -1,8 +1,7 @@
 <section class="flex flex-1 min-h-0 flex-col gap-4 p-4">
 
 	<div class="flex flex-wrap items-end gap-3">
-		<!-- Bouton volontairement inerte : le wizard d'ajout d'évaluation sera livré ultérieurement. -->
-		<wa-button variant="brand" class="ml-auto">
+		<wa-button variant="brand" class="ml-auto" (click)="openWizard()">
 			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
 			{{ 'evaluations.actions.add' | translate }}
 		</wa-button>
@@ -23,6 +22,13 @@
 		(sortChange)="onSortChange($event)">
 	</app-data-grid>
 </section>
+
+<!-- Modale d'ajout d'évaluation (wizard à étapes). -->
+<app-evaluation-wizard-dialog
+	[open]="wizardOpen()"
+	(close)="closeWizard()"
+	(validated)="onWizardValidated()">
+</app-evaluation-wizard-dialog>
 
 <!-- Templates de cellule -->
 

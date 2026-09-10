@@ -1,4 +1,11 @@
 {
+  "wizard": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "validate": "Valider",
+    "stepCounter": "Étape {{current}} / {{total}}",
+    "progress": "Progression du formulaire"
+  },
   "layout": {
     "skip-to-content": "Aller au contenu principal",
     "language": "Changer de langue",
@@ -183,6 +190,15 @@
   },
   "evaluations": {
     "title": "Evaluations",
+    "wizard": {
+      "title": "Ajouter une évaluation",
+      "force": "Force-Vitesse",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "psycho": "Psychologique",
+      "placeholder": "Contenu de l'étape à venir.",
+      "markValid": "Marquer cette étape comme valide"
+    },
     "actions": {
       "add": "Ajouter une évaluation"
     },

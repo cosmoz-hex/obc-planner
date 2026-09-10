@@ -1,0 +1,26 @@
+<wa-dialog
+  [attr.open]="open() ? true : null"
+  [attr.label]="'evaluations.wizard.title' | translate"
+  (wa-after-hide)="onDialogHide($event)">
+
+  <app-wizard (validate)="onValidate()">
+
+    <app-wizard-step [step]="1" [valid]="force.valid()" label="evaluations.wizard.force">
+      <app-eval-wizard-force #force />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="2" [valid]="technique.valid()" label="evaluations.wizard.technique">
+      <app-eval-wizard-technique #technique />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="3" [valid]="endurance.valid()" label="evaluations.wizard.endurance">
+      <app-eval-wizard-endurance #endurance />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="4" [valid]="psycho.valid()" label="evaluations.wizard.psycho">
+      <app-eval-wizard-psycho #psycho />
+    </app-wizard-step>
+
+  </app-wizard>
+
+</wa-dialog>

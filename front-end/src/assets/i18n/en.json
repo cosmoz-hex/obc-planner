@@ -1,4 +1,11 @@
 {
+  "wizard": {
+    "previous": "Previous",
+    "next": "Next",
+    "validate": "Submit",
+    "stepCounter": "Step {{current}} / {{total}}",
+    "progress": "Form progress"
+  },
   "layout": {
     "skip-to-content": "Skip to content",
     "language": "Change language",
@@ -183,6 +190,15 @@
   },
   "evaluations": {
     "title": "Evaluations",
+    "wizard": {
+      "title": "Add an evaluation",
+      "force": "Strength-Speed",
+      "technique": "Technique",
+      "endurance": "Endurance",
+      "psycho": "Psychological",
+      "placeholder": "Step content coming soon.",
+      "markValid": "Mark this step as valid"
+    },
     "actions": {
       "add": "Add an evaluation"
     },
