@@ -1,0 +1,55 @@
+<section class="flex flex-col gap-3 py-2">
+
+  <!-- Épaulé de référence : première ligne du modèle, base des variantes. -->
+  <label class="flex items-center gap-2">
+    <span class="font-medium">{{ 'evaluations.wizard.clean.reference' | translate }}</span>
+    <wa-input
+      type="number"
+      size="small"
+      [formField]="cleanForm[0].realValue"
+      [attr.placeholder]="'evaluations.wizard.realValue' | translate">
+      <span slot="suffix">{{ 'evaluations.wizard.unit.kg' | translate }}</span>
+    </wa-input>
+  </label>
+
+  <div class="grid grid-cols-5 items-center gap-1">
+
+    <!-- Entête des colonnes -->
+    <span class="font-medium">{{ 'evaluations.wizard.exercise' | translate }}</span>
+    <span class="text-center font-medium">{{ 'evaluations.wizard.achieved' | translate }}</span>
+    <span class="text-center font-medium">{{ 'evaluations.wizard.rating.low' | translate }}</span>
+    <span class="text-center font-medium">{{ 'evaluations.wizard.rating.mid' | translate }}</span>
+    <span class="text-center font-medium">{{ 'evaluations.wizard.rating.high' | translate }}</span>
+
+    @for (exercice of exercices; track exercice.code; let i = $index) {
+      <!-- La ligne 0 (épaulé de référence) est saisie au-dessus du tableau. -->
+      @if (i > 0) {
+        @let threshold = thresholds()[i];
+        @let unit = 'evaluations.wizard.unit.kg' | translate;
+
+        <!-- Libellé de la question -->
+        <span class="font-medium">{{ exercice.label | translate }}</span>
+
+        <!-- Valeur réalisée (désactivée tant que l'épaulé de référence n'est pas saisi) -->
+        <wa-input
+          type="number"
+          size="small"
+          [formField]="cleanForm[i].realValue"
+          [attr.placeholder]="'evaluations.wizard.realValue' | translate">
+        </wa-input>
+
+        <!-- Résultat choisi par le coach, avec seuils dynamiques (±5% de l'attendu). -->
+        @if (threshold.expected !== null) {
+          <app-eval-rating
+            [formField]="cleanForm[i].result"
+            [low]="'< ' + (threshold.low | number: '1.0-0') + ' ' + unit | sanitizeHtml"
+            [mid]="(threshold.expected | number: '1.0-0') + ' ' + unit | sanitizeHtml"
+            [high]="'> ' + (threshold.high | number: '1.0-0') + ' ' + unit | sanitizeHtml">
+          </app-eval-rating>
+        } @else {
+          <span class="col-span-3 text-center opacity-40">—</span>
+        }
+      }
+    }
+  </div>
+</section>

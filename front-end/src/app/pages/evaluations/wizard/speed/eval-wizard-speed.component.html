@@ -1,0 +1,30 @@
+<section class="grid grid-cols-5 items-center gap-1 py-2">
+
+  <!-- Entête des colonnes -->
+  <span class="font-medium">{{ 'evaluations.wizard.exercise' | translate }}</span>
+  <span class="text-center font-medium">{{ 'evaluations.wizard.achieved' | translate }}</span>
+  <span class="text-center font-medium">{{ 'evaluations.wizard.rating.low' | translate }}</span>
+  <span class="text-center font-medium">{{ 'evaluations.wizard.rating.mid' | translate }}</span>
+  <span class="text-center font-medium">{{ 'evaluations.wizard.rating.high' | translate }}</span>
+
+  @for (exercice of exercices; track exercice.code; let i = $index) {
+    <!-- Libellé de la question -->
+    <span class="font-medium">{{ exercice.label | translate }}</span>
+
+    <!-- Valeur réalisée (champ number du Signal Form, via la directive accessor) -->
+    <wa-input
+      type="number"
+      size="small"
+      [formField]="speedForm[i].realValue"
+      [attr.placeholder]="'evaluations.wizard.realValue' | translate">
+    </wa-input>
+
+    <!-- Résultat : Faible (-1) / Moyen (0) / Fort (1) (champ du Signal Form) -->
+    <app-eval-rating
+      [formField]="speedForm[i].result"
+      [low]="exercice.low | sanitizeHtml"
+      [mid]="exercice.mid | sanitizeHtml"
+      [high]="exercice.high | sanitizeHtml">
+    </app-eval-rating>
+  }
+</section>

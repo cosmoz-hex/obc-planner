@@ -192,10 +192,64 @@
     "title": "Evaluations",
     "wizard": {
       "title": "Add an evaluation",
-      "force": "Strength-Speed",
-      "technique": "Technique",
+      "realValue": "Achieved value",
+      "exercise": "Exercise",
+      "achieved": "Achieved",
+      "rating": {
+        "low": "Low",
+        "mid": "Medium",
+        "high": "High"
+      },
+      "speed": {
+        "title": "Speed",
+        "items": {
+          "jumpElan": "Countermovement jump",
+          "jumpStatic": "Squat jump",
+          "squat30": "Squat 30%",
+          "squat50": "Squat 50%",
+          "squat70": "Squat 70%",
+          "highPull80": "High pull 80%"
+        }
+      },
+      "strength": {
+        "title": "Strength",
+        "items": {
+          "frontSquatCj": "3RM Front Squat / C&J",
+          "backSquatCj": "3RM Back Squat / C&J",
+          "pullSnatch": "3RM Pull / Snatch",
+          "pullCj": "3RM Pull / C&J",
+          "grip": "Grip"
+        }
+      },
+      "snatch": {
+        "title": "Snatch",
+        "reference": "Reference snatch"
+      },
+      "unit": {
+        "kg": "kg"
+      },
+      "clean": {
+        "title": "Clean",
+        "reference": "Reference clean"
+      },
+      "jerk": {
+        "title": "Jerk",
+        "reference": "Reference jerk"
+      },
+      "squat": {
+        "title": "Squat",
+        "reference": "Reference clean"
+      },
       "endurance": "Endurance",
-      "psycho": "Psychological",
+      "psycho": {
+        "emotional": "Emotional management",
+        "confidence": "Self-confidence",
+        "motivation": "Motivation",
+        "focus": "Concentration",
+        "competitive": "Competitive behaviour",
+        "failure": "Relationship with failure",
+        "autonomy": "Autonomy and accountability"
+      },
       "placeholder": "Step content coming soon.",
       "markValid": "Mark this step as valid"
     },

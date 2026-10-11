@@ -5,7 +5,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 import '@awesome.me/webawesome/dist/components/switch/switch.js';
 
 /**
- * Étape 3 du wizard d'évaluation : Endurance (placeholder).
+ * Étape 7 du wizard d'évaluation : Endurance (placeholder).
  *
  * Le vrai formulaire viendra plus tard. Expose sa validité via le signal
  * public {@link valid} ; l'interrupteur permet de tester la logique du wizard.

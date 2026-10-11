@@ -1,9 +1,9 @@
 import {Directive} from '@angular/core';
 import {WaControlDirective} from './wa-control.directive';
-import {waEventValue} from './wa-event-value';
 
 /**
  * Value accessor pour `<wa-select>` (sélection simple), utilisable via `[formField]`.
+ * Conversion identité (T = string) héritée de la base.
  *
  * `<wa-select>` n'a pas d'état `readonly` natif : on le rabat sur `disabled`.
  */
@@ -11,13 +11,12 @@ import {waEventValue} from './wa-event-value';
   selector: 'wa-select[formField]',
   standalone: true,
   host: {
-    '(change)': 'value.set(readEventValue($event))',
-    '(wa-clear)': 'value.set("")',
+    '(change)': 'raw.set(readEventValue($event))',
+    '(wa-clear)': 'raw.set("")',
     '(wa-after-hide)': 'touch.emit()'
   }
 })
-export class WaSelectControlDirective extends WaControlDirective {
-  protected readEventValue = waEventValue;
+export class WaSelectControlDirective extends WaControlDirective<string> {
 
   protected override reflectStates(element: HTMLElement): void {
     this.reflect(element, 'disabled', this.disabled() || this.readonly());

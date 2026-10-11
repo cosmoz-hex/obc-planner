@@ -5,22 +5,20 @@ import {TranslatePipe} from '@ngx-translate/core';
 import '@awesome.me/webawesome/dist/components/switch/switch.js';
 
 /**
- * Étape 1 du wizard d'évaluation : Force-Vitesse (placeholder).
+ * Étape 12 du wizard d'évaluation : profil psycho — Comportement compétitif (placeholder).
  *
- * Le vrai formulaire viendra plus tard. Le composant expose déjà le contrat
- * attendu par le wizard : le signal public {@link valid}. L'interrupteur permet
- * de basculer la validité pour tester la logique du wizard (bouton Suivant
- * désactivé quand l'étape est invalide).
+ * Le vrai formulaire viendra plus tard. Expose sa validité via le signal
+ * public {@link valid} ; l'interrupteur permet de tester la logique du wizard.
  */
 @Component({
-  selector: 'app-eval-wizard-force',
+  selector: 'app-eval-wizard-psycho-competitive',
   standalone: true,
   imports: [TranslatePipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './eval-wizard-force.component.html'
+  templateUrl: './eval-wizard-psycho-competitive.component.html'
 })
-export class EvalWizardForceComponent {
+export class EvalWizardPsychoCompetitiveComponent {
 
   private readonly stepValid = signal(true);
 

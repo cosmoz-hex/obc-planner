@@ -1,24 +1,65 @@
 <wa-dialog
+	style="--width: 70vw;"
   [attr.open]="open() ? true : null"
   [attr.label]="'evaluations.wizard.title' | translate"
   (wa-after-hide)="onDialogHide($event)">
 
   <app-wizard (validate)="onValidate()">
 
-    <app-wizard-step [step]="1" [valid]="force.valid()" label="evaluations.wizard.force">
-      <app-eval-wizard-force #force />
+    <app-wizard-step [step]="1" [valid]="speed.valid()" label="evaluations.wizard.speed.title">
+      <app-eval-wizard-speed #speed />
     </app-wizard-step>
 
-    <app-wizard-step [step]="2" [valid]="technique.valid()" label="evaluations.wizard.technique">
-      <app-eval-wizard-technique #technique />
+    <app-wizard-step [step]="2" [valid]="strength.valid()" label="evaluations.wizard.strength.title">
+      <app-eval-wizard-strength #strength />
     </app-wizard-step>
 
-    <app-wizard-step [step]="3" [valid]="endurance.valid()" label="evaluations.wizard.endurance">
+    <app-wizard-step [step]="3" [valid]="snatch.valid()" label="evaluations.wizard.snatch.title">
+      <app-eval-wizard-snatch #snatch />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="4" [valid]="clean.valid()" label="evaluations.wizard.clean.title">
+      <app-eval-wizard-clean #clean />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="5" [valid]="jerk.valid()" label="evaluations.wizard.jerk.title">
+      <app-eval-wizard-jerk #jerk />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="6" [valid]="squat.valid()" label="evaluations.wizard.squat.title">
+      <app-eval-wizard-squat #squat />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="7" [valid]="endurance.valid()" label="evaluations.wizard.endurance">
       <app-eval-wizard-endurance #endurance />
     </app-wizard-step>
 
-    <app-wizard-step [step]="4" [valid]="psycho.valid()" label="evaluations.wizard.psycho">
-      <app-eval-wizard-psycho #psycho />
+    <app-wizard-step [step]="8" [valid]="psychoEmotional.valid()" label="evaluations.wizard.psycho.emotional">
+      <app-eval-wizard-psycho-emotional #psychoEmotional />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="9" [valid]="psychoConfidence.valid()" label="evaluations.wizard.psycho.confidence">
+      <app-eval-wizard-psycho-confidence #psychoConfidence />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="10" [valid]="psychoMotivation.valid()" label="evaluations.wizard.psycho.motivation">
+      <app-eval-wizard-psycho-motivation #psychoMotivation />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="11" [valid]="psychoFocus.valid()" label="evaluations.wizard.psycho.focus">
+      <app-eval-wizard-psycho-focus #psychoFocus />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="12" [valid]="psychoCompetitive.valid()" label="evaluations.wizard.psycho.competitive">
+      <app-eval-wizard-psycho-competitive #psychoCompetitive />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="13" [valid]="psychoFailure.valid()" label="evaluations.wizard.psycho.failure">
+      <app-eval-wizard-psycho-failure #psychoFailure />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="14" [valid]="psychoAutonomy.valid()" label="evaluations.wizard.psycho.autonomy">
+      <app-eval-wizard-psycho-autonomy #psychoAutonomy />
     </app-wizard-step>
 
   </app-wizard>

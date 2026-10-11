@@ -12,8 +12,8 @@ import {WizardHost} from './wizard.types';
  *
  * Usage :
  * ```html
- * <app-wizard-step [step]="1" [valid]="force.valid()" label="evaluations.wizard.force">
- *   <app-eval-wizard-force #force />
+ * <app-wizard-step [step]="1" [valid]="speed.valid()" label="evaluations.wizard.speed">
+ *   <app-eval-wizard-speed #speed />
  * </app-wizard-step>
  * ```
  */

@@ -5,20 +5,20 @@ import {TranslatePipe} from '@ngx-translate/core';
 import '@awesome.me/webawesome/dist/components/switch/switch.js';
 
 /**
- * Étape 4 du wizard d'évaluation : Psychologique (placeholder).
+ * Étape 9 du wizard d'évaluation : profil psycho — Confiance en soi (placeholder).
  *
  * Le vrai formulaire viendra plus tard. Expose sa validité via le signal
  * public {@link valid} ; l'interrupteur permet de tester la logique du wizard.
  */
 @Component({
-  selector: 'app-eval-wizard-psycho',
+  selector: 'app-eval-wizard-psycho-confidence',
   standalone: true,
   imports: [TranslatePipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './eval-wizard-psycho.component.html'
+  templateUrl: './eval-wizard-psycho-confidence.component.html'
 })
-export class EvalWizardPsychoComponent {
+export class EvalWizardPsychoConfidenceComponent {
 
   private readonly stepValid = signal(true);
 

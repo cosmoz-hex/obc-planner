@@ -192,10 +192,64 @@
     "title": "Evaluations",
     "wizard": {
       "title": "Ajouter une évaluation",
-      "force": "Force-Vitesse",
-      "technique": "Technique",
+      "realValue": "Valeur réalisée",
+      "exercise": "Exercice",
+      "achieved": "Réalisé",
+      "rating": {
+        "low": "Faible",
+        "mid": "Moyen",
+        "high": "Fort"
+      },
+      "speed": {
+        "title": "Vitesse",
+        "items": {
+          "jumpElan": "Détente avec élan",
+          "jumpStatic": "Détente sèche",
+          "squat30": "Squat 30%",
+          "squat50": "Squat 50%",
+          "squat70": "Squat 70%",
+          "highPull80": "Tirage haut 80%"
+        }
+      },
+      "strength": {
+        "title": "Force",
+        "items": {
+          "frontSquatCj": "3RM Squat Clav. / EPJ",
+          "backSquatCj": "3RM Squat nuque / EPJ",
+          "pullSnatch": "3RM Tirage / Arraché",
+          "pullCj": "3RM Tirage / Épaulé-jeté",
+          "grip": "Grip"
+        }
+      },
+      "snatch": {
+        "title": "Arraché",
+        "reference": "Arraché de référence"
+      },
+      "unit": {
+        "kg": "kg"
+      },
+      "clean": {
+        "title": "Épaulé",
+        "reference": "Épaulé de référence"
+      },
+      "jerk": {
+        "title": "Jeté",
+        "reference": "Jeté de référence"
+      },
+      "squat": {
+        "title": "Squat",
+        "reference": "Épaulé de référence"
+      },
       "endurance": "Endurance",
-      "psycho": "Psychologique",
+      "psycho": {
+        "emotional": "Gestion émotionnelle",
+        "confidence": "Confiance en soi",
+        "motivation": "Motivation",
+        "focus": "Concentration",
+        "competitive": "Comportement compétitif",
+        "failure": "Rapport à l'échec",
+        "autonomy": "Autonomie et responsabilisation"
+      },
       "placeholder": "Contenu de l'étape à venir.",
       "markValid": "Marquer cette étape comme valide"
     },

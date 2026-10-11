@@ -1,0 +1,160 @@
+import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, signal} from '@angular/core';
+import {DecimalPipe} from '@angular/common';
+import {TranslatePipe} from '@ngx-translate/core';
+import {applyEach, disabled, form, FormField} from '@angular/forms/signals';
+import {EvalCategorie, EvalDetail} from '../../../../models/eval-detail.model';
+import {EvalWizardStep} from '../eval-wizard-step';
+import {EvalRatingComponent} from '../eval-rating.component';
+import {WaNumberInputControlDirective} from '../../../../directives/wa-forms/wa-number-input-control.directive';
+import {SanitizeHtmlPipe} from '../../../../pipes/sanitize-html.pipe';
+
+// Composants WebAwesome utilisés (enregistrement ciblé).
+import '@awesome.me/webawesome/dist/components/input/input.js';
+
+/** Marge appliquée autour de l'attendu pour borner Faible / Moyen / Fort. */
+const MARGIN = 0.05;
+
+/**
+ * Définition statique d'une ligne du tableau arraché.
+ *
+ * `factor` est un pourcentage appliqué à l'arraché de référence réalisé pour
+ * obtenir la valeur attendue de la variante.
+ */
+
+/** Bornes dynamiques d'une ligne (en kg), `null` tant que la base manque. */
+interface SnatchThreshold {
+  low: number | null;
+  expected: number | null;
+  high: number | null;
+}
+
+/**
+ * Étape 3 du wizard d'évaluation : Technique sur l'arraché (catégorie
+ * {@link EvalCategorie} `TECH`). Implémente {@link EvalWizardStep}.
+ *
+ * Comme les étapes Vitesse / Force, le modèle du Signal Form est directement un
+ * `EvalDetail[]` (ce qui sera inséré en base) : une ligne par mesure, alignée
+ * sur {@link exercices} par index. La première ligne est l'**arraché de
+ * référence** (sans rating) : c'est la base de calcul des variantes.
+ *
+ * Spécificité par rapport aux autres étapes : les **libellés** des seuils Faible
+ * / Moyen / Fort sont **dynamiques**. Chaque variante attend un pourcentage de
+ * l'arraché de référence réalisé ; on applique une marge de ±5% autour de
+ * l'attendu (arrondi à l'entier) pour afficher `< low` / `attendu` / `> high`
+ * sur le contrôle {@link EvalRatingComponent}. Le résultat (-1/0/1) reste choisi
+ * par le coach.
+ *
+ * Désactivation en cascade : les variantes sont saisissables une fois l'arraché
+ * de référence renseigné.
+ */
+@Component({
+  selector: 'app-eval-wizard-snatch',
+  standalone: true,
+  imports: [TranslatePipe, DecimalPipe, SanitizeHtmlPipe, FormField, WaNumberInputControlDirective, EvalRatingComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './eval-wizard-snatch.component.html',
+  providers: [{provide: EvalWizardStep, useExisting: EvalWizardSnatchComponent}]
+})
+export class EvalWizardSnatchComponent implements EvalWizardStep {
+
+  private static readonly CATEGORIE: EvalCategorie = 'TECH';
+
+  /** Index de la ligne arraché de référence (base des variantes). */
+  private static readonly SNATCH_INDEX = 0;
+
+  /**
+   * Les lignes du tableau arraché (libellés et pourcentages du PDF), alignées
+   * sur le modèle `EvalDetail[]` : l'arraché de référence en tête, puis les
+   * variantes exprimées en pourcentage de l'arraché réalisé.
+   */
+  protected readonly exercices = [
+    {code: 'exercice.snatch.tech.simple',   factor: 1.00},
+    {code: 'exercice.snatch.heavy.squat',   factor: 1.00},
+    {code: 'exercice.snatch.heavy.power',   factor: 0.85},
+    {code: 'exercice.snatch.heavy.block',   factor: 0.95},
+    {code: 'exercice.snatch.heavy.hang',    factor: 0.95},
+    {code: 'exercice.snatch.heavy.no-feet', factor: 0.92},
+    {code: 'exercice.snatch.light.muscle',  factor: 0.66},
+    {code: 'exercice.snatch.heavy.balance', factor: 1.00},
+    {code: 'exercice.snatch.light.tall',    factor: 0.56},
+    {code: 'exercice.snatch.pull.simple',   factor: 1.20},
+    {code: 'exercice.snatch.pull.double',   factor: 1.14},
+    {code: 'exercice.snatch.pull.triple',   factor: 1.08},
+    {code: 'exercice.snatch.pull.high',     factor: 1.00}
+  ];
+
+  /** Modèle du form : une ligne eval_details par question (alignée sur `exercices`). */
+  private readonly model = signal<EvalDetail[]>(this.emptyModel());
+
+  /**
+   * Signal Form sur le modèle `EvalDetail[]` : pilote `wa-input` (realValue) et
+   * `app-eval-rating` (result) via `[formField]`. L'arraché de référence est
+   * toujours saisissable ; une variante est verrouillée tant que l'arraché
+   * réalisé est vide.
+   */
+  protected readonly snatchForm = form(this.model, (path) => {
+    // Désactive la ligne entière (realValue + result) tant que sa base manque.
+    // Le contexte d'item porte l'index ; disabled sur l'item se propage aux sous-champs.
+    applyEach(path, (rowPath) => {
+      disabled(rowPath, {when: (ctx) => this.isRowDisabled(ctx.index())});
+    });
+  });
+
+  /** Arraché de référence réalisé (base des variantes). */
+  private readonly snatchRealised = computed<number | null>(
+    () => this.model()[EvalWizardSnatchComponent.SNATCH_INDEX]?.realValue ?? null
+  );
+
+  /**
+   * Bornes dynamiques par ligne (en kg, arrondies) : `low` = attendu −5%,
+   * `expected`, `high` = attendu +5%. `null` pour l'arraché de référence (pas de
+   * rating) et tant que la base n'est pas saisie. Les libellés sont composés en
+   * template.
+   */
+  protected readonly thresholds = computed<SnatchThreshold[]>(() =>
+    this.exercices.map((row, i) => {
+      if (i === EvalWizardSnatchComponent.SNATCH_INDEX) {
+        return {low: null, expected: null, high: null};
+      }
+      const base = this.snatchRealised();
+      if (base == null) {
+        return {low: null, expected: null, high: null};
+      }
+      const expected = Math.round(base * row.factor);
+      return {
+        low: Math.round(expected * (1 - MARGIN)),
+        expected,
+        high: Math.round(expected * (1 + MARGIN))
+      };
+    })
+  );
+
+  /** Contrat {@link EvalWizardStep} : pas de contrôle, l'étape est toujours valide. */
+  readonly valid = signal(true).asReadonly();
+
+  /** Contrat {@link EvalWizardStep} : le modèle est déjà des lignes eval_details. */
+  readonly value = computed<readonly EvalDetail[]>(() => this.model());
+
+  /** Contrat {@link EvalWizardStep} : réinitialise le formulaire. */
+  reset(): void {
+    this.model.set(this.emptyModel());
+  }
+
+  /** Une variante est verrouillée tant que l'arraché de référence n'est pas saisi. */
+  private isRowDisabled(index: number): boolean {
+    if (index === EvalWizardSnatchComponent.SNATCH_INDEX) {
+      return false;
+    }
+    return this.snatchRealised() == null;
+  }
+
+  private emptyModel(): EvalDetail[] {
+    return this.exercices.map((row) => ({
+      evalCategorie: EvalWizardSnatchComponent.CATEGORIE,
+      exerciceCode: row.code,
+      realValue: null,
+      result: null
+    }));
+  }
+}

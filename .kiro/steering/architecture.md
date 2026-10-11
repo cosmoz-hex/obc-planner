@@ -66,14 +66,16 @@ src/app/
 │                       # avancement (barre + compteur), navigation précédent/suivant/valider
 ├── pages/              # Pages principales
 │   ├── athletes/       # Gestion des athlètes
-│   ├── evaluations/    # Consultation des évaluations (lecture seule)
+│   ├── evaluations/    # Consultation des évaluations
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── exercices/
 │       ├── correctifs/
 │       ├── archetypes/
 │       └── trame-generale/
 ├── models/             # Interfaces TypeScript correspondant aux DTOs backend
-└── services/           # Services HTTP par domaine métier + loader i18n custom
+├── services/           # Services HTTP par domaine métier + loader i18n custom
+├── directives/         # Directives transverses (ex. value accessors Signal Forms pour les composants WebAwesome)
+└── pipes/              # Pipes transverses (ex. date localisée, HTML assaini)
 ```
 
 ### Routes
@@ -82,7 +84,7 @@ src/app/
 |---|---|---|
 | `/` | redirect → `/athletes` | Redirection par défaut |
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
-| `/evaluations` | `EvaluationsComponent` | Consultation des évaluations (lecture seule) |
+| `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
 | `/referentiel/exercices` | `ExercicesComponent` | Catalogue des exercices |
 | `/referentiel/correctifs` | `CorrectifsComponent` | Exercices correctifs |
