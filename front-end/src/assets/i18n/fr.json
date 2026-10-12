@@ -226,7 +226,8 @@
         "reference": "Arraché de référence"
       },
       "unit": {
-        "kg": "kg"
+        "kg": "kg",
+        "percent": "%"
       },
       "clean": {
         "title": "Épaulé",
@@ -240,18 +241,184 @@
         "title": "Squat",
         "reference": "Épaulé de référence"
       },
-      "endurance": "Endurance",
+      "competition": {
+        "title": "Réussite en compétition",
+        "items": {
+          "snatchFirst": "Arraché (1er essai)",
+          "snatchGlobal": "Arraché (global)",
+          "cjFirst": "Épaulé-jeté (1er essai)",
+          "cjGlobal": "Épaulé-jeté (global)"
+        }
+      },
+      "endurance": {
+        "title": "Endurance",
+        "items": {
+          "protocol1": "Protocole cardio 1 — récupération (min)",
+          "protocol2": "Protocole cardio 2 — récupération (min)",
+          "maxRepSquat": "Max rep Squat Nuque @70% (rep)",
+          "maxRepPullCj": "Max rep Tirage Épaulé @70% (rep)",
+          "snatchX3": "Arraché (x3) (% / max)",
+          "snatchX2": "Arraché (x2) (% / max)",
+          "cjX3": "Épaulé-Jeté (x3) (% / max)",
+          "cjX2": "Épaulé-Jeté (x2) (% / max)",
+          "plank": "Gainage Planche (s)",
+          "plank50": "Gainage Planche (+50% BW) (s)",
+          "plank100": "Gainage Planche (+100% BW) (s)"
+        }
+      },
       "psycho": {
+        "legend": "Cochez les affirmations qui sont vraies vous concernant",
         "emotional": "Gestion émotionnelle",
         "confidence": "Confiance en soi",
         "motivation": "Motivation",
         "focus": "Concentration",
         "competitive": "Comportement compétitif",
         "failure": "Rapport à l'échec",
-        "autonomy": "Autonomie et responsabilisation"
+        "autonomy": "Autonomie et responsabilisation",
+        "items": {
+          "emotional": {
+            "1": "Je reste calme même dans les moments critiques",
+            "2": "Je sais me recentrer quand je suis frustré(e)",
+            "3": "Mes émotions n'impactent pas ma technique",
+            "4": "Je prends du recul après une contre-performance",
+            "5": "Je suis capable de relativiser un échec",
+            "6": "Je me maîtrise bien quand je suis en colère",
+            "7": "Je transforme la peur en action"
+          },
+          "confidence": {
+            "1": "Je crois en ma capacité à réussir mes barres",
+            "2": "J'ai confiance en mon niveau de performance",
+            "3": "Même si je rate, je reste sûr(e) de moi",
+            "4": "Je me sens légitime dans mon sport",
+            "5": "Je suis fier/fière de mon parcours",
+            "6": "Je me sens capable de rivaliser avec les meilleurs",
+            "7": "Je crois que je peux atteindre mes objectifs"
+          },
+          "motivation": {
+            "1": "Je suis motivé(e) à chaque entraînement",
+            "2": "J'aime repousser mes limites",
+            "3": "J'ai toujours envie de progresser",
+            "4": "Je suis impliqué(e), même sans compétition proche",
+            "5": "Je m'entraîne sérieusement même quand personne ne regarde",
+            "6": "Je suis prêt(e) à m'investir sur le long terme",
+            "7": "Je continue à m'entraîner même quand je doute"
+          },
+          "focus": {
+            "1": "Je suis pleinement dans l'instant quand je m'entraîne",
+            "2": "Je me reconcentre facilement après une erreur",
+            "3": "Mon attention ne se disperse pas pendant une séance",
+            "4": "Je suis capable de bloquer les pensées parasites",
+            "5": "J'ai une routine de concentration efficace",
+            "6": "Je visualise clairement mes mouvements",
+            "7": "Je me sens en \"pilotage automatique\" sur mes barres clés"
+          },
+          "competitive": {
+            "1": "Je me donne toujours à 100% en compétition",
+            "2": "Je reste concentré(e) malgré l'ambiance ou les autres athlètes",
+            "3": "J'adore les situations de duel ou de pression",
+            "4": "J'utilise la compétition pour me surpasser",
+            "5": "Je reste maître de mes émotions sur le plateau",
+            "6": "J'accepte les décisions des arbitres sans frustration",
+            "7": "J'apprends de chaque compétition, même ratée"
+          },
+          "failure": {
+            "1": "Un échec m'encourage à travailler davantage",
+            "2": "Je vois les erreurs comme une opportunité d'apprentissage",
+            "3": "Je ne me décourage pas après un raté",
+            "4": "Je sais rebondir rapidement après une mauvaise séance",
+            "5": "J'analyse mes échecs objectivement",
+            "6": "Je n'ai pas peur d'échouer devant les autres",
+            "7": "Je reste motivé(e) malgré les périodes de stagnation"
+          },
+          "autonomy": {
+            "1": "Je prends mes responsabilités dans ma progression",
+            "2": "Je suis autonome dans ma préparation",
+            "3": "Je suis capable d'auto-analyse",
+            "4": "Je ne dépends pas du coach pour rester motivé(e)",
+            "5": "Je prends des initiatives pour progresser (vidéos, lectures, récup…)",
+            "6": "Je suis conscient(e) de mes points forts et faibles",
+            "7": "Je m'investis dans ma carrière comme un(e) pro, même amateur"
+          }
+        }
       },
-      "placeholder": "Contenu de l'étape à venir.",
-      "markValid": "Marquer cette étape comme valide"
+      "summary": {
+        "title": "Synthèse",
+        "profile": {
+          "title": "Profil & Archétype",
+          "strengthSpeed": "Force / Vitesse",
+          "technique": "Technique",
+          "endurance": "Endurance",
+          "archetype": "Archétype"
+        },
+        "strengthSpeed": {
+          "STRENGTH": "Fort",
+          "MID": "Mixte",
+          "SPEED": "Rapide"
+        },
+        "technique": {
+          "LOW": "Irrégulier",
+          "MID": "Fiable",
+          "HIGH": "Technicien"
+        },
+        "endurance": {
+          "LOW": "Explosif",
+          "MID": "Mixte",
+          "HIGH": "Endurant"
+        },
+        "archetype": {
+          "MID": "Mixte",
+          "ROUGH": "Bourrin",
+          "TECH": "Technicien",
+          "CYCLE": "Cyclique",
+          "LEARN": "Apprentissage"
+        },
+        "technicalFocus": {
+          "title": "Technique",
+          "movement": "Mouvement",
+          "strength": "Force",
+          "weakness": "Faiblesse"
+        },
+        "protocol": {
+          "title": "Protocole Squat, Tirage & Musculation",
+          "squat": "Squat",
+          "pull": "Tirage",
+          "musculation": "Musculation"
+        },
+        "protocolGoal": {
+          "KEEP": "Maintien",
+          "STRENGTH": "Force",
+          "SPEED": "Vitesse"
+        },
+        "musculation": {
+          "GENERAL": "Général",
+          "LEGS": "Jambes",
+          "POSTERIOR_CHAIN": "Chaîne postérieure",
+          "UPPER_BODY": "Haut du corps"
+        },
+        "psycho": {
+          "title": "Psychologique",
+          "strength": "Force",
+          "weakness": "Faiblesse"
+        },
+        "psychoStrength": {
+          "CALM": "Calme",
+          "CONFIDENT": "Confiant",
+          "MOTIVATED": "Motivé",
+          "FOCUSED": "Concentré",
+          "COMPETITIVE": "Compétiteur",
+          "CHALLENGER": "Challenger",
+          "INDEPENDANT": "Autonome"
+        },
+        "psychoWeakness": {
+          "EMOTIONAL": "Émotif",
+          "ANXIOUS": "Anxieux",
+          "INDIFFERENT": "Indifférent",
+          "DISTRACTED": "Distrait",
+          "HEDONISTIC": "Hédoniste",
+          "PRAGMATIC": "Pragmatique",
+          "RULE": "Référentiel"
+        }
+      }
     },
     "actions": {
       "add": "Ajouter une évaluation"

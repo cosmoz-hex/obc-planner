@@ -1,0 +1,14 @@
+<label class="flex w-full items-center justify-center gap-1">
+  <input type="radio" [name]="group" [value]="-1" [checked]="value() === -1" (change)="value.set(-1)"/>
+  <span [innerHTML]="low()"></span>
+</label>
+
+<label class="flex w-full items-center justify-center gap-1">
+  <input type="radio" [name]="group" [value]="0" [checked]="value() === 0" (change)="value.set(0)"/>
+  <span [innerHTML]="mid()"></span>
+</label>
+
+<label class="flex w-full items-center justify-center gap-1">
+  <input type="radio" [name]="group" [value]="1" [checked]="value() === 1" (change)="value.set(1)"/>
+  <span [innerHTML]="high()"></span>
+</label>

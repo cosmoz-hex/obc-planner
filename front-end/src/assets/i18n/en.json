@@ -226,7 +226,8 @@
         "reference": "Reference snatch"
       },
       "unit": {
-        "kg": "kg"
+        "kg": "kg",
+        "percent": "%"
       },
       "clean": {
         "title": "Clean",
@@ -240,18 +241,184 @@
         "title": "Squat",
         "reference": "Reference clean"
       },
-      "endurance": "Endurance",
+      "competition": {
+        "title": "Competition success rate",
+        "items": {
+          "snatchFirst": "Snatch (1st attempt)",
+          "snatchGlobal": "Snatch (overall)",
+          "cjFirst": "Clean & Jerk (1st attempt)",
+          "cjGlobal": "Clean & Jerk (overall)"
+        }
+      },
+      "endurance": {
+        "title": "Endurance",
+        "items": {
+          "protocol1": "Cardio protocol 1 — recovery (min)",
+          "protocol2": "Cardio protocol 2 — recovery (min)",
+          "maxRepSquat": "Max rep Back Squat @70% (rep)",
+          "maxRepPullCj": "Max rep Clean Pull @70% (rep)",
+          "snatchX3": "Snatch (x3) (% / max)",
+          "snatchX2": "Snatch (x2) (% / max)",
+          "cjX3": "Clean & Jerk (x3) (% / max)",
+          "cjX2": "Clean & Jerk (x2) (% / max)",
+          "plank": "Plank (s)",
+          "plank50": "Plank (+50% BW) (s)",
+          "plank100": "Plank (+100% BW) (s)"
+        }
+      },
       "psycho": {
+        "legend": "Tick the statements that apply to you",
         "emotional": "Emotional management",
         "confidence": "Self-confidence",
         "motivation": "Motivation",
         "focus": "Concentration",
         "competitive": "Competitive behaviour",
         "failure": "Relationship with failure",
-        "autonomy": "Autonomy and accountability"
+        "autonomy": "Autonomy and accountability",
+        "items": {
+          "emotional": {
+            "1": "I stay calm even in critical moments",
+            "2": "I can refocus when I am frustrated",
+            "3": "My emotions do not affect my technique",
+            "4": "I step back after an underperformance",
+            "5": "I am able to put a failure into perspective",
+            "6": "I keep control when I am angry",
+            "7": "I turn fear into action"
+          },
+          "confidence": {
+            "1": "I believe in my ability to make my lifts",
+            "2": "I am confident in my performance level",
+            "3": "Even if I miss, I stay sure of myself",
+            "4": "I feel legitimate in my sport",
+            "5": "I am proud of my journey",
+            "6": "I feel able to compete with the best",
+            "7": "I believe I can reach my goals"
+          },
+          "motivation": {
+            "1": "I am motivated at every training session",
+            "2": "I enjoy pushing my limits",
+            "3": "I always want to improve",
+            "4": "I stay committed, even with no competition coming up",
+            "5": "I train seriously even when no one is watching",
+            "6": "I am ready to commit for the long term",
+            "7": "I keep training even when I have doubts"
+          },
+          "focus": {
+            "1": "I am fully in the moment when I train",
+            "2": "I refocus easily after a mistake",
+            "3": "My attention does not drift during a session",
+            "4": "I am able to block out intrusive thoughts",
+            "5": "I have an effective concentration routine",
+            "6": "I clearly visualise my movements",
+            "7": "I feel on \"autopilot\" on my key lifts"
+          },
+          "competitive": {
+            "1": "I always give 100% in competition",
+            "2": "I stay focused despite the atmosphere or other athletes",
+            "3": "I love duel or pressure situations",
+            "4": "I use competition to surpass myself",
+            "5": "I stay in control of my emotions on the platform",
+            "6": "I accept the referees' decisions without frustration",
+            "7": "I learn from every competition, even a failed one"
+          },
+          "failure": {
+            "1": "A failure encourages me to work harder",
+            "2": "I see mistakes as a learning opportunity",
+            "3": "I do not get discouraged after a miss",
+            "4": "I can bounce back quickly after a bad session",
+            "5": "I analyse my failures objectively",
+            "6": "I am not afraid to fail in front of others",
+            "7": "I stay motivated despite plateaus"
+          },
+          "autonomy": {
+            "1": "I take responsibility for my progress",
+            "2": "I am autonomous in my preparation",
+            "3": "I am capable of self-analysis",
+            "4": "I do not depend on the coach to stay motivated",
+            "5": "I take initiatives to improve (videos, reading, recovery…)",
+            "6": "I am aware of my strengths and weaknesses",
+            "7": "I invest in my career like a pro, even as an amateur"
+          }
+        }
       },
-      "placeholder": "Step content coming soon.",
-      "markValid": "Mark this step as valid"
+      "summary": {
+        "title": "Summary",
+        "profile": {
+          "title": "Profile & Archetype",
+          "strengthSpeed": "Strength / Speed",
+          "technique": "Technique",
+          "endurance": "Endurance",
+          "archetype": "Archetype"
+        },
+        "strengthSpeed": {
+          "STRENGTH": "Strong",
+          "MID": "Mixed",
+          "SPEED": "Fast"
+        },
+        "technique": {
+          "LOW": "Inconsistent",
+          "MID": "Reliable",
+          "HIGH": "Technician"
+        },
+        "endurance": {
+          "LOW": "Explosive",
+          "MID": "Mixed",
+          "HIGH": "Endurant"
+        },
+        "archetype": {
+          "MID": "Mixed",
+          "ROUGH": "Bruiser",
+          "TECH": "Technician",
+          "CYCLE": "Cyclic",
+          "LEARN": "Learning"
+        },
+        "technicalFocus": {
+          "title": "Technique",
+          "movement": "Movement",
+          "strength": "Strength",
+          "weakness": "Weakness"
+        },
+        "protocol": {
+          "title": "Squat, Pull & Accessory protocol",
+          "squat": "Squat",
+          "pull": "Pull",
+          "musculation": "Accessory work"
+        },
+        "protocolGoal": {
+          "KEEP": "Maintain",
+          "STRENGTH": "Strength",
+          "SPEED": "Speed"
+        },
+        "musculation": {
+          "GENERAL": "General",
+          "LEGS": "Legs",
+          "POSTERIOR_CHAIN": "Posterior chain",
+          "UPPER_BODY": "Upper body"
+        },
+        "psycho": {
+          "title": "Psychological",
+          "strength": "Strength",
+          "weakness": "Weakness"
+        },
+        "psychoStrength": {
+          "CALM": "Calm",
+          "CONFIDENT": "Confident",
+          "MOTIVATED": "Motivated",
+          "FOCUSED": "Focused",
+          "COMPETITIVE": "Competitor",
+          "CHALLENGER": "Challenger",
+          "INDEPENDANT": "Independent"
+        },
+        "psychoWeakness": {
+          "EMOTIONAL": "Emotional",
+          "ANXIOUS": "Anxious",
+          "INDIFFERENT": "Indifferent",
+          "DISTRACTED": "Distracted",
+          "HEDONISTIC": "Hedonistic",
+          "PRAGMATIC": "Pragmatic",
+          "RULE": "Rule-bound"
+        }
+      }
     },
     "actions": {
       "add": "Add an evaluation"

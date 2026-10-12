@@ -4,7 +4,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {FormField, applyEach, disabled, form} from '@angular/forms/signals';
 import {EvalCategorie, EvalDetail} from '../../../../models/eval-detail.model';
 import {EvalWizardStep} from '../eval-wizard-step';
-import {EvalRatingComponent} from '../eval-rating.component';
+import {EvalRatingComponent} from '../rating/eval-rating.component';
 import {WaNumberInputControlDirective} from '../../../../directives/wa-forms/wa-number-input-control.directive';
 import {SanitizeHtmlPipe} from '../../../../pipes/sanitize-html.pipe';
 

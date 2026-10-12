@@ -1,0 +1,139 @@
+<section class="grid grid-cols-4 items-end gap-1 py-1">
+
+  <!-- Bloc 1 : Profil & Archétype -->
+  <h3 class="col-span-4 font-medium mb-0">{{ 'evaluations.wizard.summary.profile.title' | translate }}</h3>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.profile.strengthSpeed' | translate"
+             [value]="strengthSpeedValue() ?? ''" (change)="onStrengthSpeed($event)">
+    @for (opt of strengthSpeedOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.strengthSpeed.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.profile.technique' | translate"
+             [value]="techniqueValue() ?? ''" (change)="onTechnique($event)">
+    @for (opt of techniqueOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.technique.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.profile.endurance' | translate"
+             [value]="enduranceValue() ?? ''" (change)="onEndurance($event)">
+    @for (opt of enduranceOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.endurance.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.profile.archetype' | translate"
+             [value]="archetypeValue() ?? ''" (change)="onArchetype($event)">
+    @for (opt of archetypeOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.archetype.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <!-- Bloc 2 : Technique (force / faiblesse par mouvement) -->
+  <h3 class="col-span-4 font-medium mt-1 mb-0">{{ 'evaluations.wizard.summary.technicalFocus.title' | translate }}</h3>
+
+  <span class="font-medium">{{ 'evaluations.wizard.summary.technicalFocus.movement' | translate }}</span>
+  <span class="font-medium">{{ 'evaluations.wizard.summary.technicalFocus.strength' | translate }}</span>
+  <span class="font-medium">{{ 'evaluations.wizard.summary.technicalFocus.weakness' | translate }}</span>
+  <span></span>
+
+  <!-- Arraché -->
+  <span class="font-medium">{{ 'evaluations.wizard.snatch.title' | translate }}</span>
+  <wa-select size="s" [value]="snatchStrengthValue() ?? ''" (change)="onTechniquePick('snatchStrength', $event)">
+    @for (o of snatchOptions(); track o.code) {
+      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    }
+  </wa-select>
+  <wa-select size="s" [value]="snatchWeaknessValue() ?? ''" (change)="onTechniquePick('snatchWeakness', $event)">
+    @for (o of snatchOptions(); track o.code) {
+      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    }
+  </wa-select>
+  <span></span>
+
+  <!-- Épaulé -->
+  <span class="font-medium">{{ 'evaluations.wizard.clean.title' | translate }}</span>
+  <wa-select size="s" [value]="cleanStrengthValue() ?? ''" (change)="onTechniquePick('cleanStrength', $event)">
+    @for (o of cleanOptions(); track o.code) {
+      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    }
+  </wa-select>
+  <wa-select size="s" [value]="cleanWeaknessValue() ?? ''" (change)="onTechniquePick('cleanWeakness', $event)">
+    @for (o of cleanOptions(); track o.code) {
+      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    }
+  </wa-select>
+  <span></span>
+
+  <!-- Jeté -->
+  <span class="font-medium">{{ 'evaluations.wizard.jerk.title' | translate }}</span>
+  <wa-select size="s" [value]="jerkStrengthValue() ?? ''" (change)="onTechniquePick('jerkStrength', $event)">
+    @for (o of jerkOptions(); track o.code) {
+      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    }
+  </wa-select>
+  <wa-select size="s" [value]="jerkWeaknessValue() ?? ''" (change)="onTechniquePick('jerkWeakness', $event)">
+    @for (o of jerkOptions(); track o.code) {
+      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    }
+  </wa-select>
+  <span></span>
+
+  <!-- Bloc 3 : Protocole Squat / Tirage / Musculation -->
+  <h3 class="col-span-4 font-medium mt-1 mb-0">{{ 'evaluations.wizard.summary.protocol.title' | translate }}</h3>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.protocol.squat' | translate"
+             [value]="squatValue() ?? ''" (change)="onSquat($event)">
+    @for (opt of protocolOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.protocolGoal.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.protocol.pull' | translate"
+             [value]="pullValue() ?? ''" (change)="onPull($event)">
+    @for (opt of protocolOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.protocolGoal.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-select size="s" multiple
+             [attr.label]="'evaluations.wizard.summary.protocol.musculation' | translate"
+             [value]="musculationSelected()" (change)="onMusculation($event)">
+    @for (opt of musculationOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.musculation.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <span></span>
+
+  <!-- Bloc 4 : Psychologique -->
+  <h3 class="col-span-4 font-medium mt-1 mb-0">{{ 'evaluations.wizard.summary.psycho.title' | translate }}</h3>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.psycho.strength' | translate"
+             [value]="psychoStrengthValue() ?? ''" (change)="onPsychoStrength($event)">
+    @for (opt of psychoStrengthOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.psychoStrength.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.summary.psycho.weakness' | translate"
+             [value]="psychoWeaknessValue() ?? ''" (change)="onPsychoWeakness($event)">
+    @for (opt of psychoWeaknessOptions; track opt) {
+      <wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.psychoWeakness.' + opt | translate }}</wa-option>
+    }
+  </wa-select>
+
+  <span></span>
+  <span></span>
+
+</section>

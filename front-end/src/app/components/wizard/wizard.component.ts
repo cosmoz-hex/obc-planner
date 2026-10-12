@@ -53,10 +53,12 @@ export class WizardComponent implements WizardHost {
   /** Émis au clic sur « Valider » (dernière étape, formulaire valide). */
   readonly validate = output<void>();
 
-  /** Étapes projetées, triées par numéro d'étape croissant. */
+  /** Étapes projetées, résolues (step > 0), triées par numéro croissant. */
   private readonly projectedSteps = contentChildren(WizardStepComponent);
   protected readonly steps = computed(() =>
-    [...this.projectedSteps()].sort((a, b) => a.step() - b.step())
+    this.projectedSteps()
+      .filter((step) => step.step() > 0)
+      .sort((a, b) => a.step() - b.step())
   );
 
   protected readonly totalSteps = computed(() => this.steps().length);

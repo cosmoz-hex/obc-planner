@@ -13,7 +13,7 @@ import {DataGridComponent} from '../../components/data-grid/data-grid.component'
 import {ColumnDef, GridFilter, SortState} from '../../models/data-grid.model';
 import {EvaluationService} from '../../services/evaluation.service';
 import {LocalizedDatePipe} from '../../pipes/localized-date.pipe';
-import {EvaluationWizardDialogComponent} from './wizard/evaluation-wizard-dialog.component';
+import {EvaluationWizardDialogComponent} from './wizard/dialog/evaluation-wizard-dialog.component';
 import {Evaluation} from '../../models/evaluation.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).

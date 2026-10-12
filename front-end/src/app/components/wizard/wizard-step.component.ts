@@ -35,8 +35,15 @@ import {WizardHost} from './wizard.types';
 })
 export class WizardStepComponent {
 
-  /** Position (1-based) de l'étape dans le wizard. */
-  readonly step = input.required<number>();
+  /**
+   * Position (1-based) de l'étape dans le wizard.
+   *
+   * Non-`required` (défaut `0`) : le conteneur lit `step()` dans un `computed`
+   * (tri des étapes) qui peut s'exécuter avant la résolution des bindings des
+   * étapes projetées. Un input requis lèverait alors `NG0950`. La valeur `0`
+   * marque une étape « pas encore résolue », ignorée par le conteneur.
+   */
+  readonly step = input<number>(0);
 
   /**
    * Validité de l'étape. Pilote l'activation des boutons Suivant / Valider.

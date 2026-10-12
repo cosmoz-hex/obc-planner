@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, input, model} from '@angular/core';
 import {FormValueControl} from '@angular/forms/signals';
 import {SafeHtml} from '@angular/platform-browser';
-import {EvalResult} from '../../../models/eval-detail.model';
+import {EvalResult} from '../../../../models/eval-detail.model';
 
 /**
  * Contrôle de résultat d'une question d'évaluation : trois radios
@@ -20,22 +20,7 @@ import {EvalResult} from '../../../models/eval-detail.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {class: 'contents'},
-  template: `
-    <label class="flex w-full items-center justify-center gap-1">
-      <input type="radio" [name]="group" [value]="-1" [checked]="value() === -1" (change)="value.set(-1)"/>
-      <span [innerHTML]="low()"></span>
-    </label>
-
-    <label class="flex w-full items-center justify-center gap-1">
-      <input type="radio" [name]="group" [value]="0" [checked]="value() === 0" (change)="value.set(0)"/>
-      <span [innerHTML]="mid()"></span>
-    </label>
-
-    <label class="flex w-full items-center justify-center gap-1">
-      <input type="radio" [name]="group" [value]="1" [checked]="value() === 1" (change)="value.set(1)"/>
-      <span [innerHTML]="high()"></span>
-    </label>
-  `
+  templateUrl: './eval-rating.component.html'
 })
 export class EvalRatingComponent implements FormValueControl<EvalResult | null> {
 

@@ -19,3 +19,4 @@ export abstract class EvalWizardStep {
   /** Réinitialise le formulaire de l'étape à son état vide. */
   abstract reset(): void;
 }
+ 

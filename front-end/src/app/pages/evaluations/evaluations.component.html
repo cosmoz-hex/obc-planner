@@ -66,7 +66,7 @@
 
 <!-- Psychologique : point fort (vert/success) + point faible (rouge/danger) dans la même cellule. -->
 <ng-template #psychoCell let-evaluation>
-	<div class="flex flex-wrap items-center justify-center gap-1">
+	<div class="flex items-center justify-center gap-1">
 		@if (evaluation.psychoStrength) {
 		<wa-tag variant="success">{{ 'evaluations.enums.psychoStrength.' + evaluation.psychoStrength | translate }}</wa-tag>
 		}
