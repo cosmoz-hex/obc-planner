@@ -46,13 +46,13 @@
   <!-- Arraché -->
   <span class="font-medium">{{ 'evaluations.wizard.snatch.title' | translate }}</span>
   <wa-select size="s" [value]="snatchStrengthValue() ?? ''" (change)="onTechniquePick('snatchStrength', $event)">
-    @for (o of snatchOptions(); track o.code) {
-      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    @for (o of snatchOptions(); track o) {
+      <wa-option [attr.value]="o">{{ o | translate }}</wa-option>
     }
   </wa-select>
   <wa-select size="s" [value]="snatchWeaknessValue() ?? ''" (change)="onTechniquePick('snatchWeakness', $event)">
-    @for (o of snatchOptions(); track o.code) {
-      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    @for (o of snatchOptions(); track o) {
+      <wa-option [attr.value]="o">{{ o | translate }}</wa-option>
     }
   </wa-select>
   <span></span>
@@ -60,13 +60,13 @@
   <!-- Épaulé -->
   <span class="font-medium">{{ 'evaluations.wizard.clean.title' | translate }}</span>
   <wa-select size="s" [value]="cleanStrengthValue() ?? ''" (change)="onTechniquePick('cleanStrength', $event)">
-    @for (o of cleanOptions(); track o.code) {
-      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    @for (o of cleanOptions(); track o) {
+      <wa-option [attr.value]="o">{{ o | translate }}</wa-option>
     }
   </wa-select>
   <wa-select size="s" [value]="cleanWeaknessValue() ?? ''" (change)="onTechniquePick('cleanWeakness', $event)">
-    @for (o of cleanOptions(); track o.code) {
-      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    @for (o of cleanOptions(); track o) {
+      <wa-option [attr.value]="o">{{ o | translate }}</wa-option>
     }
   </wa-select>
   <span></span>
@@ -74,13 +74,13 @@
   <!-- Jeté -->
   <span class="font-medium">{{ 'evaluations.wizard.jerk.title' | translate }}</span>
   <wa-select size="s" [value]="jerkStrengthValue() ?? ''" (change)="onTechniquePick('jerkStrength', $event)">
-    @for (o of jerkOptions(); track o.code) {
-      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    @for (o of jerkOptions(); track o) {
+      <wa-option [attr.value]="o">{{ o | translate }}</wa-option>
     }
   </wa-select>
   <wa-select size="s" [value]="jerkWeaknessValue() ?? ''" (change)="onTechniquePick('jerkWeakness', $event)">
-    @for (o of jerkOptions(); track o.code) {
-      <wa-option [attr.value]="o.code">{{ o.code | translate }}</wa-option>
+    @for (o of jerkOptions(); track o) {
+      <wa-option [attr.value]="o">{{ o | translate }}</wa-option>
     }
   </wa-select>
   <span></span>

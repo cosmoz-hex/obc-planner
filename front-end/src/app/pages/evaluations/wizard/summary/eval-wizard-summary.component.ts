@@ -4,21 +4,12 @@ import {EvalDetail} from '../../../../models/eval-detail.model';
 import {Archetype, Endurance, StrengthSpeed, Technique} from '../../../../models/archetype.model';
 import {PsychoStrength, PsychoWeakness} from '../../../../models/evaluation.model';
 import {EvalSummary, MUSCULATION_FLAGS, MusculationKey, ProtocolGoal} from '../../../../models/eval-summary.model';
+import {TechniqueGap} from '../eval-wizard-step';
 import {resolveArchetype} from './archetype-combinations';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/option/option.js';
-
-/** Agrégat des résultats d'une étape, tel que remonté par le dialog. */
-export type StepResults = readonly EvalDetail[];
-
-/** Option de force / faiblesse technique (exercice présélectionnable). */
-interface TechniqueOption {
-  code: string;
-  /** Écart relatif à la référence réalisée, pour le tri (null si non calculable). */
-  gap: number | null;
-}
 
 /** Vrai si l'exercice est un mouvement de tirage (exclu de certains calculs). */
 function isPull(code: string): boolean {
@@ -26,7 +17,7 @@ function isPull(code: string): boolean {
 }
 
 /** Somme des résultats (-1/0/1) d'une liste, en ignorant les lignes sans result. */
-function sumResults(rows: StepResults, keep: (row: EvalDetail) => boolean = () => true): number {
+function sumResults(rows: readonly EvalDetail[], keep: (row: EvalDetail) => boolean = () => true): number {
   return rows.reduce((sum, row) => (row.result != null && keep(row) ? sum + row.result : sum), 0);
 }
 
@@ -39,36 +30,15 @@ function popcount(value: number): number {
   return count;
 }
 
-/** Écarts techniques d'une étape (hors ligne de référence, hors tirage, realValue renseigné). */
-function techniqueGaps(rows: StepResults): TechniqueOption[] {
-  if (rows.length === 0) {
-    return [];
-  }
-  const reference = rows[0]?.realValue ?? null; // ligne 0 = référence du mouvement
-  // La liste d'options contient TOUTES les variantes non-tirage (le coach peut
-  // choisir même une variante non mesurée). L'écart n'est calculé que pour les
-  // variantes mesurées (`realValue` renseigné) : il sert uniquement à la
-  // présélection force / faiblesse.
-  return rows
-    .slice(1)
-    .filter((r) => !isPull(r.exerciceCode))
-    .map((r) => ({
-      code: r.exerciceCode,
-      gap: r.realValue != null && reference != null && reference !== 0
-        ? (r.realValue - reference) / reference
-        : null
-    }));
-}
-
 /** Code de la variante mesurée au plus grand écart (force), ou null si aucune mesurée. */
-function strongest(options: readonly TechniqueOption[]): string | null {
+function strongest(options: readonly TechniqueGap[]): string | null {
   const measured = options.filter((o) => o.gap != null);
   if (measured.length === 0) return null;
   return measured.reduce((best, o) => (o.gap! > best.gap! ? o : best)).code;
 }
 
 /** Code de la variante mesurée au plus petit écart (faiblesse), ou null si aucune mesurée. */
-function weakest(options: readonly TechniqueOption[]): string | null {
+function weakest(options: readonly TechniqueGap[]): string | null {
   const measured = options.filter((o) => o.gap != null);
   if (measured.length === 0) return null;
   return measured.reduce((worst, o) => (o.gap! < worst.gap! ? o : worst)).code;
@@ -101,16 +71,21 @@ function weakest(options: readonly TechniqueOption[]): string | null {
 export class EvalWizardSummaryComponent {
 
   // --- Entrées : résultats agrégés des étapes précédentes ---
-  readonly speed = input<StepResults>([]);          // étape 1
-  readonly strength = input<StepResults>([]);       // étape 2
-  readonly snatch = input<StepResults>([]);         // étape 3
-  readonly clean = input<StepResults>([]);          // étape 4
-  readonly jerk = input<StepResults>([]);           // étape 5
-  readonly squatStep = input<StepResults>([]);      // étape 6
-  readonly competition = input<StepResults>([]);    // étape 7
-  readonly enduranceStep = input<StepResults>([]);  // étape 8
+  readonly speed = input<readonly EvalDetail[]>([]);          // étape 1
+  readonly strength = input<readonly EvalDetail[]>([]);       // étape 2
+  readonly snatch = input<readonly EvalDetail[]>([]);         // étape 3
+  readonly clean = input<readonly EvalDetail[]>([]);          // étape 4
+  readonly jerk = input<readonly EvalDetail[]>([]);           // étape 5
+  readonly squatStep = input<readonly EvalDetail[]>([]);      // étape 6
+  readonly competition = input<readonly EvalDetail[]>([]);    // étape 7
+  readonly enduranceStep = input<readonly EvalDetail[]>([]);  // étape 8
   /** Résultats des 7 blocs psycho (étapes 9-15), dans l'ordre des blocs. */
-  readonly psycho = input<readonly StepResults[]>([]);
+  readonly psycho = input<readonly (readonly EvalDetail[])[]>([]);
+
+  // --- Entrées : écarts réalisé / attendu des étapes techniques ---
+  readonly snatchGaps = input<readonly TechniqueGap[]>([]);  // étape 3
+  readonly cleanGaps = input<readonly TechniqueGap[]>([]);   // étape 4
+  readonly jerkGaps = input<readonly TechniqueGap[]>([]);    // étape 5
 
   // --- Options des listes déroulantes (valeurs d'enum alignées BD) ---
   protected readonly strengthSpeedOptions: readonly StrengthSpeed[] = ['STRENGTH', 'MID', 'SPEED'];
@@ -166,16 +141,16 @@ export class EvalWizardSummaryComponent {
 
   // ===== Bloc 2 : Technique (force / faiblesse par mouvement) =====
 
-  protected readonly snatchOptions = computed(() => techniqueGaps(this.snatch()));
-  protected readonly cleanOptions = computed(() => techniqueGaps(this.clean()));
-  protected readonly jerkOptions = computed(() => techniqueGaps(this.jerk()));
+  protected snatchOptions = computed(() => this.snatchGaps().map(e => e.code));
+  protected cleanOptions = computed(() => this.cleanGaps().map(e => e.code));
+  protected jerkOptions = computed(() => this.jerkGaps().map(e => e.code));
 
-  readonly snatchStrengthValue = linkedSignal<string | null>(() => strongest(this.snatchOptions()));
-  readonly snatchWeaknessValue = linkedSignal<string | null>(() => weakest(this.snatchOptions()));
-  readonly cleanStrengthValue = linkedSignal<string | null>(() => strongest(this.cleanOptions()));
-  readonly cleanWeaknessValue = linkedSignal<string | null>(() => weakest(this.cleanOptions()));
-  readonly jerkStrengthValue = linkedSignal<string | null>(() => strongest(this.jerkOptions()));
-  readonly jerkWeaknessValue = linkedSignal<string | null>(() => weakest(this.jerkOptions()));
+  readonly snatchStrengthValue = linkedSignal<string | null>(() => strongest(this.snatchGaps()));
+  readonly snatchWeaknessValue = linkedSignal<string | null>(() => weakest(this.snatchGaps()));
+  readonly cleanStrengthValue = linkedSignal<string | null>(() => strongest(this.cleanGaps()));
+  readonly cleanWeaknessValue = linkedSignal<string | null>(() => weakest(this.cleanGaps()));
+  readonly jerkStrengthValue = linkedSignal<string | null>(() => strongest(this.jerkGaps()));
+  readonly jerkWeaknessValue = linkedSignal<string | null>(() => weakest(this.jerkGaps()));
 
   // ===== Bloc 3 : squat / tirage / musculation =====
 

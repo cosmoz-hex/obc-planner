@@ -3,7 +3,7 @@ import {DecimalPipe} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
 import {applyEach, disabled, form, FormField} from '@angular/forms/signals';
 import {EvalCategorie, EvalDetail} from '../../../../models/eval-detail.model';
-import {EvalWizardStep} from '../eval-wizard-step';
+import {EvalWizardStep, TechniqueEvalStep, TechniqueGap} from '../eval-wizard-step';
 import {EvalRatingComponent} from '../rating/eval-rating.component';
 import {WaNumberInputControlDirective} from '../../../../directives/wa-forms/wa-number-input-control.directive';
 import {SanitizeHtmlPipe} from '../../../../pipes/sanitize-html.pipe';
@@ -54,9 +54,12 @@ interface SnatchThreshold {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './eval-wizard-snatch.component.html',
-  providers: [{provide: EvalWizardStep, useExisting: EvalWizardSnatchComponent}]
+  providers: [
+    {provide: EvalWizardStep, useExisting: EvalWizardSnatchComponent},
+    {provide: TechniqueEvalStep, useExisting: EvalWizardSnatchComponent}
+  ]
 })
-export class EvalWizardSnatchComponent implements EvalWizardStep {
+export class EvalWizardSnatchComponent implements TechniqueEvalStep {
 
   private static readonly CATEGORIE: EvalCategorie = 'TECH';
 
@@ -135,6 +138,26 @@ export class EvalWizardSnatchComponent implements EvalWizardStep {
 
   /** Contrat {@link EvalWizardStep} : le modèle est déjà des lignes eval_details. */
   readonly value = computed<readonly EvalDetail[]>(() => this.model());
+
+  /**
+   * Contrat {@link TechniqueEvalStep} : écart réalisé / attendu par variante
+   * mesurée. L'attendu provient de {@link thresholds} (référence × facteur) ;
+   * on exclut la ligne de référence et les mouvements de tirage.
+   */
+  readonly techniqueGaps = computed<readonly TechniqueGap[]>(() => {
+    const rows = this.model();
+    const thresholds = this.thresholds();
+    return this.exercices
+      .map((row, i) => ({row, realValue: rows[i]?.realValue ?? null, expected: thresholds[i]?.expected ?? null}))
+      .filter((_, i) => i !== EvalWizardSnatchComponent.SNATCH_INDEX)
+      .filter(({row}) => !row.code.includes('.pull.'))
+      .map(({row, realValue, expected}) => ({
+        code: row.code,
+        gap: realValue != null && expected != null && expected !== 0
+          ? (realValue - expected) / expected
+          : null
+      }));
+  });
 
   /** Contrat {@link EvalWizardStep} : réinitialise le formulaire. */
   reset(): void {
