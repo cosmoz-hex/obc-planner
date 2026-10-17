@@ -120,6 +120,70 @@
       "delete": "Deletion failed. Please try again."
     }
   },
+  "exercices": {
+    "title": "Exercises",
+    "actions": {
+      "add": "Add an exercise"
+    },
+    "filters": {
+      "label": "Filters",
+      "type": "Type",
+      "categorie": "Category"
+    },
+    "table": {
+      "caption": "Exercise list"
+    },
+    "fields": {
+      "exercice": "Exercise",
+      "type": "Type",
+      "categorie": "Category",
+      "estimate": "Load",
+      "exerciceCode": "Exercise code",
+      "reference": "Reference exercise",
+      "actions": "Actions"
+    },
+    "enums": {
+      "type": {
+        "SQUAT": "Squat",
+        "PULL": "Pull",
+        "SNATCH": "Snatch",
+        "CLEAN": "Clean",
+        "JERK": "Jerk"
+      },
+      "categorie": {
+        "TECH": "Technique",
+        "COMBI": "Complex",
+        "SEMI_LEGER": "Semi-technical light",
+        "SEMI_LOURD": "Semi-technical heavy",
+        "RENFO": "Strengthening",
+        "CARDIO": "Cardio",
+        "PLYO": "Plyometrics",
+        "BACK": "Back squat",
+        "FRONT": "Front squat"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "New exercise",
+        "edit": "Edit exercise"
+      },
+      "noReference": "None",
+      "errors": {
+        "type": "Type is required.",
+        "categorie": "Category is required.",
+        "exerciceCode": "Exercise code is required."
+      }
+    },
+    "delete": {
+      "title": "Delete exercise",
+      "message": "This action is irreversible. Do you confirm the deletion of this exercise?"
+    },
+    "errors": {
+      "save": "Saving failed. Please try again.",
+      "delete": "Deletion failed. Please try again.",
+      "duplicate": "This exercise code is already in use."
+    }
+  },
   "archetypes": {
     "actions": {
       "add": "Add an archetype"

@@ -120,6 +120,70 @@
       "delete": "La suppression a échoué. Veuillez réessayer."
     }
   },
+  "exercices": {
+    "title": "Exercices",
+    "actions": {
+      "add": "Ajouter un exercice"
+    },
+    "filters": {
+      "label": "Filtres",
+      "type": "Type",
+      "categorie": "Catégorie"
+    },
+    "table": {
+      "caption": "Liste des exercices"
+    },
+    "fields": {
+      "exercice": "Exercice",
+      "type": "Type",
+      "categorie": "Catégorie",
+      "estimate": "Charge",
+      "exerciceCode": "Code de l'exercice",
+      "reference": "Exercice de référence",
+      "actions": "Actions"
+    },
+    "enums": {
+      "type": {
+        "SQUAT": "Squat",
+        "PULL": "Tirage",
+        "SNATCH": "Arraché",
+        "CLEAN": "Épaulé",
+        "JERK": "Jeté"
+      },
+      "categorie": {
+        "TECH": "Technique",
+        "COMBI": "Combiné",
+        "SEMI_LEGER": "Semi-technique léger",
+        "SEMI_LOURD": "Semi-technique lourd",
+        "RENFO": "Renforcement",
+        "CARDIO": "Cardio",
+        "PLYO": "Pliométrie",
+        "BACK": "Squat nuque",
+        "FRONT": "Squat clavicule"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "Nouvel exercice",
+        "edit": "Modifier l'exercice"
+      },
+      "noReference": "Aucun",
+      "errors": {
+        "type": "Le type est obligatoire.",
+        "categorie": "La catégorie est obligatoire.",
+        "exerciceCode": "Le code de l'exercice est obligatoire."
+      }
+    },
+    "delete": {
+      "title": "Supprimer l'exercice",
+      "message": "Cette action est irréversible. Confirmez-vous la suppression de cet exercice ?"
+    },
+    "errors": {
+      "save": "L'enregistrement a échoué. Veuillez réessayer.",
+      "delete": "La suppression a échoué. Veuillez réessayer.",
+      "duplicate": "Ce code d'exercice est déjà utilisé."
+    }
+  },
   "archetypes": {
     "actions": {
       "add": "Ajouter un archétype"

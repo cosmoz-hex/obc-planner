@@ -1,0 +1,50 @@
+<wa-dialog [attr.open]="open() ? true : null" [attr.label]="title() | translate" (wa-after-hide)="onDialogHide($event)">
+
+	<form class="flex flex-col gap-1" (submit)="$event.preventDefault(); onSubmit()">
+
+		@if (errorKey()) {
+		<wa-callout variant="danger" role="alert" aria-live="assertive">
+			<wa-icon slot="icon" name="triangle-exclamation" aria-hidden="true"></wa-icon>
+			{{ errorKey()! | translate }}
+		</wa-callout>
+		}
+
+		<wa-select [formField]="exerciceForm.typeExercice" [attr.label]="'exercices.fields.type' | translate">
+			@for (value of typeExercices; track value) {
+			<wa-option [attr.value]="value">{{ 'exercices.enums.type.' + value | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<wa-select [formField]="exerciceForm.categorieExercice" [attr.label]="'exercices.fields.categorie' | translate">
+			@for (value of categorieExercices; track value) {
+			<wa-option [attr.value]="value">{{ 'exercices.enums.categorie.' + value | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<wa-input [formField]="exerciceForm.exerciceCode"
+		          [attr.label]="'exercices.fields.exerciceCode' | translate"></wa-input>
+
+		<!-- Exercice de référence (facultatif) -->
+		<wa-select with-clear [formField]="exerciceForm.exerciceRef"
+		           [attr.label]="'exercices.fields.reference' | translate"
+		           [attr.placeholder]="'exercices.form.noReference' | translate">
+			@for (ref of referenceExercices; track ref.id) {
+			<wa-option [attr.value]="ref.id">{{ ref.labelKey | translate }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Charge de travail en % de l'exercice de référence (facultatif) -->
+		<wa-input type="number" [formField]="exerciceForm.estimatePercent"
+		          [attr.label]="'exercices.fields.estimate' | translate"></wa-input>
+
+		<div slot="footer" class="flex justify-end gap-1">
+			<wa-button appearance="plain" type="button" (click)="onClose()">
+				{{ 'common.actions.cancel' | translate }}
+			</wa-button>
+
+			<wa-button variant="brand" type="submit" [attr.disabled]="exerciceForm().invalid() ? true : null">
+				{{ 'common.actions.save' | translate }}
+			</wa-button>
+		</div>
+	</form>
+</wa-dialog>

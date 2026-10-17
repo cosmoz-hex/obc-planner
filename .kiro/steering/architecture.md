@@ -45,6 +45,11 @@ Base URL: `/api`
 | `POST` | `/ref-archetypes` | `RefArchetypeController` | Création (combinaison de profils unique — 409 sinon) |
 | `PUT` | `/ref-archetypes/{id}` | `RefArchetypeController` | Modification (unicité de la combinaison contrôlée) |
 | `DELETE` | `/ref-archetypes/{id}` | `RefArchetypeController` | Suppression d'un archétype de référence |
+| `GET` | `/exercices` | `ExerciceController` | Liste paginée, filtrée (type, catégorie) et triée des exercices (tri par défaut type/catégorie/code). `size=0` désactive la pagination |
+| `GET` | `/exercices/{id}` | `ExerciceController` | Consultation d'un exercice |
+| `POST` | `/exercices` | `ExerciceController` | Création (code d'exercice unique — 409 sinon ; exercice de référence optionnel, introuvable → 409) |
+| `PUT` | `/exercices/{id}` | `ExerciceController` | Modification (unicité du code contrôlée). Exercice introuvable → 404 |
+| `DELETE` | `/exercices/{id}` | `ExerciceController` | Suppression d'un exercice. Exercice introuvable → 404 |
 | `GET` | `/evaluations` | `EvaluationController` | Liste paginée et triée des évaluations (lecture seule, une ligne par évaluation ; tri par défaut date décroissante). `size=0` désactive la pagination |
 | `GET` | `/evaluations/{id}` | `EvaluationController` | Relecture complète d'une évaluation (bilan `eval_summaries` + détail `eval_details`) pour l'édition. Évaluation introuvable → 404 |
 | `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
