@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dto.EvaluationCreatedResponse;
+import com.example.backend.dto.EvaluationDetailResponse;
 import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,6 +54,20 @@ public class EvaluationController {
     @ResponseStatus(HttpStatus.CREATED)
     public EvaluationCreatedResponse create(@Valid @RequestBody EvaluationRequest request) {
         return evaluationService.create(request);
+    }
+
+    /** Relecture complète d'une évaluation (bilan + détail), pour l'édition. */
+    @GetMapping("/{evaluationId}")
+    public EvaluationDetailResponse get(@PathVariable Integer evaluationId) {
+        return evaluationService.findById(evaluationId);
+    }
+
+    /** Met à jour une évaluation (bilan mis à jour en place, détail remplacé). */
+    @PutMapping("/{evaluationId}")
+    public ResponseEntity<Void> update(@PathVariable Integer evaluationId,
+                                       @Valid @RequestBody EvaluationRequest request) {
+        evaluationService.update(evaluationId, request);
+        return ResponseEntity.noContent().build();
     }
 
     /** Supprime une évaluation (détail des mesures supprimé en cascade). */

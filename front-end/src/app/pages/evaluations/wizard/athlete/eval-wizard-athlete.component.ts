@@ -67,6 +67,12 @@ export class EvalWizardAthleteComponent {
     this.evaluationDate.set(todayIso());
   }
 
+  /** Pré-remplit l'athlète et la date (édition d'une évaluation existante). */
+  load(athleteId: number, evaluationDate: string): void {
+    this.athleteId.set(athleteId);
+    this.evaluationDate.set(evaluationDate);
+  }
+
   protected onAthlete(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.athleteId.set(value ? Number(value) : null);

@@ -11,12 +11,13 @@ import {
 } from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {DataGridComponent} from '../../components/data-grid/data-grid.component';
-import {ColumnDef, GridFilter, SortState} from '../../models/data-grid.model';
+import {ColumnDef, CellClickEvent, GridFilter, SortState} from '../../models/data-grid.model';
 import {EvaluationService} from '../../services/evaluation.service';
 import {LocalizedDatePipe} from '../../pipes/localized-date.pipe';
 import {EvaluationWizardDialogComponent} from './wizard/dialog/evaluation-wizard-dialog.component';
 import {ConfirmDialogComponent} from '../../components/confirm-dialog/confirm-dialog.component';
 import {Evaluation} from '../../models/evaluation.model';
+import {EvaluationDetail} from '../../models/evaluation-detail.model';
 import {EvaluationRequest} from '../../models/evaluation-request.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
@@ -106,6 +107,7 @@ export class EvaluationsComponent {
         headerLabel: 'evaluations.fields.name',
         sortable: true,
         hideable: false,
+        cellClass: 'cursor-pointer',
         formatter: (e) => `${e.firstName} ${e.lastName}`
       },
       {
@@ -137,11 +139,38 @@ export class EvaluationsComponent {
     this.page.set(0);
   }
 
-  // --- Wizard d'ajout d'évaluation ---
+  // --- Wizard d'ajout / modification d'évaluation ---
   protected readonly wizardOpen = signal(false);
+  protected readonly wizardMode = signal<'create' | 'edit'>('create');
+  /** Évaluation complète chargée pour l'édition (null en création). */
+  protected readonly editingEvaluation = signal<EvaluationDetail | null>(null);
 
   protected openWizard(): void {
+    this.wizardMode.set('create');
+    this.editingEvaluation.set(null);
     this.wizardOpen.set(true);
+  }
+
+  /** Ouvre le wizard en édition après récupération de l'évaluation complète. */
+  protected async openEdit(evaluation: Evaluation): Promise<void> {
+    try {
+      const full = await this.evaluationService.getById(evaluation.evaluationId);
+      this.editingEvaluation.set(full);
+      this.wizardMode.set('edit');
+      this.wizardOpen.set(true);
+    } catch {
+      void this.errorToast()?.nativeElement.create(this.t('evaluations.errors.load'), {
+        variant: 'danger',
+        icon: 'triangle-exclamation'
+      });
+    }
+  }
+
+  /** Clic sur la cellule « nom & prénom » → édition de l'évaluation. */
+  protected onCellClick(event: CellClickEvent<Evaluation>): void {
+    if (event.column.key === 'lastName') {
+      void this.openEdit(event.row);
+    }
   }
 
   protected closeWizard(): void {
@@ -149,9 +178,14 @@ export class EvaluationsComponent {
   }
 
   protected async onWizardValidated(request: EvaluationRequest): Promise<void> {
-    await this.evaluationService.create(request);
+    const editing = this.editingEvaluation();
+    if (editing) {
+      await this.evaluationService.update(editing.evaluationId, request);
+    } else {
+      await this.evaluationService.create(request);
+    }
     this.wizardOpen.set(false);
-    // Rafraîchit la liste pour afficher la nouvelle évaluation.
+    // Rafraîchit la liste pour refléter l'ajout ou la modification.
     this.evaluationsResource.reload();
   }
 
@@ -163,7 +197,9 @@ export class EvaluationsComponent {
   protected onRowAction(evaluation: Evaluation, event: Event): void {
     const detail = (event as CustomEvent<{ item?: Element }>).detail;
     const action = detail?.item?.getAttribute('value');
-    if (action === 'delete') {
+    if (action === 'edit') {
+      void this.openEdit(evaluation);
+    } else if (action === 'delete') {
       this.askDelete(evaluation);
     }
   }

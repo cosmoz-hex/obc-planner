@@ -19,13 +19,16 @@
 		[totalElements]="totalElements()"
 		[sort]="sort()"
 		(pageSizeChange)="onPageSizeChange()"
-		(sortChange)="onSortChange($event)">
+		(sortChange)="onSortChange($event)"
+		(cellClick)="onCellClick($event)">
 	</app-data-grid>
 </section>
 
-<!-- Modale d'ajout d'évaluation (wizard à étapes). -->
+<!-- Modale d'ajout / modification d'évaluation (wizard à étapes). -->
 <app-evaluation-wizard-dialog
 	[open]="wizardOpen()"
+	[mode]="wizardMode()"
+	[evaluation]="editingEvaluation()"
 	(close)="closeWizard()"
 	(validated)="onWizardValidated($event)">
 </app-evaluation-wizard-dialog>
@@ -84,6 +87,10 @@
 		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
 			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
 		</wa-button>
+		<wa-dropdown-item value="edit">
+			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.edit' | translate }}
+		</wa-dropdown-item>
 		<wa-dropdown-item value="delete" variant="danger">
 			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
 			{{ 'common.actions.delete' | translate }}

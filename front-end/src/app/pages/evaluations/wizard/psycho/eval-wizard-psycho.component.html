@@ -2,7 +2,7 @@
   <legend>{{ 'evaluations.wizard.psycho.legend' | translate }}</legend>
 
   @for (label of labels(); track label; let i = $index) {
-    <wa-checkbox (change)="onToggle(i, $event)">
+    <wa-checkbox [checked]="checked()[i] ?? false" (change)="onToggle(i, $event)">
       {{ label | translate }}
     </wa-checkbox>
   }

@@ -93,7 +93,7 @@ export class EvalWizardPsychoComponent implements EvalWizardStep {
   });
 
   /** État coché de chaque affirmation (aligné par index sur `labels`). */
-  private readonly checked = signal<boolean[]>([]);
+  protected readonly checked = signal<boolean[]>([]);
 
   /**
    * Score binaire du bloc : somme des 2^index pour les affirmations cochées.
@@ -117,6 +117,18 @@ export class EvalWizardPsychoComponent implements EvalWizardStep {
   /** Contrat {@link EvalWizardStep} : décoche toutes les affirmations. */
   reset(): void {
     this.checked.set(this.labels().map(() => false));
+  }
+
+  /**
+   * Contrat {@link EvalWizardStep} : pré-remplit le bloc (édition).
+   * Reconstitue les cases cochées en décodant le score binaire de la ligne
+   * `eval_details` correspondant à ce bloc (`exerciceCode = eval.psycho.<block>`).
+   */
+  load(details: readonly EvalDetail[]): void {
+    const row = details.find((d) => d.exerciceCode === this.code());
+    const score = row?.realValue ?? 0;
+    const count = this.labels().length;
+    this.checked.set(Array.from({length: count}, (_, i) => (score & (1 << i)) !== 0));
   }
 
   /** Met à jour l'état coché d'une affirmation suite à l'événement du checkbox. */

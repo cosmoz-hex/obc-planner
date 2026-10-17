@@ -2,6 +2,7 @@ import {inject, Injectable, Signal} from '@angular/core';
 import {HttpClient, httpResource, HttpResourceRef} from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
 import {Evaluation} from '../models/evaluation.model';
+import {EvaluationDetail} from '../models/evaluation-detail.model';
 import {EvaluationRequest} from '../models/evaluation-request.model';
 import {GridFilter, PageResponse} from '../models/data-grid.model';
 
@@ -45,6 +46,16 @@ export class EvaluationService {
   /** Crée une évaluation (bilan + détail). Renvoie l'identifiant créé. */
   create(request: EvaluationRequest): Promise<EvaluationCreatedResponse> {
     return firstValueFrom(this.http.post<EvaluationCreatedResponse>(EVALUATIONS_URL, request));
+  }
+
+  /** Relecture complète d'une évaluation (bilan + détail) pour l'édition. */
+  getById(evaluationId: number): Promise<EvaluationDetail> {
+    return firstValueFrom(this.http.get<EvaluationDetail>(`${EVALUATIONS_URL}/${evaluationId}`));
+  }
+
+  /** Met à jour une évaluation (bilan + détail). */
+  update(evaluationId: number, request: EvaluationRequest): Promise<void> {
+    return firstValueFrom(this.http.put<void>(`${EVALUATIONS_URL}/${evaluationId}`, request));
   }
 
   /** Supprime une évaluation (détail supprimé en cascade côté serveur). */

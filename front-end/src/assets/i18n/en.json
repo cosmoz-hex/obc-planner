@@ -192,6 +192,7 @@
     "title": "Evaluations",
     "wizard": {
       "title": "Add an evaluation",
+      "titleEdit": "Edit evaluation",
       "athlete": {
         "title": "Athlete",
         "athlete": "Athlete",
@@ -489,7 +490,8 @@
       "message": "This action is irreversible. Do you confirm the deletion of this evaluation?"
     },
     "errors": {
-      "delete": "Deletion failed. Please try again."
+      "delete": "Deletion failed. Please try again.",
+      "load": "Failed to load the evaluation. Please try again."
     }
   },
   "pages": {

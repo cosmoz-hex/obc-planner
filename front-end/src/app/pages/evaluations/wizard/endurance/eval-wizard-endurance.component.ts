@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, si
 import {TranslatePipe} from '@ngx-translate/core';
 import {FormField, form} from '@angular/forms/signals';
 import {EvalCategorie, EvalDetail, EvalMeasureRow} from '../../../../models/eval-detail.model';
-import {EvalWizardStep} from '../eval-wizard-step';
+import {EvalWizardStep, mergeDetails} from '../eval-wizard-step';
 import {EvalRatingComponent} from '../rating/eval-rating.component';
 import {WaNumberInputControlDirective} from '../../../../directives/wa-forms/wa-number-input-control.directive';
 import {SanitizeHtmlPipe} from '../../../../pipes/sanitize-html.pipe';
@@ -71,6 +71,11 @@ export class EvalWizardEnduranceComponent implements EvalWizardStep {
   /** Contrat {@link EvalWizardStep} : réinitialise le formulaire. */
   reset(): void {
     this.model.set(this.emptyModel());
+  }
+
+  /** Contrat {@link EvalWizardStep} : pré-remplit les mesures (édition). */
+  load(details: readonly EvalDetail[]): void {
+    this.model.set(mergeDetails(this.model(), details));
   }
 
   private emptyModel(): EvalDetail[] {

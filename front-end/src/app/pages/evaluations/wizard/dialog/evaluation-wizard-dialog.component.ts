@@ -3,8 +3,11 @@ import {
 	Component,
 	computed,
 	CUSTOM_ELEMENTS_SCHEMA,
+	effect,
+	input,
 	model,
 	output,
+	untracked,
 	viewChild,
 	viewChildren
 } from '@angular/core';
@@ -24,6 +27,7 @@ import {EvalWizardEnduranceComponent} from '../endurance/eval-wizard-endurance.c
 import {EvalWizardPsychoComponent} from '../psycho/eval-wizard-psycho.component';
 import {EvalWizardSummaryComponent} from '../summary/eval-wizard-summary.component';
 import {EvalDetail} from '../../../../models/eval-detail.model';
+import {EvaluationDetail} from '../../../../models/evaluation-detail.model';
 import {EvalDetailRequest, EvaluationRequest} from '../../../../models/evaluation-request.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
@@ -96,11 +100,51 @@ export class EvaluationWizardDialogComponent {
   /** Ouverture pilotée par le parent. */
   readonly open = model<boolean>(false);
 
+  /** Mode du wizard : création d'une nouvelle évaluation ou édition. */
+  readonly mode = input<'create' | 'edit'>('create');
+
+  /**
+   * Évaluation à éditer (bilan + détail), fournie par le parent en mode édition.
+   * `null` en création. À l'ouverture, les mesures sont réinjectées dans chaque
+   * étape ; la synthèse n'est pas rechargée (elle est recalculée par le wizard).
+   */
+  readonly evaluation = input<EvaluationDetail | null>(null);
+
   /** Demande de fermeture (croix, Échap, clic hors modale). */
   readonly close = output<void>();
 
-  /** Validation finale : émet le payload complet de création d'évaluation. */
+  /** Validation finale : émet le payload complet (création ou mise à jour). */
   readonly validated = output<EvaluationRequest>();
+
+  constructor() {
+    // Pré-remplissage : à l'ouverture en édition, charger athlète + mesures.
+    // On ne dépend QUE de (open, mode, evaluation) ; les étapes (viewChildren)
+    // sont lues en untracked pour ne pas relancer l'effect quand leurs modèles
+    // changent (sinon boucle infinie : load → set → re-run). Un garde-fou évite
+    // de recharger plusieurs fois la même évaluation.
+    effect(() => {
+      const evaluation = this.evaluation();
+      const shouldLoad = this.open() && this.mode() === 'edit' && evaluation != null;
+      if (!shouldLoad) {
+        if (!this.open()) {
+          this.loadedEvaluationId = null;
+        }
+        return;
+      }
+      if (this.loadedEvaluationId === evaluation.evaluationId) {
+        return;
+      }
+      this.loadedEvaluationId = evaluation.evaluationId;
+      untracked(() => {
+        this.athleteStep().load(evaluation.athleteId, evaluation.evaluationDate);
+        // Chaque étape ne retient que les lignes dont elle connaît l'exerciceCode.
+        this.steps().forEach((step) => step.load(evaluation.details));
+      });
+    });
+  }
+
+  /** Identifiant de l'évaluation déjà chargée dans le wizard (anti-rechargement). */
+  private loadedEvaluationId: number | null = null;
 
   /** Référence au wizard projeté, pour réinitialiser l'étape à la fermeture. */
   private readonly wizard = viewChild.required(WizardComponent);

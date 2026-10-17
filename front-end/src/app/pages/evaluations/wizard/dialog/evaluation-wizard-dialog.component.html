@@ -1,7 +1,7 @@
 <wa-dialog
 	style="--width: 70vw;"
   [attr.open]="open() ? true : null"
-  [attr.label]="'evaluations.wizard.title' | translate"
+  [attr.label]="(mode() === 'edit' ? 'evaluations.wizard.titleEdit' : 'evaluations.wizard.title') | translate"
   (wa-after-hide)="onDialogHide($event)">
 
   <app-wizard (validate)="onValidate()">

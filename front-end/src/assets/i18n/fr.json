@@ -192,6 +192,7 @@
     "title": "Evaluations",
     "wizard": {
       "title": "Ajouter une évaluation",
+      "titleEdit": "Modifier l'évaluation",
       "athlete": {
         "title": "Athlète",
         "athlete": "Athlète",
@@ -489,7 +490,8 @@
       "message": "Cette action est irréversible. Confirmez-vous la suppression de cette évaluation ?"
     },
     "errors": {
-      "delete": "La suppression a échoué. Veuillez réessayer."
+      "delete": "La suppression a échoué. Veuillez réessayer.",
+      "load": "Le chargement de l'évaluation a échoué. Veuillez réessayer."
     }
   },
   "pages": {

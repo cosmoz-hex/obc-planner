@@ -1,6 +1,7 @@
 package com.example.backend.services.impl;
 
 import com.example.backend.dto.EvaluationCreatedResponse;
+import com.example.backend.dto.EvaluationDetailResponse;
 import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
@@ -59,6 +60,17 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public EvaluationDetailResponse findById(Integer evaluationId) {
+        EvalSummary summary = evaluationRepository.findById(evaluationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Évaluation introuvable : " + evaluationId));
+        List<EvalDetail> details =
+                evalDetailRepository.findByEvaluation_EvaluationIdOrderByEvaluationDetailIdAsc(evaluationId);
+        return evaluationMapper.toDetailResponse(summary, details);
+    }
+
+    @Override
     @Transactional
     public EvaluationCreatedResponse create(EvaluationRequest request) {
         Athlete athlete = athleteRepository.findById(request.athleteId())
@@ -66,15 +78,36 @@ public class EvaluationServiceImpl implements EvaluationService {
                         "Athlète introuvable : " + request.athleteId()));
 
         EvalSummary summary = evaluationRepository.save(evaluationMapper.toSummary(request, athlete));
+        saveDetails(request, summary);
 
+        return new EvaluationCreatedResponse(summary.getEvaluationId());
+    }
+
+    @Override
+    @Transactional
+    public void update(Integer evaluationId, EvaluationRequest request) {
+        EvalSummary summary = evaluationRepository.findById(evaluationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Évaluation introuvable : " + evaluationId));
+
+        // Bilan : mise à jour en place (identité et FK préservées, ex. programmes).
+        evaluationMapper.updateSummary(summary, request);
+        evaluationRepository.save(summary);
+
+        // Détail : remplacement intégral (delete + insert).
+        evalDetailRepository.deleteByEvaluation_EvaluationId(evaluationId);
+        evalDetailRepository.flush();
+        saveDetails(request, summary);
+    }
+
+    /** Persiste les lignes de détail de la requête rattachées au bilan. */
+    private void saveDetails(EvaluationRequest request, EvalSummary summary) {
         if (request.details() != null && !request.details().isEmpty()) {
             List<EvalDetail> details = request.details().stream()
                     .map(detail -> evaluationMapper.toDetail(detail, summary))
                     .toList();
             evalDetailRepository.saveAll(details);
         }
-
-        return new EvaluationCreatedResponse(summary.getEvaluationId());
     }
 
     @Override

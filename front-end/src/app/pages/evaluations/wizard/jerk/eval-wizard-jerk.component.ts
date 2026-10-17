@@ -3,7 +3,7 @@ import {DecimalPipe} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
 import {applyEach, disabled, form, FormField} from '@angular/forms/signals';
 import {EvalCategorie, EvalDetail} from '../../../../models/eval-detail.model';
-import {EvalWizardStep, TechniqueEvalStep, TechniqueGap} from '../eval-wizard-step';
+import {EvalWizardStep, mergeDetails, TechniqueEvalStep, TechniqueGap} from '../eval-wizard-step';
 import {EvalRatingComponent} from '../rating/eval-rating.component';
 import {WaNumberInputControlDirective} from '../../../../directives/wa-forms/wa-number-input-control.directive';
 import {SanitizeHtmlPipe} from '../../../../pipes/sanitize-html.pipe';
@@ -157,6 +157,11 @@ export class EvalWizardJerkComponent implements TechniqueEvalStep {
   /** Contrat {@link EvalWizardStep} : réinitialise le formulaire. */
   reset(): void {
     this.model.set(this.emptyModel());
+  }
+
+  /** Contrat {@link EvalWizardStep} : pré-remplit les mesures (édition). */
+  load(details: readonly EvalDetail[]): void {
+    this.model.set(mergeDetails(this.model(), details));
   }
 
   /** Une variante est verrouillée tant que le jeté de référence n'est pas saisi. */
