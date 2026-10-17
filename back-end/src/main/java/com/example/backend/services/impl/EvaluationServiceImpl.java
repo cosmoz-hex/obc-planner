@@ -77,6 +77,16 @@ public class EvaluationServiceImpl implements EvaluationService {
         return new EvaluationCreatedResponse(summary.getEvaluationId());
     }
 
+    @Override
+    @Transactional
+    public void delete(Integer evaluationId) {
+        if (!evaluationRepository.existsById(evaluationId)) {
+            throw new ResourceNotFoundException("Évaluation introuvable : " + evaluationId);
+        }
+        // Les lignes eval_details associées sont supprimées en cascade (FK ON DELETE CASCADE).
+        evaluationRepository.deleteById(evaluationId);
+    }
+
     /**
      * Nettoie le {@link Pageable} : borne la taille de page et ne conserve que
      * les tris sur des champs autorisés (traduits vers leur chemin JPQL), avec

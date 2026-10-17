@@ -78,3 +78,28 @@
 		}
 	</div>
 </ng-template>
+
+<ng-template #actionsCell let-evaluation>
+	<wa-dropdown (wa-select)="onRowAction(evaluation, $event)">
+		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
+			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
+		</wa-button>
+		<wa-dropdown-item value="delete" variant="danger">
+			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.delete' | translate }}
+		</wa-dropdown-item>
+	</wa-dropdown>
+</ng-template>
+
+<!-- Confirmation de suppression -->
+<app-confirm-dialog
+	[open]="confirmOpen()"
+	titleKey="evaluations.delete.title"
+	messageKey="evaluations.delete.message"
+	confirmKey="common.actions.delete"
+	(confirmed)="confirmDelete()"
+	(cancelled)="cancelDelete()">
+</app-confirm-dialog>
+
+<!-- Conteneur de notifications non bloquantes (toasts fermables, auto-dismiss). -->
+<wa-toast #errorToast></wa-toast>

@@ -439,7 +439,8 @@
       "strengthSpeed": "Strength-Speed",
       "technique": "Technique",
       "endurance": "Endurance",
-      "psycho": "Psychological"
+      "psycho": "Psychological",
+      "actions": "Actions"
     },
     "enums": {
       "archetype": {
@@ -482,6 +483,13 @@
         "PRAGMATIC": "Pragmatic",
         "RULE": "Rule-bound"
       }
+    },
+    "delete": {
+      "title": "Delete evaluation",
+      "message": "This action is irreversible. Do you confirm the deletion of this evaluation?"
+    },
+    "errors": {
+      "delete": "Deletion failed. Please try again."
     }
   },
   "pages": {

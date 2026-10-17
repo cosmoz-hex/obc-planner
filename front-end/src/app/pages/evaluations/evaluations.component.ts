@@ -3,17 +3,19 @@ import {
 	Component,
 	computed,
 	CUSTOM_ELEMENTS_SCHEMA,
+	ElementRef,
 	inject,
 	signal,
 	TemplateRef,
 	viewChild
 } from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {DataGridComponent} from '../../components/data-grid/data-grid.component';
 import {ColumnDef, GridFilter, SortState} from '../../models/data-grid.model';
 import {EvaluationService} from '../../services/evaluation.service';
 import {LocalizedDatePipe} from '../../pipes/localized-date.pipe';
 import {EvaluationWizardDialogComponent} from './wizard/dialog/evaluation-wizard-dialog.component';
+import {ConfirmDialogComponent} from '../../components/confirm-dialog/confirm-dialog.component';
 import {Evaluation} from '../../models/evaluation.model';
 import {EvaluationRequest} from '../../models/evaluation-request.model';
 
@@ -22,11 +24,15 @@ import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/tag/tag.js';
 import '@awesome.me/webawesome/dist/components/badge/badge.js';
+import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
+import '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js';
+import '@awesome.me/webawesome/dist/components/toast/toast.js';
+import type WaToast from '@awesome.me/webawesome/dist/components/toast/toast.js';
 
 @Component({
   selector: 'app-evaluations',
   standalone: true,
-  imports: [TranslatePipe, DataGridComponent, EvaluationWizardDialogComponent],
+  imports: [TranslatePipe, DataGridComponent, EvaluationWizardDialogComponent, ConfirmDialogComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './evaluations.component.html',
@@ -36,10 +42,16 @@ import '@awesome.me/webawesome/dist/components/badge/badge.js';
 export class EvaluationsComponent {
 
   private readonly evaluationService = inject(EvaluationService);
+  private readonly translate = inject(TranslateService);
   private readonly localizedDatePipe = inject(LocalizedDatePipe);
 
   /** Identité d'une ligne du grid : l'identifiant de l'évaluation. */
   protected readonly rowId = (evaluation: Evaluation): number => evaluation.evaluationId;
+
+  /** Traduction impérative (pour aria-label). */
+  protected t(key: string): string {
+    return this.translate.instant(key);
+  }
 
   // --- Pagination / tri (server-side) ---
   protected readonly page = signal(0);
@@ -67,6 +79,10 @@ export class EvaluationsComponent {
   private readonly techniqueTpl = viewChild<TemplateRef<{ $implicit: Evaluation }>>('techniqueCell');
   private readonly enduranceTpl = viewChild<TemplateRef<{ $implicit: Evaluation }>>('enduranceCell');
   private readonly psychoTpl = viewChild<TemplateRef<{ $implicit: Evaluation }>>('psychoCell');
+  private readonly actionsTpl = viewChild<TemplateRef<{ $implicit: Evaluation }>>('actionsCell');
+
+  /** Référence au conteneur de toasts (notifications non bloquantes, auto-dismiss). */
+  private readonly errorToast = viewChild<ElementRef<WaToast>>('errorToast');
 
   /**
    * Définition des colonnes, dérivée des templates de cellule. Retourne `[]` tant
@@ -80,7 +96,8 @@ export class EvaluationsComponent {
     const technique = this.techniqueTpl();
     const endurance = this.enduranceTpl();
     const psycho = this.psychoTpl();
-    if (!archetype || !strengthSpeed || !technique || !endurance || !psycho) {
+    const actions = this.actionsTpl();
+    if (!archetype || !strengthSpeed || !technique || !endurance || !psycho || !actions) {
       return [];
     }
     return [
@@ -104,7 +121,8 @@ export class EvaluationsComponent {
       {key: 'strengthSpeed', headerLabel: 'evaluations.fields.strengthSpeed', sortable: true, align: 'center', cellTemplate: strengthSpeed},
       {key: 'technique', headerLabel: 'evaluations.fields.technique', sortable: true, align: 'center', cellTemplate: technique},
       {key: 'endurance', headerLabel: 'evaluations.fields.endurance', sortable: true, align: 'center', cellTemplate: endurance},
-      {key: 'psycho', headerLabel: 'evaluations.fields.psycho', align: 'center', cellTemplate: psycho}
+      {key: 'psycho', headerLabel: 'evaluations.fields.psycho', align: 'center', cellTemplate: psycho},
+      {key: 'actions', headerLabel: 'evaluations.fields.actions', hideable: false, align: 'end', width: '5%', cellTemplate: actions}
     ];
   });
 
@@ -135,5 +153,48 @@ export class EvaluationsComponent {
     this.wizardOpen.set(false);
     // Rafraîchit la liste pour afficher la nouvelle évaluation.
     this.evaluationsResource.reload();
+  }
+
+  // --- Suppression ---
+  protected readonly confirmOpen = signal(false);
+  protected readonly evaluationToDelete = signal<Evaluation | null>(null);
+
+  /** Route l'action choisie dans le menu d'action de la ligne. */
+  protected onRowAction(evaluation: Evaluation, event: Event): void {
+    const detail = (event as CustomEvent<{ item?: Element }>).detail;
+    const action = detail?.item?.getAttribute('value');
+    if (action === 'delete') {
+      this.askDelete(evaluation);
+    }
+  }
+
+  protected askDelete(evaluation: Evaluation): void {
+    this.evaluationToDelete.set(evaluation);
+    this.confirmOpen.set(true);
+  }
+
+  protected cancelDelete(): void {
+    this.confirmOpen.set(false);
+    this.evaluationToDelete.set(null);
+  }
+
+  protected async confirmDelete(): Promise<void> {
+    const evaluation = this.evaluationToDelete();
+    this.confirmOpen.set(false);
+    if (!evaluation) {
+      return;
+    }
+    try {
+      await this.evaluationService.delete(evaluation.evaluationId);
+      this.evaluationsResource.reload();
+    } catch {
+      // Notification non bloquante, fermable et auto-dismiss (5 s par défaut).
+      void this.errorToast()?.nativeElement.create(this.t('evaluations.errors.delete'), {
+        variant: 'danger',
+        icon: 'triangle-exclamation'
+      });
+    } finally {
+      this.evaluationToDelete.set(null);
+    }
   }
 }

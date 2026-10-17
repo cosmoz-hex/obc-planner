@@ -19,4 +19,10 @@ public interface EvaluationService {
      * Crée une évaluation : le bilan synthétique et toutes ses lignes de détail.
      */
     EvaluationCreatedResponse create(EvaluationRequest request);
+
+    /**
+     * Supprime une évaluation ainsi que ses lignes de détail (cascade BD sur
+     * {@code eval_details}).
+     */
+    void delete(Integer evaluationId);
 }

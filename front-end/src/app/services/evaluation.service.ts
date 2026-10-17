@@ -46,4 +46,9 @@ export class EvaluationService {
   create(request: EvaluationRequest): Promise<EvaluationCreatedResponse> {
     return firstValueFrom(this.http.post<EvaluationCreatedResponse>(EVALUATIONS_URL, request));
   }
+
+  /** Supprime une évaluation (détail supprimé en cascade côté serveur). */
+  delete(evaluationId: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${EVALUATIONS_URL}/${evaluationId}`));
+  }
 }
