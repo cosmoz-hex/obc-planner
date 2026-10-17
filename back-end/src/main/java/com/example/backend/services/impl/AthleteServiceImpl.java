@@ -11,6 +11,7 @@ import com.example.backend.exception.BusinessRuleException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repositories.AthleteRepository;
 import com.example.backend.services.apis.AthleteService;
+import com.example.backend.services.mapper.AthleteMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

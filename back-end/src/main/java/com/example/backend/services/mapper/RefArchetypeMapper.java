@@ -1,4 +1,4 @@
-package com.example.backend.services.impl;
+package com.example.backend.services.mapper;
 
 import com.example.backend.dto.RefArchetypeRequest;
 import com.example.backend.dto.RefArchetypeResponse;

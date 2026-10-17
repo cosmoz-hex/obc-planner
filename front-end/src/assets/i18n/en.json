@@ -192,6 +192,12 @@
     "title": "Evaluations",
     "wizard": {
       "title": "Add an evaluation",
+      "athlete": {
+        "title": "Athlete",
+        "athlete": "Athlete",
+        "athletePlaceholder": "Select an athlete",
+        "date": "Evaluation date"
+      },
       "realValue": "Achieved value",
       "exercise": "Exercise",
       "achieved": "Achieved",
@@ -385,8 +391,8 @@
           "musculation": "Accessory work"
         },
         "protocolGoal": {
-          "KEEP": "Maintain",
           "STRENGTH": "Strength",
+          "MID": "Mixed",
           "SPEED": "Speed"
         },
         "musculation": {

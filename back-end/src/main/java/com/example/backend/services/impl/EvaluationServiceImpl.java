@@ -1,9 +1,18 @@
 package com.example.backend.services.impl;
 
+import com.example.backend.dto.EvaluationCreatedResponse;
+import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
+import com.example.backend.entities.Athlete;
+import com.example.backend.entities.EvalDetail;
+import com.example.backend.entities.EvalSummary;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repositories.AthleteRepository;
+import com.example.backend.repositories.EvalDetailRepository;
 import com.example.backend.repositories.EvaluationRepository;
 import com.example.backend.services.apis.EvaluationService;
+import com.example.backend.services.mapper.EvaluationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -37,12 +47,34 @@ public class EvaluationServiceImpl implements EvaluationService {
     private static final int MAX_PAGE_SIZE = 100;
 
     private final EvaluationRepository evaluationRepository;
+    private final EvalDetailRepository evalDetailRepository;
+    private final AthleteRepository athleteRepository;
+    private final EvaluationMapper evaluationMapper;
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<EvaluationResponse> findAll(Pageable pageable) {
         Page<EvaluationResponse> page = evaluationRepository.findAllProjected(sanitizeSort(pageable));
         return PageResponse.from(page);
+    }
+
+    @Override
+    @Transactional
+    public EvaluationCreatedResponse create(EvaluationRequest request) {
+        Athlete athlete = athleteRepository.findById(request.athleteId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Athlète introuvable : " + request.athleteId()));
+
+        EvalSummary summary = evaluationRepository.save(evaluationMapper.toSummary(request, athlete));
+
+        if (request.details() != null && !request.details().isEmpty()) {
+            List<EvalDetail> details = request.details().stream()
+                    .map(detail -> evaluationMapper.toDetail(detail, summary))
+                    .toList();
+            evalDetailRepository.saveAll(details);
+        }
+
+        return new EvaluationCreatedResponse(summary.getEvaluationId());
     }
 
     /**

@@ -1,19 +1,26 @@
 package com.example.backend.controllers;
 
+import com.example.backend.dto.EvaluationCreatedResponse;
+import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
 import com.example.backend.services.apis.EvaluationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * API REST de consultation des évaluations (lecture seule). Pagination et tri
- * sont gérés côté serveur via {@link Pageable} ; tri par défaut : date
- * d'évaluation décroissante.
+ * API REST des évaluations. La liste est paginée et triée côté serveur via
+ * {@link Pageable} (tri par défaut : date d'évaluation décroissante) ; la
+ * création persiste le bilan et son détail.
  */
 @RestController
 @RequestMapping("/evaluations")
@@ -35,5 +42,12 @@ public class EvaluationController {
             Pageable pageable) {
         Pageable effective = (size == null || size == 0) ? Pageable.unpaged(pageable.getSort()) : pageable;
         return evaluationService.findAll(effective);
+    }
+
+    /** Crée une évaluation (bilan synthétique + détail des mesures). */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public EvaluationCreatedResponse create(@Valid @RequestBody EvaluationRequest request) {
+        return evaluationService.create(request);
     }
 }

@@ -27,10 +27,6 @@ import java.time.LocalDate;
 /**
  * Bilan synthétique d'une évaluation athlète, mappé sur la table {@code eval_summaries}.
  *
- * <p>Seules les colonnes exploitées par les fonctionnalités actuelles sont mappées :
- * l'identité de l'évaluation, l'athlète évalué, la date, les profils résultants
- * (archétype, force-vitesse, technique, endurance) et les axes psychologiques.
- * Le reste des colonnes du bilan relève d'autres fonctionnalités.</p>
  */
 @Entity
 @Table(name = "eval_summaries")
@@ -68,6 +64,35 @@ public class EvalSummary {
     @Enumerated(EnumType.STRING)
     @Column(name = "endurance", length = 10)
     private Endurance endurance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "squat", length = 10)
+    private StrengthSpeed squat;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pull", length = 10)
+    private StrengthSpeed pull;
+
+    @Column(name = "musculation", nullable = false)
+    private Integer musculation = 0;
+
+    @Column(name = "snatch_strength", length = 100)
+    private String snatchStrength;
+
+    @Column(name = "snatch_weakness", length = 100)
+    private String snatchWeakness;
+
+    @Column(name = "clean_strength", length = 100)
+    private String cleanStrength;
+
+    @Column(name = "clean_weakness", length = 100)
+    private String cleanWeakness;
+
+    @Column(name = "jerk_strength", length = 100)
+    private String jerkStrength;
+
+    @Column(name = "jerk_weakness", length = 100)
+    private String jerkWeakness;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "psycho_strength", length = 100)

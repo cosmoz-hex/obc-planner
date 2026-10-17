@@ -6,35 +6,39 @@
 
   <app-wizard (validate)="onValidate()">
 
-    <app-wizard-step [step]="1" [valid]="speed.valid()" label="evaluations.wizard.speed.title">
+    <app-wizard-step [step]="1" [valid]="athlete.valid()" label="evaluations.wizard.athlete.title">
+      <app-eval-wizard-athlete #athlete />
+    </app-wizard-step>
+
+    <app-wizard-step [step]="2" [valid]="speed.valid()" label="evaluations.wizard.speed.title">
       <app-eval-wizard-speed #speed />
     </app-wizard-step>
 
-    <app-wizard-step [step]="2" [valid]="strength.valid()" label="evaluations.wizard.strength.title">
+    <app-wizard-step [step]="3" [valid]="strength.valid()" label="evaluations.wizard.strength.title">
       <app-eval-wizard-strength #strength />
     </app-wizard-step>
 
-    <app-wizard-step [step]="3" [valid]="snatch.valid()" label="evaluations.wizard.snatch.title">
+    <app-wizard-step [step]="4" [valid]="snatch.valid()" label="evaluations.wizard.snatch.title">
       <app-eval-wizard-snatch #snatch />
     </app-wizard-step>
 
-    <app-wizard-step [step]="4" [valid]="clean.valid()" label="evaluations.wizard.clean.title">
+    <app-wizard-step [step]="5" [valid]="clean.valid()" label="evaluations.wizard.clean.title">
       <app-eval-wizard-clean #clean />
     </app-wizard-step>
 
-    <app-wizard-step [step]="5" [valid]="jerk.valid()" label="evaluations.wizard.jerk.title">
+    <app-wizard-step [step]="6" [valid]="jerk.valid()" label="evaluations.wizard.jerk.title">
       <app-eval-wizard-jerk #jerk />
     </app-wizard-step>
 
-    <app-wizard-step [step]="6" [valid]="squat.valid()" label="evaluations.wizard.squat.title">
+    <app-wizard-step [step]="7" [valid]="squat.valid()" label="evaluations.wizard.squat.title">
       <app-eval-wizard-squat #squat />
     </app-wizard-step>
 
-    <app-wizard-step [step]="7" [valid]="competition.valid()" label="evaluations.wizard.competition.title">
+    <app-wizard-step [step]="8" [valid]="competition.valid()" label="evaluations.wizard.competition.title">
       <app-eval-wizard-competition #competition />
     </app-wizard-step>
 
-    <app-wizard-step [step]="8" [valid]="endurance.valid()" label="evaluations.wizard.endurance.title">
+    <app-wizard-step [step]="9" [valid]="endurance.valid()" label="evaluations.wizard.endurance.title">
       <app-eval-wizard-endurance #endurance />
     </app-wizard-step>
 

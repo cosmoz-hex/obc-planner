@@ -1,10 +1,12 @@
 package com.example.backend.services.apis;
 
+import com.example.backend.dto.EvaluationCreatedResponse;
+import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
 import org.springframework.data.domain.Pageable;
 
-/** Opérations de lecture sur les évaluations. */
+/** Opérations sur les évaluations. */
 public interface EvaluationService {
 
     /**
@@ -12,4 +14,9 @@ public interface EvaluationService {
      * évaluation). Tri par défaut : date d'évaluation décroissante.
      */
     PageResponse<EvaluationResponse> findAll(Pageable pageable);
+
+    /**
+     * Crée une évaluation : le bilan synthétique et toutes ses lignes de détail.
+     */
+    EvaluationCreatedResponse create(EvaluationRequest request);
 }

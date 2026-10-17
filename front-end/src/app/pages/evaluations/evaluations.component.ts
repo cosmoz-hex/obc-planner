@@ -15,6 +15,7 @@ import {EvaluationService} from '../../services/evaluation.service';
 import {LocalizedDatePipe} from '../../pipes/localized-date.pipe';
 import {EvaluationWizardDialogComponent} from './wizard/dialog/evaluation-wizard-dialog.component';
 import {Evaluation} from '../../models/evaluation.model';
+import {EvaluationRequest} from '../../models/evaluation-request.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/button/button.js';
@@ -129,9 +130,10 @@ export class EvaluationsComponent {
     this.wizardOpen.set(false);
   }
 
-  protected onWizardValidated(): void {
-    // Placeholder : la persistance sera branchée quand les étapes porteront un
-    // vrai formulaire. Pour l'instant on ferme simplement la modale.
+  protected async onWizardValidated(request: EvaluationRequest): Promise<void> {
+    await this.evaluationService.create(request);
     this.wizardOpen.set(false);
+    // Rafraîchit la liste pour afficher la nouvelle évaluation.
+    this.evaluationsResource.reload();
   }
 }

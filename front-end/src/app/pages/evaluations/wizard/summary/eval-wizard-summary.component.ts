@@ -92,7 +92,7 @@ export class EvalWizardSummaryComponent {
   protected readonly techniqueOptions: readonly Technique[] = ['LOW', 'MID', 'HIGH'];
   protected readonly enduranceOptions: readonly Endurance[] = ['LOW', 'MID', 'HIGH'];
   protected readonly archetypeOptions: readonly Archetype[] = ['MID', 'ROUGH', 'TECH', 'CYCLE', 'LEARN'];
-  protected readonly protocolOptions: readonly ProtocolGoal[] = ['KEEP', 'STRENGTH', 'SPEED'];
+  protected readonly protocolOptions: readonly ProtocolGoal[] = ['STRENGTH', 'MID', 'SPEED'];
   protected readonly psychoStrengthOptions: readonly PsychoStrength[] =
     ['CALM', 'CONFIDENT', 'MOTIVATED', 'FOCUSED', 'COMPETITIVE', 'CHALLENGER', 'INDEPENDANT'];
   protected readonly psychoWeaknessOptions: readonly PsychoWeakness[] =
@@ -160,7 +160,7 @@ export class EvalWizardSummaryComponent {
     if (squatSum < -2) return 'STRENGTH';
     const speedNoHighPull = sumResults(this.speed(), (r) => r.exerciceCode !== 'eval.strength.speed.high-pull-80');
     if (squatSum > -2 && speedNoHighPull < 0) return 'SPEED';
-    return 'KEEP';
+    return 'MID';
   });
 
   /** Tirage : <-2 Force ; sinon si Σpull>-2 ET vitesse(tirage haut)<0 Vitesse ; sinon Maintien. */
@@ -171,7 +171,7 @@ export class EvalWizardSummaryComponent {
     const highPull = this.speed().find((r) => r.exerciceCode === 'eval.strength.speed.high-pull-80');
     const highPullResult = highPull?.result ?? 0;
     if (pullSum > -2 && highPullResult < 0) return 'SPEED';
-    return 'KEEP';
+    return 'MID';
   });
 
   /**

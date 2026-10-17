@@ -192,6 +192,12 @@
     "title": "Evaluations",
     "wizard": {
       "title": "Ajouter une évaluation",
+      "athlete": {
+        "title": "Athlète",
+        "athlete": "Athlète",
+        "athletePlaceholder": "Sélectionner un athlète",
+        "date": "Date d'évaluation"
+      },
       "realValue": "Valeur réalisée",
       "exercise": "Exercice",
       "achieved": "Réalisé",
@@ -385,8 +391,8 @@
           "musculation": "Musculation"
         },
         "protocolGoal": {
-          "KEEP": "Maintien",
           "STRENGTH": "Force",
+          "MID": "Mixte",
           "SPEED": "Vitesse"
         },
         "musculation": {

@@ -1,0 +1,18 @@
+<section class="flex flex-row items-start gap-1 py-1">
+
+  <wa-select size="s"
+             [attr.label]="'evaluations.wizard.athlete.athlete' | translate"
+             [attr.placeholder]="'evaluations.wizard.athlete.athletePlaceholder' | translate"
+             [value]="str(athleteId())"
+             (change)="onAthlete($event)">
+    @for (a of athletes(); track a.athleteId) {
+      <wa-option [attr.value]="str(a.athleteId)">{{ a.lastName }} {{ a.firstName }}</wa-option>
+    }
+  </wa-select>
+
+  <wa-input size="s" type="date"
+            [attr.label]="'evaluations.wizard.athlete.date' | translate"
+            [value]="evaluationDate()"
+            (input)="onDate($event)"></wa-input>
+
+</section>

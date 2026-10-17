@@ -27,7 +27,7 @@
 <app-evaluation-wizard-dialog
 	[open]="wizardOpen()"
 	(close)="closeWizard()"
-	(validated)="onWizardValidated()">
+	(validated)="onWizardValidated($event)">
 </app-evaluation-wizard-dialog>
 
 <!-- Templates de cellule -->

@@ -46,6 +46,7 @@ Base URL: `/api`
 | `PUT` | `/ref-archetypes/{id}` | `RefArchetypeController` | Modification (unicité de la combinaison contrôlée) |
 | `DELETE` | `/ref-archetypes/{id}` | `RefArchetypeController` | Suppression d'un archétype de référence |
 | `GET` | `/evaluations` | `EvaluationController` | Liste paginée et triée des évaluations (lecture seule, une ligne par évaluation ; tri par défaut date décroissante). `size=0` désactive la pagination |
+| `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
 
 ---
 
@@ -163,6 +164,7 @@ Bilan synthétique d'une évaluation athlète.
 | `endurance` | `VARCHAR(10)` | — | Profil endurance : `LOW`, `MID`, `HIGH` |
 | `squat` | `VARCHAR(10)` | — | Profil squat : `STRENGTH`, `MID`, `SPEED` |
 | `pull` | `VARCHAR(10)` | — | Profil tirage : `STRENGTH`, `MID`, `SPEED` |
+| `musculation` | `INTEGER` | NOT NULL, DEFAULT 0 | Bitmask des orientations de musculation : `GENERAL` (1), `LEGS` (2), `POSTERIOR_CHAIN` (4), `UPPER_BODY` (8) |
 | `snatch_strength` | `VARCHAR(100)` | — | Point fort à l'arraché |
 | `snatch_weakness` | `VARCHAR(100)` | — | Point faible à l'arraché |
 | `clean_strength` | `VARCHAR(100)` | — | Point fort à l'épaulé |

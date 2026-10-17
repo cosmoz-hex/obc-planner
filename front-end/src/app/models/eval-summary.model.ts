@@ -5,10 +5,10 @@ import {PsychoStrength, PsychoWeakness} from './evaluation.model';
 export type StrengthSpeedProfile = StrengthSpeed;
 
 /** Objectif d'un protocole squat / tirage dans la synthèse. */
-export type ProtocolGoal = 'KEEP' | 'STRENGTH' | 'SPEED';
+export type ProtocolGoal = 'STRENGTH' | 'MID' | 'SPEED';
 
-/** Valeurs possibles du protocole (alignées sur `ref_squats.goal` / `ref_pulls.goal`). */
-export const PROTOCOL_GOALS: readonly ProtocolGoal[] = ['KEEP', 'STRENGTH', 'SPEED'];
+/** Valeurs possibles du profil squat / tirage (alignées sur `eval_summaries.squat` / `pull`). */
+export const PROTOCOL_GOALS: readonly ProtocolGoal[] = ['STRENGTH', 'MID', 'SPEED'];
 
 /**
  * Drapeaux de musculation (bitmask stocké). Chaque orientation est une
