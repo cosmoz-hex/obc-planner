@@ -1,27 +1,28 @@
 # Agents OBC Planner
 
 Agents Kiro spécialisés (`.kiro/agents/{nom}.json`) qui composent les [skills](../skills/README.md) du projet.
-Chaque agent est **autonome** (invocable seul) et **coordonnable** par l'`orchestrator` dans une pipeline de dev complète.
+Chaque agent est **autonome** (invocable seul) et **coordonnable** par l'`orchestrator`, qui les invoque comme **subagents** (contexte isolé) dans une pipeline de dev complète.
 
 ## Principes communs
 
-- **Format** : fichier JSON conforme au schéma Kiro (`name`, `description`, `prompt`, `tools`, `allowedTools`, `resources`). Le nom de fichier = nom de l'agent. Validé via `kiro-cli agent validate --path .kiro/agents/<nom>.json`.
+- **Format** : fichier JSON conforme au schéma Kiro v3 (`name`, `description`, `prompt`, `tools`, `resources`, `permissions`). Le nom de fichier = nom de l'agent. Les droits sont exprimés en **capabilities** dans `permissions.rules` (`fs_read`, `fs_write`, `shell`, `skill`, `subagent`…), et non plus via l'ancien `allowedTools`.
 - **Ressources** :
   - steering en `file://.kiro/steering/**/*.md` → **toujours** en contexte (règles projet) ;
+  - spec en `file://.kiro/specs/**/*.md` → contrat partagé entre subagents (requirements/design/tasks) ;
   - skills en `skill://.kiro/skills/<nom>/SKILL.md` → métadonnées chargées au démarrage, **contenu chargé à la demande** (économie de crédits).
 - **Parcimonie (crédits)** : chaque `prompt` contient un tableau « skill → condition de lecture » et la consigne de n'invoquer QUE les skills strictement nécessaires. Un agent « appelle un skill » en lisant son `SKILL.md` et en suivant sa procédure.
-- **Outils** : tous les outils sont disponibles (`tools`) ; seuls les outils de lecture sont auto-approuvés (`allowedTools`), les écritures/commandes demandent confirmation.
+- **Outils & droits** : les écritures/commandes sont soumises à `permissions` (lecture auto-approuvée, `shell` en `ask`, écriture de l'analyste restreinte à `.kiro/specs/**`).
 - **Langue** : français.
 
 ## Catalogue des agents
 
 | Agent | Mission | Skills mobilisés |
 |---|---|---|
-| [`analyste`](analyste.json) | Clarifier le besoin, cartographier l'existant, définir les axes de développement (aucun code). | `need-analyzer`, `code-explorer`, `dev-planner` |
+| [`analyste`](analyste.json) | Clarifier le besoin, cartographier l'existant, produire la spec (`requirements.md`/`design.md`/`tasks.md`, aucun code). | `need-analyzer`, `code-explorer`, `dev-planner` |
 | [`developpeur`](developpeur.json) | Implémenter/corriger de bout en bout (back, front, migration), APIs, UI, SQL ; capitaliser les leçons. | `feature-builder`, `api-builder`, `ui-generator`, `sql-writer`, `bug-fixer`, `learning-logger` |
 | [`reviewer`](reviewer.json) | Revue qualité en lecture seule : diff, régressions, sécurité, performance, accessibilité, conventions. | `git-diff`, `code-review` |
 | [`documentaliste`](documentaliste.json) | Synchroniser la doc avec le code, rédiger le message de commit ; documenter a posteriori si besoin. | `git-diff`, `code-explorer`, `doc-writer`, `commit-message` |
-| [`orchestrator`](orchestrator.json) | Chef d'orchestre : fait dialoguer les agents pour réaliser un besoin, en élaguant le parcours. | tous (`skill://.kiro/skills/*/SKILL.md`) |
+| [`orchestrator`](orchestrator.json) | Chef d'orchestre : délègue à chaque subagent (analyste/développeur/reviewer/documentaliste) pour réaliser un besoin, en élaguant le parcours. | tous (`skill://.kiro/skills/*/SKILL.md`) |
 
 ## Utilisation
 
@@ -38,13 +39,13 @@ Basculer vers un agent dans une session Kiro :
 
 ## Pipeline de développement (via `orchestrator`)
 
-Pipeline **nominale**, systématiquement **élaguée** selon l'ampleur du changement :
+L'`orchestrator` **délègue** chaque étape à un subagent (contexte isolé), qui communiquent via les **fichiers de spec** sous `.kiro/specs/<feature>/`. Pipeline **nominale**, systématiquement **élaguée** selon l'ampleur du changement :
 
 ```
-Analyste → Développeur → Reviewer → Documentaliste
+Analyste (produit la spec) → [validation humaine] → Développeur (lot par lot) → Reviewer → Documentaliste
 ```
 
-L'orchestrator saute toute étape non indispensable et le justifie. Heuristiques de périmètre :
+Le développement se fait **lot par lot** : chaque lot de `tasks.md` est une invocation distincte du subagent `developpeur`. L'orchestrator saute toute étape non indispensable et le justifie. Heuristiques de périmètre :
 
 | Nature du changement | Parcours typique (élagué) |
 |---|---|

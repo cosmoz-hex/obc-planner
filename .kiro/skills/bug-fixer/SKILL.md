@@ -1,7 +1,6 @@
 ---
 name: bug-fixer
 description: Diagnostiquer et corriger un bug dans OBC Planner en traitant la cause racine, pas le symptôme. À utiliser face à un comportement incorrect (backend, frontend ou données), pour reproduire, localiser, corriger de façon minimale et vérifier la non-régression.
-allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
 # Corriger un bug

@@ -1,8 +1,8 @@
 ---
 title: Development Practices
 description: "PostgreSQL 17+ development practices"
-inclusionMode: "fileMatch"
-fileMatch:
+inclusion: fileMatch
+fileMatchPattern:
   - "**/*.sql"
   - "**/*.java"
 ---

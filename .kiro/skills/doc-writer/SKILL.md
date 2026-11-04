@@ -1,7 +1,6 @@
 ---
 name: doc-writer
 description: Créer ou mettre à jour la documentation d'OBC Planner (steering architecture.md, README, docs) en cohérence avec un changement de code. À utiliser après une évolution pour synchroniser la documentation avec l'état réel du projet.
-allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
 # Mettre à jour la documentation

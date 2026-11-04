@@ -1,7 +1,6 @@
 ---
 name: dev-pipeline
 description: Pipeline complète de développement automatisé d'OBC Planner à partir d'une demande fonctionnelle en langage naturel. Orchestre les 4 rôles (Analyste, Développeur, Reviewer, Documentaliste) et leurs skills, avec traçabilité systématique, validation humaine du plan et communication bidirectionnelle entre agents. La fusion/commit reste manuelle.
-allowed-tools: read, write, grep, glob, code, shell, subagent
 ---
 
 # Skill : Pipeline de Développement (Multi-Agents OBC Planner)
@@ -22,16 +21,16 @@ Ce skill est la **procédure détaillée** appliquée par l'agent `orchestrator`
 
 ## Architecture multi-agents
 
-La pipeline mappe **4 rôles** sur les agents réels du projet, orchestrés via l'outil `subagent`. Les rôles communiquent dans les **deux sens** (boucles de feedback).
+La pipeline mappe **4 rôles** sur les agents réels du projet, chacun exécuté comme un **subagent au contexte isolé** invoqué via l'outil `subagent`. Les subagents ne partagent pas la conversation : ils communiquent par les **fichiers de spec** écrits sous `.kiro/specs/<feature>/` (et le code du workspace). Les rôles communiquent dans les **deux sens** (boucles de feedback) orchestrées par l'orchestrator.
 
-| Rôle (agent `subagent`) | Mission | Séquence de skills |
-|---|---|---|
-| **`analyste`** | Clarifier le besoin, cartographier l'existant, définir les axes de dev (aucun code) | `need-analyzer` → `code-explorer` → `dev-planner` |
-| **`developpeur`** | Implémenter/corriger, capitaliser | `feature-builder` (`sql-writer` + `api-builder` + `ui-generator`) **ou** `bug-fixer` → `learning-logger` |
-| **`reviewer`** | Revue qualité en lecture seule | `git-diff` → `code-review` |
-| **`documentaliste`** | Synchroniser la doc, rédiger le message de commit | `git-diff` → `code-explorer` → `doc-writer` → `commit-message` |
+| Rôle (subagent) | Mission | Séquence de skills | Entrée / Sortie (spec) |
+|---|---|---|---|
+| **`analyste`** | Clarifier le besoin, cartographier l'existant, produire la spec (aucun code) | `need-analyzer` → `code-explorer` → `dev-planner` | écrit `requirements.md`, `design.md`, `tasks.md` |
+| **`developpeur`** | Implémenter/corriger lot par lot, capitaliser | `feature-builder` (`sql-writer` + `api-builder` + `ui-generator`) **ou** `bug-fixer` → `learning-logger` | lit la spec, coche `tasks.md` |
+| **`reviewer`** | Revue qualité en lecture seule | `git-diff` → `code-review` | lit `requirements.md`/`design.md` |
+| **`documentaliste`** | Synchroniser la doc, rédiger le message de commit | `git-diff` → `code-explorer` → `doc-writer` → `commit-message` | lit la spec |
 
-> Les valeurs `role` de l'outil `subagent` sont exactement : `analyste`, `developpeur`, `reviewer`, `documentaliste`.
+> Les valeurs `role` de l'outil `subagent` sont exactement : `analyste`, `developpeur`, `reviewer`, `documentaliste`. Chaque prompt de subagent est **autoportant** : il reçoit le chemin de la spec et le périmètre (ex. lot de `tasks.md`), jamais l'historique de conversation.
 
 ## Règle d'or : traçabilité obligatoire (non négociable)
 
@@ -61,28 +60,28 @@ Adapter le parcours à l'ampleur réelle du changement. N'exécuter un rôle ou 
 
 ## Procédure
 
-### Phase 1 — Analyse (agent : `analyste`)
+### Phase 1 — Analyse & spec (subagent : `analyste`)
 
-Séquence interne du rôle : `need-analyzer` → `code-explorer` → `dev-planner`, chaque skill n'étant lu que s'il est nécessaire (voir parcimonie).
+Séquence interne du rôle : `need-analyzer` → `code-explorer` → `dev-planner`, chaque skill n'étant lu que s'il est nécessaire (voir parcimonie). Livrable = **fichiers de spec écrits sur disque**.
 
 ```
 Stage: analysis
 Role: analyste
-Prompt: "Traite la demande suivante : {demande}. Applique ta séquence need-analyzer → code-explorer → dev-planner selon la parcimonie. Produis des LIVRABLES ÉCRITS : synthèse fonctionnelle (si clarification nécessaire), état des lieux du code impacté, puis axes de développement techniques (fichiers à créer/modifier, couches impactées, migrations, approche). Note en tête chaque skill invoqué."
+Prompt: "Traite la demande suivante : {demande}. Applique ta séquence need-analyzer → code-explorer → dev-planner selon la parcimonie. Écris la spec dans .kiro/specs/<feature>/ : requirements.md (user stories + critères EARS), puis design.md (architecture/impacts) et tasks.md (lots de travail numérotés, tracés aux requirements). Note en tête chaque skill invoqué. Restitue les CHEMINS des fichiers écrits et un résumé."
 ```
 
-**Communication bidirectionnelle (Analyste → Utilisateur)** : si une zone d'ombre **bloquante** subsiste, l'analyste NE transmet rien au développeur ; il pose des questions ciblées à l'utilisateur et **suspend** la pipeline. Aucune hypothèse silencieuse.
+**Communication bidirectionnelle (Analyste → Utilisateur)** : si une zone d'ombre **bloquante** subsiste, l'analyste N'écrit PAS la spec ; il pose des questions ciblées à l'utilisateur et **suspend** la pipeline. Aucune hypothèse silencieuse.
 
-**Point de contrôle humain** : présenter les axes de développement à l'utilisateur et attendre validation.
+**Point de contrôle humain** : présenter les fichiers de spec (requirements/design/tasks) à l'utilisateur et attendre validation.
 - **Validé** → Phase 2.
-- **Partiellement validé** → intégrer les corrections dans les axes avant la Phase 2.
-- **Rejeté** → demander les points à corriger, relancer l'analyse (max 2 itérations). Au-delà, proposer à l'utilisateur de fournir ses propres axes ou d'abandonner.
+- **Partiellement validé** → l'analyste corrige la spec avant la Phase 2.
+- **Rejeté** → demander les points à corriger, relancer l'analyse (max 2 itérations). Au-delà, proposer à l'utilisateur de fournir sa propre spec ou d'abandonner.
 
-> Si l'analyste dispose de tous les éléments et que les axes sont validés, il peut transmettre directement au développeur — à condition que chaque livrable soit écrit (traçabilité).
+> Si l'analyste dispose de tous les éléments et que la spec est validée, on passe au développement — la spec sur disque EST la transmission (pas besoin de recopier les axes dans le prompt).
 
-### Phase 2 — Développement (agent : `developpeur`)
+### Phase 2 — Développement par lot (subagent : `developpeur`)
 
-Après validation des axes. Le développeur choisit sa séquence selon la nature :
+Après validation de la spec. Le développement se fait **lot par lot** : chaque lot de `tasks.md` est une **invocation distincte** du subagent `developpeur`, exécutée dans l'ordre des dépendances. Le développeur choisit sa séquence de skills selon la nature :
 - **Évolution** : `feature-builder` qui délègue aux skills de couche impactés (`sql-writer` + `api-builder` + `ui-generator`).
 - **Correctif** : `bug-fixer` (cause racine, correction minimale).
 - Puis `learning-logger` **si** une leçon est à consigner.
@@ -91,8 +90,10 @@ Après validation des axes. Le développeur choisit sa séquence selon la nature
 Stage: development
 Role: developpeur
 Depends_on: analysis
-Prompt: "Implémente le besoin {demande} selon ces axes de développement validés : {axes_valides}. Applique feature-builder (sql-writer + api-builder + ui-generator selon les couches) OU bug-fixer selon la nature. Respecte les conventions .kiro/steering/*-convention.md et évite les pièges de learning.md. Vérifie la compilation back (mvn -q -f back-end/pom.xml compile) et le build front (npm --prefix front-end run build). Ne crée aucun commit ni push. Note en tête chaque skill invoqué. Produis un compte-rendu écrit : fichiers créés/modifiés + résultat build/compilation."
+Prompt: "Implémente le besoin décrit dans .kiro/specs/<feature>/. Lis requirements.md, design.md et tasks.md, puis traite UNIQUEMENT le {lot} (ex. 'Lot 2 — Backend'). Applique feature-builder (sql-writer + api-builder + ui-generator selon les couches) OU bug-fixer selon la nature. Respecte .kiro/steering/*-convention.md et évite les pièges de learning.md. Coche les tâches réalisées dans tasks.md. Vérifie la compilation back (mvn -q -f back-end/pom.xml compile) et le build front (npm --prefix front-end run build). Ne crée aucun commit ni push. Note en tête chaque skill invoqué. Produis un compte-rendu écrit : fichiers créés/modifiés + résultat build/compilation."
 ```
+
+Répéter cette invocation pour chaque lot, dans l'ordre des dépendances, en attendant un build vert avant de passer au suivant.
 
 **Communication bidirectionnelle (Développeur → Analyste/Utilisateur)** : si les axes sont incomplets, contradictoires ou révèlent un désaccord de conception, le développeur remonte la question avant de coder — pas d'hypothèse silencieuse.
 

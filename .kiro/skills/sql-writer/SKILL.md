@@ -5,7 +5,6 @@ description: "
     en respectant le nommage, la sécurité anti-injection, l'indexation et la performance. 
     À utiliser pour concevoir une requête, diagnostiquer une lenteur ou écrire une migration.
 "
-allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
 # Rédiger / optimiser une requête SQL

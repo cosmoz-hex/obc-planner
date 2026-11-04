@@ -1,8 +1,8 @@
 ---
 title: Development Practices - Accessibility
 description: "Accessibility development practices for Angular 22+"
-inclusionMode: "fileMatch"
-fileMatch:
+inclusion: fileMatch
+fileMatchPattern:
   - "**/*.ts"
   - "**/*.html"
   - "**/*.css"

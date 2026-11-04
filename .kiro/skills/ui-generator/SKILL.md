@@ -4,7 +4,6 @@ description: "
     Créer un composant ou une page Angular 20 dans OBC Planner (standalone, Signals, WebAwesome, Tailwind, i18n, accessibilité). 
     À utiliser quand le besoin porte sur une interface : nouvel écran, composant réutilisable, formulaire, tableau, modale.
 "
-allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
 # Créer un composant UI

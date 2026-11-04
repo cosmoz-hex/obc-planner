@@ -1,8 +1,8 @@
 ---
 title: Development Practices - Backend
 description: "Backend development practices for Java / Spring Boot 4.1+"
-inclusionMode: "fileMatch"
-fileMatch:
+inclusion: fileMatch
+fileMatchPattern:
   - "**/*.java"
 ---
 

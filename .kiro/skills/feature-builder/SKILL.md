@@ -1,5 +1,5 @@
 ---
-name: development
+name: feature-builder
 description: Implémentation de code à partir d'un plan technique. Développe, teste, commite et pousse. Utilisé par l'agent Kiro Developer.
 ---
 

@@ -1,7 +1,6 @@
 ---
 name: learning-logger
 description: Ajouter une leçon apprise dans .kiro/steering/learning.md quand une correction, une erreur de jugement ou un écart aux bonnes pratiques a été identifié dans OBC Planner. À utiliser après une correction demandée par l'utilisateur pour ne jamais reproduire la même erreur.
-allowed-tools: Read, Edit, Write
 ---
 
 # Consigner un apprentissage

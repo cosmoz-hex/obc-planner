@@ -5,7 +5,6 @@ description: "
     les DTOs records, la sécurité JWT et la gestion d'erreurs centralisée. 
     À utiliser quand le besoin porte spécifiquement sur l'exposition ou la modification d'un endpoint backend.
 "
-allowed-tools: Read, Write, Edit, Grep, Glob, CodeIntelligence, Shell
 ---
 
 # Mettre en place une API

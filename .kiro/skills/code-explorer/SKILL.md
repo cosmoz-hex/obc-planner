@@ -1,7 +1,6 @@
 ---
 name: code-explorer
 description: Cartographier l'état actuel du code, des données et des fonctionnalités d'OBC Planner avant toute évolution. À utiliser quand on doit comprendre comment une fonctionnalité, un module, une table ou une API est aujourd'hui implémentée, pour produire un état des lieux factuel et sourcé.
-allowed-tools: Read, Grep, Glob, CodeIntelligence
 ---
 
 # Analyser l'existant

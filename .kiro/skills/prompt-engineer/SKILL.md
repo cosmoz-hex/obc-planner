@@ -6,7 +6,6 @@ description: "
     À utiliser quand on veut « fabriquer un beau prompt » à partir d'une intention floue : 
     le skill pose autant de questions que nécessaire, puis fige un prompt final prêt à copier-coller.
 "
-allowed-tools: Read, Grep, Glob
 ---
 
 # Fabriquer un prompt

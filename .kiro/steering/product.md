@@ -1,3 +1,8 @@
+---
+title: Functional Product Description
+inclusion: always
+---
+
 # Functional Product Description — OBC Planner
 
 > Cette application est à destination des coachs et a pour objectif de produire des plans d'entrainement d'haltérophilie 100% personnalisés

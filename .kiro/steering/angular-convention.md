@@ -1,8 +1,8 @@
 ---
 title: Development Practices - Frontend
 description: "Frontend development practices for Angular 22+"
-inclusionMode: "fileMatch"
-fileMatch:
+inclusion: fileMatch
+fileMatchPattern:
   - "**/*.ts"
   - "**/*.html"
   - "**/*.css"

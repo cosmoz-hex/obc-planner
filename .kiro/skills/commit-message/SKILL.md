@@ -4,7 +4,6 @@ description: "
     Rédiger un message de commit conforme à la convention OBC Planner à partir d'un changement de code (diff, staged, ou PR). 
     Sortie silencieuse : uniquement le bloc de message, sans analyse ni commentaire.
 "
-allowed-tools: Read, Grep, Glob, Shell
 ---
 
 # Rédiger un message de commit

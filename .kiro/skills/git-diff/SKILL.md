@@ -1,7 +1,6 @@
 ---
 name: git-diff
 description: Analyser un ensemble de modifications de code (git diff, branche ou PR) dans OBC Planner pour en comprendre la portée avant toute revue détaillée. À utiliser comme première étape de review pour cartographier ce qui change et cibler les contrôles à mener.
-allowed-tools: Read, Grep, Glob, CodeIntelligence, Shell
 ---
 
 # Analyser un diff
