@@ -28,14 +28,6 @@ export const routes: Routes = [
 						loadComponent: () => import('./pages/referentiel/archetypes/archetypes.component').then(m => m.ArchetypesComponent),
 						data: {title: 'pages.referentiel.title'}
 					}, {
-						path: 'correctifs',
-						loadComponent: () => import('./pages/referentiel/correctifs/correctifs.component').then(m => m.CorrectifsComponent),
-						data: {title: 'pages.referentiel.title'}
-					}, {
-						path: 'exercices',
-						loadComponent: () => import('./pages/referentiel/exercices/exercices.component').then(m => m.ExercicesComponent),
-						data: {title: 'pages.referentiel.title'}
-					}, {
 						path: 'trame-generale',
 						loadComponent: () => import('./pages/referentiel/trame-generale/trame-generale.component').then(m => m.TrameGeneraleComponent),
 						data: {title: 'pages.referentiel.title'}

@@ -76,23 +76,14 @@ public class EvalSummary {
     @Column(name = "musculation", nullable = false)
     private Integer musculation = 0;
 
-    @Column(name = "snatch_strength", length = 100)
-    private String snatchStrength;
+    @Column(name = "snatch", length = 100)
+    private String snatch;
 
-    @Column(name = "snatch_weakness", length = 100)
-    private String snatchWeakness;
+    @Column(name = "clean", length = 100)
+    private String clean;
 
-    @Column(name = "clean_strength", length = 100)
-    private String cleanStrength;
-
-    @Column(name = "clean_weakness", length = 100)
-    private String cleanWeakness;
-
-    @Column(name = "jerk_strength", length = 100)
-    private String jerkStrength;
-
-    @Column(name = "jerk_weakness", length = 100)
-    private String jerkWeakness;
+    @Column(name = "jerk", length = 100)
+    private String jerk;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "psycho_strength", length = 100)

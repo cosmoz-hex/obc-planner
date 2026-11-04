@@ -44,12 +44,9 @@ public class EvaluationMapper {
         summary.setSquat(request.squat());
         summary.setPull(request.pull());
         summary.setMusculation(request.musculation() != null ? request.musculation() : 0);
-        summary.setSnatchStrength(request.snatchStrength());
-        summary.setSnatchWeakness(request.snatchWeakness());
-        summary.setCleanStrength(request.cleanStrength());
-        summary.setCleanWeakness(request.cleanWeakness());
-        summary.setJerkStrength(request.jerkStrength());
-        summary.setJerkWeakness(request.jerkWeakness());
+        summary.setSnatch(request.snatch());
+        summary.setClean(request.clean());
+        summary.setJerk(request.jerk());
         summary.setPsychoStrength(request.psychoStrength());
         summary.setPsychoWeakness(request.psychoWeakness());
     }
@@ -78,12 +75,9 @@ public class EvaluationMapper {
                 summary.getSquat(),
                 summary.getPull(),
                 summary.getMusculation(),
-                summary.getSnatchStrength(),
-                summary.getSnatchWeakness(),
-                summary.getCleanStrength(),
-                summary.getCleanWeakness(),
-                summary.getJerkStrength(),
-                summary.getJerkWeakness(),
+                summary.getSnatch(),
+                summary.getClean(),
+                summary.getJerk(),
                 summary.getPsychoStrength(),
                 summary.getPsychoWeakness(),
                 details.stream().map(this::toDetailResponse).toList()

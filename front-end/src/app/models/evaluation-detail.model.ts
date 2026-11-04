@@ -20,12 +20,10 @@ export interface EvaluationDetail {
   squat: ProtocolGoal | null;
   pull: ProtocolGoal | null;
   musculation: number;
-  snatchStrength: string | null;
-  snatchWeakness: string | null;
-  cleanStrength: string | null;
-  cleanWeakness: string | null;
-  jerkStrength: string | null;
-  jerkWeakness: string | null;
+  /** Point faible technique par mouvement (EXT / CATCH / PATH). */
+  snatch: string | null;
+  clean: string | null;
+  jerk: string | null;
   psychoStrength: PsychoStrength | null;
   psychoWeakness: PsychoWeakness | null;
   details: EvalDetail[];

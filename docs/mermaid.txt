@@ -9,12 +9,7 @@ classDiagram
     PROG <-- PROG_WEEK
     PROG_WEEK <-- PROG_TRAINING
 
-    EXERCICE <-- PROG_TRAINING
-    CORRECTION --> EXERCICE
-
-    REF_TIMELINE <-- REF_PLANNING
-    REF_TIMELINE <-- REF_SQUAT
-    REF_TIMELINE <-- REF_PULL
+    REF_EXERCICE <-- REF_EXERCICE_SET
 
     class ATHLETE {
         # ATHLETE_ID
@@ -35,12 +30,9 @@ classDiagram
         ENDURANCE
         SQUAT
         PULL
-        SNATCH_STRENGTH
-        SNATCH_WEAKNESS
-        CLEAN_STRENGTH
-        CLEAN_WEAKNESS
-        JERK_STRENGTH
-        JERK_WEAKNESS
+        SNATCH
+        CLEAN
+        JERK
         PSYCHO_STRENGTH
         PSYCHO_WEAKNESS
     }
@@ -51,18 +43,6 @@ classDiagram
         EXERCICE_CODE
         REAL_VALUE
         RESULT
-    }
-    class EXERCICE {
-        # EXERCICE_ID
-        + EXERCICE_REF
-        CATEGORIE_EXERCICE
-        TYPE_EXERCICE
-        EXERCICE_CODE
-        ESTIMATE_VALUE
-    }
-    class CORRECTION {
-        # EXERCICE_ID
-        # CORRECTION_ID
     }
     class PROG {
         # PROGRAMME_ID
@@ -87,7 +67,7 @@ classDiagram
         CJ_GOAL
         BACK_SQUAT_GOAL
         FRONT_SQUAT_GOAL
-        SNACHT_PULL_GOAL
+        SNATCH_PULL_GOAL
         CJ_PULL_GOAL
     }
     class PROG_TRAINING {
@@ -95,7 +75,7 @@ classDiagram
         + PROGRAMME_WEEK_ID
         TRAINING_NUMBER
         EXERCICE_ORDER
-        EXERCICE_ID
+        EXERCICE_NAME
         SET_NUMBER
         REP_NUMBER
         MIN_WEIGHT
@@ -115,42 +95,26 @@ classDiagram
         TIMELINE
     }
     class REF_PLANNING {
-        # REF_PLANNING
-        ARCHETYPE
-        WEEK_TYPE
-        TRAINING_NUMBER
+        # REF_PLANNING_ID
+        WEEKS_NUMBERS
+        TRAINING_ORDER
         EXERCICE_ORDER
-        CATEGORIE_EXERCICE
-        TYPE_EXERCICE
-        STRENGH_WEAKNESS
-        SET_NUMBER
-        REP_NUMBER
-        REP_LABEL
+        EXERCICE_TYPE
     }
-    class REF_SQUAT {
-        # REF_SQUAT_ID
-        GOAL
-        ARCHETYPE
+    class REF_EXERCICE {
+        # REF_EXERCICE_ID
+        EXERCICE_TYPE
         WEEK_TYPE
-        TRAINING_NUMBER
-        SQUAT_TYPE
-        EXERCICE_CODE
-        SET_NUMBER
-        REP_NUMBER
-        REP_LABEL
-        ESTIMATE_VALUE
+        GOAL
+        TRAINING_ORDER
+        EXERCICE_NAME
+        REFERENCE
     }
-
-    class REF_PULL {
-        # REF_PULL_ID
-        GOAL
+    class REF_EXERCICE_SET {
+        # REF_EXERCICE_SET_ID
+        + REF_EXERCICE_ID
         ARCHETYPE
-        WEEK_TYPE
-        TRAINING_NUMBER
-        PULL_TYPE
-        EXERCICE_CODE
         SET_NUMBER
         REP_NUMBER
-        REP_LABEL
-        ESTIMATE_VALUE
+        WEIGHT
     }

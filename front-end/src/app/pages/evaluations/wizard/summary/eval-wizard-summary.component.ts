@@ -1,10 +1,9 @@
-import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, input, linkedSignal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, input, linkedSignal, signal} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import {EvalDetail} from '../../../../models/eval-detail.model';
 import {Archetype, Endurance, StrengthSpeed, Technique} from '../../../../models/archetype.model';
 import {PsychoStrength, PsychoWeakness} from '../../../../models/evaluation.model';
 import {EvalSummary, MUSCULATION_FLAGS, MusculationKey, ProtocolGoal} from '../../../../models/eval-summary.model';
-import {TechniqueGap} from '../eval-wizard-step';
 import {resolveArchetype} from './archetype-combinations';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
@@ -30,30 +29,19 @@ function popcount(value: number): number {
   return count;
 }
 
-/** Code de la variante mesurée au plus grand écart (force), ou null si aucune mesurée. */
-function strongest(options: readonly TechniqueGap[]): string | null {
-  const measured = options.filter((o) => o.gap != null);
-  if (measured.length === 0) return null;
-  return measured.reduce((best, o) => (o.gap! > best.gap! ? o : best)).code;
-}
-
-/** Code de la variante mesurée au plus petit écart (faiblesse), ou null si aucune mesurée. */
-function weakest(options: readonly TechniqueGap[]): string | null {
-  const measured = options.filter((o) => o.gap != null);
-  if (measured.length === 0) return null;
-  return measured.reduce((worst, o) => (o.gap! < worst.gap! ? o : worst)).code;
-}
-
 /**
  * Étape finale du wizard d'évaluation : Synthèse / Validation.
  *
  * Contrairement aux autres étapes, elle n'implémente pas `EvalWizardStep`
  * (dont la valeur est un `EvalDetail[]`) : elle produit un {@link EvalSummary}
  * (miroir de `eval_summaries`), exposé via {@link summary}. Elle reçoit en
- * entrée les résultats agrégés des étapes précédentes et en dérive des
- * présélections.
+ * entrée les résultats agrégés des étapes précédentes et en dérive la plupart
+ * des présélections (profil, archétype, protocole, psychologique).
  *
- * Chaque champ éditable est un {@link linkedSignal} : il **recalcule** sa
+ * Les points faibles techniques (arraché / épaulé / jeté) font exception : ils
+ * sont saisis manuellement par le coach, sans présélection automatique.
+ *
+ * Chaque champ à présélection est un {@link linkedSignal} : il **recalcule** sa
  * présélection quand les résultats d'entrée changent, tout en **conservant** un
  * choix manuel du coach jusqu'au prochain changement de source. L'archétype est
  * lié aux trois profils courants : il se recalcule dès qu'un profil change
@@ -81,11 +69,6 @@ export class EvalWizardSummaryComponent {
   readonly enduranceStep = input<readonly EvalDetail[]>([]);  // étape 8
   /** Résultats des 7 blocs psycho (étapes 9-15), dans l'ordre des blocs. */
   readonly psycho = input<readonly (readonly EvalDetail[])[]>([]);
-
-  // --- Entrées : écarts réalisé / attendu des étapes techniques ---
-  readonly snatchGaps = input<readonly TechniqueGap[]>([]);  // étape 3
-  readonly cleanGaps = input<readonly TechniqueGap[]>([]);   // étape 4
-  readonly jerkGaps = input<readonly TechniqueGap[]>([]);    // étape 5
 
   // --- Options des listes déroulantes (valeurs d'enum alignées BD) ---
   protected readonly strengthSpeedOptions: readonly StrengthSpeed[] = ['STRENGTH', 'MID', 'SPEED'];
@@ -139,18 +122,23 @@ export class EvalWizardSummaryComponent {
     resolveArchetype(this.strengthSpeedValue(), this.techniqueValue(), this.enduranceValue())
   );
 
-  // ===== Bloc 2 : Technique (force / faiblesse par mouvement) =====
+  // ===== Bloc 2 : Technique (point faible par mouvement) =====
 
-  protected snatchOptions = computed(() => this.snatchGaps().map(e => e.code));
-  protected cleanOptions = computed(() => this.cleanGaps().map(e => e.code));
-  protected jerkOptions = computed(() => this.jerkGaps().map(e => e.code));
+  /**
+   * Options de point faible technique par mouvement. Les codes sont identiques
+   * (EXT / CATCH / PATH) ; seuls les libellés diffèrent (gérés en i18n, cf.
+   * `evaluations.wizard.summary.weakness.<mouvement>.<code>`).
+   */
+  protected readonly weaknessOptions: readonly string[] = ['EXT', 'CATCH', 'PATH'];
 
-  readonly snatchStrengthValue = linkedSignal<string | null>(() => strongest(this.snatchGaps()));
-  readonly snatchWeaknessValue = linkedSignal<string | null>(() => weakest(this.snatchGaps()));
-  readonly cleanStrengthValue = linkedSignal<string | null>(() => strongest(this.cleanGaps()));
-  readonly cleanWeaknessValue = linkedSignal<string | null>(() => weakest(this.cleanGaps()));
-  readonly jerkStrengthValue = linkedSignal<string | null>(() => strongest(this.jerkGaps()));
-  readonly jerkWeaknessValue = linkedSignal<string | null>(() => weakest(this.jerkGaps()));
+  /**
+   * Point faible technique par mouvement : saisie manuelle du coach, sans
+   * présélection automatique (valeur initiale vide ; aucune dérivation depuis
+   * les écarts techniques).
+   */
+  readonly snatchValue = signal<string | null>(null);
+  readonly cleanValue = signal<string | null>(null);
+  readonly jerkValue = signal<string | null>(null);
 
   // ===== Bloc 3 : squat / tirage / musculation =====
 
@@ -231,12 +219,9 @@ export class EvalWizardSummaryComponent {
     squat: this.squatValue(),
     pull: this.pullValue(),
     musculation: this.musculationValue(),
-    snatchStrength: this.snatchStrengthValue(),
-    snatchWeakness: this.snatchWeaknessValue(),
-    cleanStrength: this.cleanStrengthValue(),
-    cleanWeakness: this.cleanWeaknessValue(),
-    jerkStrength: this.jerkStrengthValue(),
-    jerkWeakness: this.jerkWeaknessValue(),
+    snatch: this.snatchValue(),
+    clean: this.cleanValue(),
+    jerk: this.jerkValue(),
     psychoStrength: this.psychoStrengthValue(),
     psychoWeakness: this.psychoWeaknessValue()
   }));
@@ -271,20 +256,14 @@ export class EvalWizardSummaryComponent {
   protected onPsychoWeakness(event: Event): void {
     this.psychoWeaknessValue.set((event.target as HTMLInputElement).value as PsychoWeakness);
   }
-  protected onTechniquePick(
-    field: 'snatchStrength' | 'snatchWeakness' | 'cleanStrength' | 'cleanWeakness' | 'jerkStrength' | 'jerkWeakness',
-    event: Event
-  ): void {
-    const value = (event.target as HTMLInputElement).value || null;
-    const map = {
-      snatchStrength: this.snatchStrengthValue,
-      snatchWeakness: this.snatchWeaknessValue,
-      cleanStrength: this.cleanStrengthValue,
-      cleanWeakness: this.cleanWeaknessValue,
-      jerkStrength: this.jerkStrengthValue,
-      jerkWeakness: this.jerkWeaknessValue
-    };
-    map[field].set(value);
+  protected onSnatchWeakness(event: Event): void {
+    this.snatchValue.set((event.target as HTMLInputElement).value || null);
+  }
+  protected onCleanWeakness(event: Event): void {
+    this.cleanValue.set((event.target as HTMLInputElement).value || null);
+  }
+  protected onJerkWeakness(event: Event): void {
+    this.jerkValue.set((event.target as HTMLInputElement).value || null);
   }
 
   /** Sélection multiple musculation : recompose le bitmask depuis les clés cochées. */

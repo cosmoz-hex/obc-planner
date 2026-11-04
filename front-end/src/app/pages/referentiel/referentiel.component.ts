@@ -38,8 +38,6 @@ export class ReferentielComponent {
 
 	protected readonly tabs = [
 		{path: 'archetypes', labelKey: 'pages.referentiel.tabs.archetypes'},
-		{path: 'correctifs', labelKey: 'pages.referentiel.tabs.correctifs'},
-		{path: 'exercices', labelKey: 'pages.referentiel.tabs.exercices'},
 		{path: 'trame-generale', labelKey: 'pages.referentiel.tabs.trame-generale'}
 	] as const;
 

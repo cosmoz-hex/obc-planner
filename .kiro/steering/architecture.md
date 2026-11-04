@@ -45,15 +45,10 @@ Base URL: `/api`
 | `POST` | `/ref-archetypes` | `RefArchetypeController` | Création (combinaison de profils unique — 409 sinon) |
 | `PUT` | `/ref-archetypes/{id}` | `RefArchetypeController` | Modification (unicité de la combinaison contrôlée) |
 | `DELETE` | `/ref-archetypes/{id}` | `RefArchetypeController` | Suppression d'un archétype de référence |
-| `GET` | `/exercices` | `ExerciceController` | Liste paginée, filtrée (type, catégorie) et triée des exercices (tri par défaut type/catégorie/code). `size=0` désactive la pagination |
-| `GET` | `/exercices/{id}` | `ExerciceController` | Consultation d'un exercice |
-| `POST` | `/exercices` | `ExerciceController` | Création (code d'exercice unique — 409 sinon ; exercice de référence optionnel, introuvable → 409) |
-| `PUT` | `/exercices/{id}` | `ExerciceController` | Modification (unicité du code contrôlée). Exercice introuvable → 404 |
-| `DELETE` | `/exercices/{id}` | `ExerciceController` | Suppression d'un exercice. Exercice introuvable → 404 |
 | `GET` | `/evaluations` | `EvaluationController` | Liste paginée et triée des évaluations (lecture seule, une ligne par évaluation ; tri par défaut date décroissante). `size=0` désactive la pagination |
 | `GET` | `/evaluations/{id}` | `EvaluationController` | Relecture complète d'une évaluation (bilan `eval_summaries` + détail `eval_details`) pour l'édition. Évaluation introuvable → 404 |
-| `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
-| `PUT` | `/evaluations/{id}` | `EvaluationController` | Modification d'une évaluation : bilan mis à jour en place (PK et FK préservées), détail `eval_details` entièrement remplacé (delete + insert). Évaluation introuvable → 404 |
+| `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`, points faibles techniques `snatch`/`clean`/`jerk`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
+| `PUT` | `/evaluations/{id}` | `EvaluationController` | Modification d'une évaluation : bilan mis à jour en place (PK et FK préservées, points faibles techniques `snatch`/`clean`/`jerk`), détail `eval_details` entièrement remplacé (delete + insert). Évaluation introuvable → 404 |
 | `DELETE` | `/evaluations/{id}` | `EvaluationController` | Suppression d'une évaluation (détail `eval_details` supprimé en cascade). Évaluation introuvable → 404 |
 
 ---
@@ -77,8 +72,6 @@ src/app/
 │   ├── athletes/       # Gestion des athlètes
 │   ├── evaluations/    # Consultation des évaluations
 │   └── referentiel/    # Référentiel avec onglets routés
-│       ├── exercices/
-│       ├── correctifs/
 │       ├── archetypes/
 │       └── trame-generale/
 ├── models/             # Interfaces TypeScript correspondant aux DTOs backend
@@ -95,8 +88,6 @@ src/app/
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
-| `/referentiel/exercices` | `ExercicesComponent` | Catalogue des exercices |
-| `/referentiel/correctifs` | `CorrectifsComponent` | Exercices correctifs |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
 | `/referentiel/trame-generale` | `TrameGeneraleComponent` | Trame générale de programmation |
 
@@ -105,30 +96,6 @@ src/app/
 ## Base de données — PostgreSQL 17
 
 ### Schéma
-
-#### `exercices`
-Catalogue des exercices de référence.
-
-| Colonne | Type | Contrainte | Description |
-|---|---|---|---|
-| `exercice_id` | `INTEGER` | PK | Identifiant auto-généré |
-| `exercice_ref` | `INTEGER` | FK → exercices | Référence vers un exercice parent (auto-référence) |
-| `type_exercice` | `VARCHAR(10)` | NOT NULL | Type d'exercice : `SQUAT`, `PULL`, `SNATCH`, `CLEAN`, `JERK` |
-| `categorie_exercice` | `VARCHAR(10)` | NOT NULL | Catégorie / groupe musculaire : `TECH`, `COMBI`, `SEMI_LEGER`, `SEMI_LOURD`, `RENFO`, `CARDIO`, `PLYO`, `BACK`, `FRONT` |
-| `exercice_code` | `VARCHAR(50)` | NOT NULL, UNIQUE | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
-| `estimate_value` | `NUMERIC(4, 2)` | — | Charge théorique (% de l'exercice de référence) |
-
----
-
-#### `corrections`
-Exercices correctifs associés à un exercice principal.
-
-| Colonne | Type | Contrainte | Description |
-|---|---|---|---|
-| `exercice_id` | `INTEGER` | PK, FK → exercices | Exercice principal |
-| `correction_id` | `INTEGER` | PK, FK → exercices | Exercice correctif associé |
-
----
 
 #### `athletes`
 Fiche athlète OBC.
@@ -173,12 +140,9 @@ Bilan synthétique d'une évaluation athlète.
 | `squat` | `VARCHAR(10)` | — | Profil squat : `STRENGTH`, `MID`, `SPEED` |
 | `pull` | `VARCHAR(10)` | — | Profil tirage : `STRENGTH`, `MID`, `SPEED` |
 | `musculation` | `INTEGER` | NOT NULL, DEFAULT 0 | Bitmask des orientations de musculation : `GENERAL` (1), `LEGS` (2), `POSTERIOR_CHAIN` (4), `UPPER_BODY` (8) |
-| `snatch_strength` | `VARCHAR(100)` | — | Point fort à l'arraché |
-| `snatch_weakness` | `VARCHAR(100)` | — | Point faible à l'arraché |
-| `clean_strength` | `VARCHAR(100)` | — | Point fort à l'épaulé |
-| `clean_weakness` | `VARCHAR(100)` | — | Point faible à l'épaulé |
-| `jerk_strength` | `VARCHAR(100)` | — | Point fort au jeté |
-| `jerk_weakness` | `VARCHAR(100)` | — | Point faible au jeté |
+| `snatch` | `VARCHAR(100)` | — | Point faible technique à l'arraché : `EXT`, `CATCH`, `PATH` |
+| `clean` | `VARCHAR(100)` | — | Point faible technique à l'épaulé : `EXT`, `CATCH`, `PATH` |
+| `jerk` | `VARCHAR(100)` | — | Point faible technique au jeté : `EXT`, `CATCH`, `PATH` |
 | `psycho_strength` | `VARCHAR(100)` | — | Point fort psychologique : `CALM`, `CONFIDENT`, `MOTIVATED`, `FOCUSED`, `COMPETITIVE`, `CHALLENGER`, `INDEPENDANT` |
 | `psycho_weakness` | `VARCHAR(100)` | — | Point faible psychologique : `EMOTIONAL`, `ANXIOUS`, `INDIFFERENT`, `DISTRACTED`, `HEDONISTIC`, `PRAGMATIC`, `RULE` |
 
@@ -245,7 +209,7 @@ Exercices planifiés dans une semaine de programme.
 | `programme_week_id` | `INTEGER` | NOT NULL, FK → programme_weeks | Semaine parente |
 | `training_number` | `INTEGER` | NOT NULL | Numéro de la séance hebdomadaire (1 à 5) |
 | `exercice_order` | `INTEGER` | NOT NULL | Ordre de l'exercice dans la séance (même ordre = "Au choix") |
-| `exercice_code` | `VARCHAR(50)` | NOT NULL | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
+| `exercice_name` | `VARCHAR(100)` | NOT NULL | Nom de l'exercice planifié (libellé libre, non lié au catalogue) |
 | `set_number` | `INTEGER` | NOT NULL | Nombre de séries |
 | `rep_number` | `INTEGER` | NOT NULL | Nombre de répétitions par série |
 | `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
@@ -267,56 +231,41 @@ Timelines de référence par archétype et durée de programme.
 ---
 
 #### `ref_plannings`
-Planning de référence des séances type par archétype et type de semaine.
+Planning de référence du moteur de génération : séances type par nombre de séances hebdomadaires. Table autonome (aucune FK).
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
-| `ref_planning_id` | `BIGINT` | PK | Identifiant auto-généré |
-| `archetype` | `VARCHAR(10)` | NOT NULL | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
-| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload) |
-| `day_of_week` | `INTEGER` | NOT NULL | Numéro de la séance dans la semaine (1 à 5) |
-| `exercice_order` | `INTEGER` | NOT NULL | Ordre de passage dans la séance (même ordre = "Au choix") |
-| `categorie_exercice` | `VARCHAR(100)` | NOT NULL | Catégorie d'exercice attendue |
-| `type_exercice` | `VARCHAR(100)` | — | Type d'exercice attendu |
-| `strength_weakness` | `VARCHAR(10)` | — | `STRENGTH` = point fort, `WEAKNESS` = point faible |
-| `set_number` | `INTEGER` | — | Nombre de séries de référence |
-| `rep_number` | `INTEGER` | — | Nombre de répétitions de référence |
-| `rep_label` | `VARCHAR(20)` | — | Label des répétitions de référence |
+| `ref_planning_id` | `INTEGER` | PK | Identifiant auto-généré (`GENERATED BY DEFAULT AS IDENTITY`) |
+| `weeks_numbers` | `INTEGER` | NOT NULL, CHECK IN (3, 4, 5) | Nombre de séances par semaine : `3`, `4`, `5` |
+| `training_order` | `INTEGER` | NOT NULL, CHECK BETWEEN 1 AND 5 | Numéro de la séance dans la semaine (1 à 5) |
+| `exercice_order` | `INTEGER` | NOT NULL, CHECK BETWEEN 1 AND 6 | Ordre de l'exercice dans la séance (même ordre = "Au choix") |
+| `exercice_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type d'exercice attendu : `SN`, `CJ`, `SQ`, `PL`, `RF`, `MS` |
 
 ---
 
-#### `ref_squats`
-Exercices de squat de référence par archétype, objectif et type de semaine.
+#### `ref_exercices`
+Catalogue de référence des exercices du moteur de génération. Table autonome (aucune FK).
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
-| `ref_squat_id` | `INTEGER` | PK | Identifiant auto-généré |
-| `goal` | `VARCHAR(10)` | NOT NULL | Objectif : `STRENGTH` = Force, `SPEED` = Vitesse, `KEEP` = Maintien |
-| `archetype` | `VARCHAR(10)` | NOT NULL | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
-| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload), `PC` (Pré-Compétition) |
-| `training_number` | `INTEGER` | NOT NULL | Numéro de la séance dans la semaine (1 à 3) |
-| `squat_type` | `VARCHAR(50)` | NOT NULL | Type de squat : `BACK`, `FRONT` |
-| `exercice_code` | `VARCHAR(50)` | NOT NULL | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
-| `set_number` | `INTEGER` | NOT NULL | Nombre de séries de référence |
-| `rep_number` | `INTEGER` | NOT NULL | Nombre de répétitions de référence |
-| `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
-| `estimate_value` | `NUMERIC(4, 2)` | — | Pourcentage de charge estimée par rapport à l'objectif de squat |
+| `ref_exercice_id` | `INTEGER` | PK | Identifiant auto-généré (`GENERATED BY DEFAULT AS IDENTITY`) |
+| `exercice_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type d'exercice : `SN`, `CJ`, `SQ`, `PL`, `RF`, `MS` |
+| `week_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload) |
+| `goal` | `VARCHAR(10)` | NOT NULL, CHECK | Objectif : `EXT`, `CATCH`, `PATH`, `KEEP`, `STR`, `SPD` |
+| `training_order` | `INTEGER` | NOT NULL, CHECK > 0 | Ordre de l'exercice dans la séance |
+| `exercice_name` | `VARCHAR(100)` | NOT NULL | Nom de l'exercice de référence |
+| `reference` | `VARCHAR(10)` | NOT NULL, CHECK | Exercice de référence pour le calcul de charge : `SN`, `CJ`, `FS`, `BS`, `SP`, `CP` |
 
 ---
 
-#### `ref_pulls`
-Exercices de tirage de référence par archétype, objectif et type de semaine.
+#### `ref_exercice_sets`
+Séries/répétitions de référence par exercice et archétype.
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
-| `ref_pull_id` | `INTEGER` | PK | Identifiant auto-généré |
-| `goal` | `VARCHAR(10)` | NOT NULL | Objectif : `STRENGTH` = Force, `SPEED` = Vitesse, `KEEP` = Maintien |
-| `archetype` | `VARCHAR(10)` | NOT NULL | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
-| `week_type` | `VARCHAR(50)` | NOT NULL | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload), `PC` (Pré-Compétition) |
-| `training_number` | `INTEGER` | NOT NULL | Numéro de la séance dans la semaine (1 à 3) |
-| `pull_type` | `VARCHAR(50)` | NOT NULL | Type de tirage : `SNATCH_PULL`, `CJ_PULL`, etc. |
-| `exercice_code` | `VARCHAR(50)` | NOT NULL | Code unique identifiant l'exercice (libellé dans les fichiers i18n) |
-| `set_number` | `INTEGER` | NOT NULL | Nombre de séries de référence |
-| `rep_number` | `INTEGER` | NOT NULL | Nombre de répétitions de référence |
-| `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
-| `estimate_value` | `NUMERIC(4, 2)` | — | Pourcentage de charge estimée par rapport à l'objectif de tirage |
+| `ref_exercice_set_id` | `INTEGER` | PK | Identifiant auto-généré (`GENERATED BY DEFAULT AS IDENTITY`) |
+| `ref_exercice_id` | `INTEGER` | NOT NULL, FK → ref_exercices | Exercice de référence parent (index `idx_ref_exercice_sets_1`) |
+| `archetype` | `VARCHAR(10)` | NOT NULL, CHECK | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
+| `set_number` | `INTEGER` | NOT NULL, CHECK > 0 | Nombre de séries de référence |
+| `rep_number` | `INTEGER` | NOT NULL, CHECK > 0 | Nombre de répétitions de référence |
+| `weight` | `NUMERIC(6, 2)` | — | Charge de référence en kg (ou % selon usage du moteur) |

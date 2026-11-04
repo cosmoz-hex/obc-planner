@@ -48,13 +48,10 @@ export interface EvalSummary {
   /** Orientations de musculation (bitmask des {@link MUSCULATION_FLAGS}). */
   musculation: number;
 
-  /** Point fort / faible technique par mouvement (exercice_code). */
-  snatchStrength: string | null;
-  snatchWeakness: string | null;
-  cleanStrength: string | null;
-  cleanWeakness: string | null;
-  jerkStrength: string | null;
-  jerkWeakness: string | null;
+  /** Point faible technique par mouvement (EXT / CATCH / PATH). */
+  snatch: string | null;
+  clean: string | null;
+  jerk: string | null;
 
   /** Profil psychologique dominant / déficient. */
   psychoStrength: PsychoStrength | null;
