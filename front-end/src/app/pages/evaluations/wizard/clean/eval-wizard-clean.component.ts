@@ -81,11 +81,11 @@ export class EvalWizardCleanComponent implements TechniqueEvalStep {
    */
   protected readonly exercices: readonly CleanRow[] = [
     {code: 'exercice.clean.tech.simple',   label: 'evaluations.wizard.clean.reference', factor: 1.00},
-    {code: 'exercice.clean.heavy.squat',   label: 'exercice.clean.heavy.squat',   factor: 1.00},
     {code: 'exercice.clean.heavy.power',   label: 'exercice.clean.heavy.power',   factor: 0.84},
     {code: 'exercice.clean.heavy.block',   label: 'exercice.clean.heavy.block',   factor: 0.95},
     {code: 'exercice.clean.heavy.hang',    label: 'exercice.clean.heavy.hang',    factor: 0.95},
     {code: 'exercice.clean.heavy.no-feet', label: 'exercice.clean.heavy.no-feet', factor: 0.92},
+    {code: 'exercice.clean.heavy.hip',     label: 'exercice.clean.heavy.hip',     factor: 0.90},
     {code: 'exercice.clean.light.muscle',  label: 'exercice.clean.light.muscle',  factor: 0.63},
     {code: 'exercice.clean.light.tall',    label: 'exercice.clean.light.tall',    factor: 0.62},
     {code: 'exercice.clean.pull.simple',   label: 'exercice.clean.pull.simple',   factor: 1.30},
@@ -141,6 +141,23 @@ export class EvalWizardCleanComponent implements TechniqueEvalStep {
 
   /** Contrat {@link EvalWizardStep} : pas de contrôle, l'étape est toujours valide. */
   readonly valid = signal(true).asReadonly();
+
+  /**
+   * Contrat {@link TechniqueEvalStep} : valeur attendue par `exerciceCode` (hors
+   * épaulé de référence). Dérivée de {@link thresholds} (pas de recalcul des
+   * facteurs). `null` tant que la base n'est pas saisie. Donnée transitoire front
+   * (jamais persistée).
+   */
+  readonly expectedByCode = computed<ReadonlyMap<string, number | null>>(() => {
+    const thresholds = this.thresholds();
+    const map = new Map<string, number | null>();
+    this.exercices.forEach((row, i) => {
+      if (i !== EvalWizardCleanComponent.CLEAN_INDEX) {
+        map.set(row.code, thresholds[i].expected);
+      }
+    });
+    return map;
+  });
 
   /** Contrat {@link EvalWizardStep} : le modèle est déjà des lignes eval_details. */
   readonly value = computed<readonly EvalDetail[]>(() => this.model());

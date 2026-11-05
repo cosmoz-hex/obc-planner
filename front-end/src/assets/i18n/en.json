@@ -188,6 +188,59 @@
       "duplicate": "This profile combination is already associated with an archetype."
     }
   },
+  "planning": {
+    "actions": {
+      "add": "Add a row"
+    },
+    "filters": {
+      "label": "Filters",
+      "weeksNumbers": "Weekly format",
+      "trainingOrder": "Session no."
+    },
+    "table": {
+      "caption": "Planning rows list"
+    },
+    "fields": {
+      "weeksNumbers": "Weekly format",
+      "trainingOrder": "Session no.",
+      "exerciceOrder": "Exercise no.",
+      "exerciceType": "Category",
+      "actions": "Actions"
+    },
+    "enums": {
+      "weeksNumbers": "{{value}} days",
+      "trainingOrder": "Session {{value}}",
+      "exerciceType": {
+        "SN": "Snatch",
+        "CJ": "Clean & Jerk",
+        "SQ": "Squat",
+        "PL": "Pull",
+        "RF": "Specific strength work",
+        "MS": "Bodybuilding / Accessory",
+        "PC": "Plyometrics / Cardio"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "New planning row",
+        "edit": "Edit planning row"
+      },
+      "errors": {
+        "weeksNumbers": "The weekly format is required.",
+        "trainingOrder": "The session number is required.",
+        "exerciceOrder": "The exercise number is required.",
+        "exerciceType": "The category is required."
+      }
+    },
+    "delete": {
+      "title": "Delete planning row",
+      "message": "This action is irreversible. Do you confirm the deletion of this row?"
+    },
+    "errors": {
+      "save": "Saving failed. Please try again.",
+      "delete": "Deletion failed. Please try again."
+    }
+  },
   "evaluations": {
     "title": "Evaluations",
     "wizard": {
@@ -522,13 +575,10 @@
       "title": "Reference Data",
       "tabs": {
         "archetypes": "Archetypes",
-        "trame-generale": "General Framework"
+        "planning": "Planning"
       },
       "archetypes": {
         "placeholder": "Archetype management will be available here."
-      },
-      "trame-generale": {
-        "placeholder": "General framework management will be available here."
       }
     }
   },

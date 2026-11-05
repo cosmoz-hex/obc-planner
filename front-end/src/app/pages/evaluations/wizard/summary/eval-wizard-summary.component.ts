@@ -1,10 +1,11 @@
-import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, input, linkedSignal, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, input, linkedSignal} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import {EvalDetail} from '../../../../models/eval-detail.model';
 import {Archetype, Endurance, StrengthSpeed, Technique} from '../../../../models/archetype.model';
 import {PsychoStrength, PsychoWeakness} from '../../../../models/evaluation.model';
 import {EvalSummary, MUSCULATION_FLAGS, MusculationKey, ProtocolGoal} from '../../../../models/eval-summary.model';
 import {resolveArchetype} from './archetype-combinations';
+import {weakestCategory} from './technical-weakness';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/select/select.js';
@@ -38,8 +39,9 @@ function popcount(value: number): number {
  * entrée les résultats agrégés des étapes précédentes et en dérive la plupart
  * des présélections (profil, archétype, protocole, psychologique).
  *
- * Les points faibles techniques (arraché / épaulé / jeté) font exception : ils
- * sont saisis manuellement par le coach, sans présélection automatique.
+ * Les points faibles techniques (arraché / épaulé / jeté) étaient auparavant
+ * saisis manuellement ; ils sont désormais présélectionnés à partir des mesures
+ * techniques (ratios réalisé/attendu par catégorie), tout en restant écrasables.
  *
  * Chaque champ à présélection est un {@link linkedSignal} : il **recalcule** sa
  * présélection quand les résultats d'entrée changent, tout en **conservant** un
@@ -69,6 +71,16 @@ export class EvalWizardSummaryComponent {
   readonly enduranceStep = input<readonly EvalDetail[]>([]);  // étape 8
   /** Résultats des 7 blocs psycho (étapes 9-15), dans l'ordre des blocs. */
   readonly psycho = input<readonly (readonly EvalDetail[])[]>([]);
+
+  /**
+   * Valeur attendue (`expected`) par `exerciceCode` pour chaque mouvement
+   * technique, propagée depuis les étapes Arraché / Épaulé / Jeté. Donnée
+   * purement transitoire front (non persistée) alimentant le calcul des ratios
+   * du point faible. Vaut une map vide tant que les étapes n'ont rien exposé.
+   */
+  readonly snatchExpected = input<ReadonlyMap<string, number | null>>(new Map());
+  readonly cleanExpected = input<ReadonlyMap<string, number | null>>(new Map());
+  readonly jerkExpected = input<ReadonlyMap<string, number | null>>(new Map());
 
   // --- Options des listes déroulantes (valeurs d'enum alignées BD) ---
   protected readonly strengthSpeedOptions: readonly StrengthSpeed[] = ['STRENGTH', 'MID', 'SPEED'];
@@ -132,13 +144,22 @@ export class EvalWizardSummaryComponent {
   protected readonly weaknessOptions: readonly string[] = ['EXT', 'CATCH', 'PATH'];
 
   /**
-   * Point faible technique par mouvement : saisie manuelle du coach, sans
-   * présélection automatique (valeur initiale vide ; aucune dérivation depuis
-   * les écarts techniques).
+   * Point faible technique par mouvement : présélection dérivée des mesures
+   * techniques et des valeurs attendues (`weakestCategory`), tout en restant
+   * **écrasable** par le coach. En tant que {@link linkedSignal}, chaque champ
+   * recalcule sa présélection quand les mesures / l'attendu changent, mais
+   * conserve un choix manuel jusqu'au prochain changement de source (RG10).
+   * Vaut `null` tant qu'aucune mesure exploitable n'est saisie.
    */
-  readonly snatchValue = signal<string | null>(null);
-  readonly cleanValue = signal<string | null>(null);
-  readonly jerkValue = signal<string | null>(null);
+  readonly snatchValue = linkedSignal<string | null>(() =>
+    weakestCategory('snatch', this.snatch(), this.snatchExpected())
+  );
+  readonly cleanValue = linkedSignal<string | null>(() =>
+    weakestCategory('clean', this.clean(), this.cleanExpected())
+  );
+  readonly jerkValue = linkedSignal<string | null>(() =>
+    weakestCategory('jerk', this.jerk(), this.jerkExpected())
+  );
 
   // ===== Bloc 3 : squat / tirage / musculation =====
 

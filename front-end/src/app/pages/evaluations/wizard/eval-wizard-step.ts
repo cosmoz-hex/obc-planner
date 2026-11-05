@@ -54,5 +54,16 @@ export abstract class EvalWizardStep {
  * useExisting: MonEtapeComponent}`).
  */
 export abstract class TechniqueEvalStep extends EvalWizardStep {
+  /**
+   * Valeur attendue (`expected = base × factor`, arrondie) par exercice, indexée
+   * sur `exerciceCode`, hors ligne de référence (index 0).
+   *
+   * Donnée **purement transitoire côté front** : calculée une seule fois dans
+   * l'étape (source des facteurs) et exposée à la synthèse pour le calcul des
+   * ratios. Vaut `null` pour un exercice tant que la base de référence du
+   * mouvement n'est pas saisie. N'est **jamais** persistée (hors contrat
+   * `eval_details`).
+   */
+  abstract readonly expectedByCode: Signal<ReadonlyMap<string, number | null>>;
 }
  

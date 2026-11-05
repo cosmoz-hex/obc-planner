@@ -45,6 +45,11 @@ Base URL: `/api`
 | `POST` | `/ref-archetypes` | `RefArchetypeController` | Création (combinaison de profils unique — 409 sinon) |
 | `PUT` | `/ref-archetypes/{id}` | `RefArchetypeController` | Modification (unicité de la combinaison contrôlée) |
 | `DELETE` | `/ref-archetypes/{id}` | `RefArchetypeController` | Suppression d'un archétype de référence |
+| `GET` | `/ref-plannings` | `RefPlanningController` | Liste paginée, filtrée (format hebdomadaire `weeksNumbers`, numéro de séance `trainingOrder`) et triée (tri par défaut numéro d'exercice `exerciceOrder`). `size=0` désactive la pagination |
+| `GET` | `/ref-plannings/{id}` | `RefPlanningController` | Consultation d'une ligne de planning de référence |
+| `POST` | `/ref-plannings` | `RefPlanningController` | Création d'une ligne de planning de référence |
+| `PUT` | `/ref-plannings/{id}` | `RefPlanningController` | Modification d'une ligne de planning de référence. Introuvable → 404 |
+| `DELETE` | `/ref-plannings/{id}` | `RefPlanningController` | Suppression d'une ligne de planning de référence. Introuvable → 404 |
 | `GET` | `/evaluations` | `EvaluationController` | Liste paginée et triée des évaluations (lecture seule, une ligne par évaluation ; tri par défaut date décroissante). `size=0` désactive la pagination |
 | `GET` | `/evaluations/{id}` | `EvaluationController` | Relecture complète d'une évaluation (bilan `eval_summaries` + détail `eval_details`) pour l'édition. Évaluation introuvable → 404 |
 | `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`, points faibles techniques `snatch`/`clean`/`jerk`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
@@ -70,10 +75,14 @@ src/app/
 │                       # avancement (barre + compteur), navigation précédent/suivant/valider
 ├── pages/              # Pages principales
 │   ├── athletes/       # Gestion des athlètes
-│   ├── evaluations/    # Consultation des évaluations
+│   ├── evaluations/    # Consultation des évaluations + wizard de saisie (étapes
+│   │                   # techniques arraché/épaulé/jeté, synthèse à présélections
+│   │                   # écrasables). La synthèse présélectionne les points faibles
+│   │                   # techniques (EXT/CATCH/PATH) via summary/technical-weakness.ts
+│   │                   # (ratios réalisé/attendu ; `expected` transitoire front, non persisté)
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── archetypes/
-│       └── trame-generale/
+│       └── planning/
 ├── models/             # Interfaces TypeScript correspondant aux DTOs backend
 ├── services/           # Services HTTP par domaine métier + loader i18n custom
 ├── directives/         # Directives transverses (ex. value accessors Signal Forms pour les composants WebAwesome)
@@ -89,7 +98,7 @@ src/app/
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
-| `/referentiel/trame-generale` | `TrameGeneraleComponent` | Trame générale de programmation |
+| `/referentiel/planning` | `PlanningComponent` | Planning de programmation |
 
 ---
 
@@ -239,7 +248,7 @@ Planning de référence du moteur de génération : séances type par nombre de 
 | `weeks_numbers` | `INTEGER` | NOT NULL, CHECK IN (3, 4, 5) | Nombre de séances par semaine : `3`, `4`, `5` |
 | `training_order` | `INTEGER` | NOT NULL, CHECK BETWEEN 1 AND 5 | Numéro de la séance dans la semaine (1 à 5) |
 | `exercice_order` | `INTEGER` | NOT NULL, CHECK BETWEEN 1 AND 6 | Ordre de l'exercice dans la séance (même ordre = "Au choix") |
-| `exercice_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type d'exercice attendu : `SN`, `CJ`, `SQ`, `PL`, `RF`, `MS` |
+| `exercice_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type d'exercice attendu : `SN`, `CJ`, `SQ`, `PL`, `RF`, `MS`, `PC` (`PC` = Pliométrie / Cardio) |
 
 ---
 

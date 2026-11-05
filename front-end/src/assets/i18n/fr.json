@@ -188,6 +188,59 @@
       "duplicate": "Cette combinaison de profils est déjà associée à un archétype."
     }
   },
+  "planning": {
+    "actions": {
+      "add": "Ajouter une ligne"
+    },
+    "filters": {
+      "label": "Filtres",
+      "weeksNumbers": "Format hebdomadaire",
+      "trainingOrder": "N° séance"
+    },
+    "table": {
+      "caption": "Liste des lignes de planning"
+    },
+    "fields": {
+      "weeksNumbers": "Format hebdomadaire",
+      "trainingOrder": "N° séance",
+      "exerciceOrder": "N° exercice",
+      "exerciceType": "Catégorie",
+      "actions": "Actions"
+    },
+    "enums": {
+      "weeksNumbers": "{{value}} jours",
+      "trainingOrder": "Séance {{value}}",
+      "exerciceType": {
+        "SN": "Arraché",
+        "CJ": "Épaulé-Jeté",
+        "SQ": "Squat",
+        "PL": "Tirage",
+        "RF": "Renfo spécifique",
+        "MS": "Muscul",
+        "PC": "Pliométrie / Cardio"
+      }
+    },
+    "form": {
+      "title": {
+        "create": "Nouvelle ligne de planning",
+        "edit": "Modifier la ligne de planning"
+      },
+      "errors": {
+        "weeksNumbers": "Le format hebdomadaire est obligatoire.",
+        "trainingOrder": "Le n° de séance est obligatoire.",
+        "exerciceOrder": "Le n° d'exercice est obligatoire.",
+        "exerciceType": "La catégorie est obligatoire."
+      }
+    },
+    "delete": {
+      "title": "Supprimer la ligne de planning",
+      "message": "Cette action est irréversible. Confirmez-vous la suppression de cette ligne ?"
+    },
+    "errors": {
+      "save": "L'enregistrement a échoué. Veuillez réessayer.",
+      "delete": "La suppression a échoué. Veuillez réessayer."
+    }
+  },
   "evaluations": {
     "title": "Evaluations",
     "wizard": {
@@ -522,13 +575,10 @@
       "title": "Référentiel",
       "tabs": {
         "archetypes": "Archétypes",
-        "trame-generale": "Trame générale"
+        "planning": "Planning"
       },
       "archetypes": {
         "placeholder": "La gestion des archétypes sera disponible ici."
-      },
-      "trame-generale": {
-        "placeholder": "La gestion de la trame générale sera disponible ici."
       }
     }
   },

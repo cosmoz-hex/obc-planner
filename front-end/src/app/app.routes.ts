@@ -28,8 +28,8 @@ export const routes: Routes = [
 						loadComponent: () => import('./pages/referentiel/archetypes/archetypes.component').then(m => m.ArchetypesComponent),
 						data: {title: 'pages.referentiel.title'}
 					}, {
-						path: 'trame-generale',
-						loadComponent: () => import('./pages/referentiel/trame-generale/trame-generale.component').then(m => m.TrameGeneraleComponent),
+						path: 'planning',
+						loadComponent: () => import('./pages/referentiel/planning/planning.component').then(m => m.PlanningComponent),
 						data: {title: 'pages.referentiel.title'}
 					}
 				]

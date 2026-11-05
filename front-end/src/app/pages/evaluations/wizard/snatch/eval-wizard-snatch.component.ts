@@ -73,11 +73,11 @@ export class EvalWizardSnatchComponent implements TechniqueEvalStep {
    */
   protected readonly exercices = [
     {code: 'exercice.snatch.tech.simple',   factor: 1.00},
-    {code: 'exercice.snatch.heavy.squat',   factor: 1.00},
     {code: 'exercice.snatch.heavy.power',   factor: 0.85},
     {code: 'exercice.snatch.heavy.block',   factor: 0.95},
     {code: 'exercice.snatch.heavy.hang',    factor: 0.95},
     {code: 'exercice.snatch.heavy.no-feet', factor: 0.92},
+    {code: 'exercice.snatch.heavy.pause',   factor: 0.90},
     {code: 'exercice.snatch.light.muscle',  factor: 0.66},
     {code: 'exercice.snatch.heavy.balance', factor: 1.00},
     {code: 'exercice.snatch.light.tall',    factor: 0.56},
@@ -135,6 +135,23 @@ export class EvalWizardSnatchComponent implements TechniqueEvalStep {
 
   /** Contrat {@link EvalWizardStep} : pas de contrôle, l'étape est toujours valide. */
   readonly valid = signal(true).asReadonly();
+
+  /**
+   * Contrat {@link TechniqueEvalStep} : valeur attendue par `exerciceCode` (hors
+   * arraché de référence). Dérivée de {@link thresholds} (pas de recalcul des
+   * facteurs). `null` tant que la base n'est pas saisie. Donnée transitoire front
+   * (jamais persistée).
+   */
+  readonly expectedByCode = computed<ReadonlyMap<string, number | null>>(() => {
+    const thresholds = this.thresholds();
+    const map = new Map<string, number | null>();
+    this.exercices.forEach((row, i) => {
+      if (i !== EvalWizardSnatchComponent.SNATCH_INDEX) {
+        map.set(row.code, thresholds[i].expected);
+      }
+    });
+    return map;
+  });
 
   /** Contrat {@link EvalWizardStep} : le modèle est déjà des lignes eval_details. */
   readonly value = computed<readonly EvalDetail[]>(() => this.model());

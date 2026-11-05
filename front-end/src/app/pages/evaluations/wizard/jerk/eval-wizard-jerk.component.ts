@@ -76,10 +76,10 @@ export class EvalWizardJerkComponent implements TechniqueEvalStep {
    */
   protected readonly exercices: readonly JerkRow[] = [
     {code: 'exercice.jerk.tech.simple',  label: 'evaluations.wizard.jerk.reference', factor: 1.00},
-    {code: 'exercice.jerk.tech.simple',  label: 'exercice.jerk.tech.simple',  factor: 1.00},
-		{code: 'exercice.jerk.heavy.power',  label: 'exercice.jerk.heavy.power',  factor: 0.92},
-    {code: 'exercice.jerk.heavy.no-feet', label: 'exercice.jerk.heavy.no-feet', factor: 0.90},
-    {code: 'exercice.jerk.light.muscle', label: 'exercice.jerk.light.muscle', factor: 0.71}
+    {code: 'exercice.jerk.heavy.power',  label: 'exercice.jerk.heavy.power',  factor: 0.92},
+    {code: 'exercice.jerk.heavy.pause',  label: 'exercice.jerk.heavy.pause',  factor: 0.90},
+    {code: 'exercice.jerk.light.muscle', label: 'exercice.jerk.light.muscle', factor: 0.71},
+    {code: 'exercice.jerk.light.drop',   label: 'exercice.jerk.light.drop',   factor: 0.50}
   ];
 
   /** Modèle du form : une ligne eval_details par question (alignée sur `exercices`). */
@@ -130,6 +130,23 @@ export class EvalWizardJerkComponent implements TechniqueEvalStep {
 
   /** Contrat {@link EvalWizardStep} : pas de contrôle, l'étape est toujours valide. */
   readonly valid = signal(true).asReadonly();
+
+  /**
+   * Contrat {@link TechniqueEvalStep} : valeur attendue par `exerciceCode` (hors
+   * jeté de référence). Dérivée de {@link thresholds} (pas de recalcul des
+   * facteurs). `null` tant que la base n'est pas saisie. Donnée transitoire front
+   * (jamais persistée).
+   */
+  readonly expectedByCode = computed<ReadonlyMap<string, number | null>>(() => {
+    const thresholds = this.thresholds();
+    const map = new Map<string, number | null>();
+    this.exercices.forEach((row, i) => {
+      if (i !== EvalWizardJerkComponent.JERK_INDEX) {
+        map.set(row.code, thresholds[i].expected);
+      }
+    });
+    return map;
+  });
 
   /** Contrat {@link EvalWizardStep} : le modèle est déjà des lignes eval_details. */
   readonly value = computed<readonly EvalDetail[]>(() => this.model());
