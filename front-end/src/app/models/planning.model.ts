@@ -34,3 +34,27 @@ export interface PlanningFilter {
   weeksNumbers: number | null;
   trainingOrder: number | null;
 }
+
+/** Valeur possible d'une cellule de la grille pivot (type d'exercice ou « vide »). */
+export type ExerciceTypeOrEmpty = ExerciceType | '';
+
+/** Une cellule de la grille pivot (intersection n° exercice × séance). */
+export interface PlanningCell {
+  readonly exerciceOrder: number; // 1..6 (ligne)
+  readonly trainingOrder: number; // 1..F (colonne = n° séance)
+  readonly refPlanningId: number | null; // id de la ligne ref_plannings si elle existe, sinon null
+  readonly exerciceType: ExerciceTypeOrEmpty; // type courant ('' = cellule vide)
+}
+
+/** Une ligne de la grille pivot (un n° d'exercice, toutes séances confondues). */
+export interface PlanningRow {
+  readonly exerciceOrder: number; // 1..6
+  readonly cells: readonly PlanningCell[]; // longueur = F (une cellule par séance)
+}
+
+/** Grille pivot complète pour un format hebdomadaire donné. */
+export interface PlanningGrid {
+  readonly weeksNumbers: number; // format courant F
+  readonly trainingOrders: readonly number[]; // [1..F] (colonnes)
+  readonly rows: readonly PlanningRow[]; // 6 lignes (exerciceOrder 1..6)
+}

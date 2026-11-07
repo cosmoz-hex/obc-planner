@@ -3,98 +3,48 @@
 	<div class="flex flex-wrap items-end gap-3">
 		<div role="group" [attr.aria-label]="'planning.filters.label' | translate"
 		     class="flex flex-wrap items-end gap-3">
-			<wa-select size="s" with-clear [formField]="filtersForm.weeksNumbers"
+			<wa-select size="s" [value]="selectedWeeksNumbers().toString()"
 			           [attr.label]="'planning.filters.weeksNumbers' | translate"
-			           [attr.placeholder]="'common.filters.all' | translate">
+			           (change)="onWeeksNumbersChange($any($event.target).value)">
 				@for (value of weeksNumbers; track value) {
 				<wa-option [attr.value]="value">{{ 'planning.enums.weeksNumbers' | translate: { value: value } }}</wa-option>
 				}
 			</wa-select>
-
-			<wa-select size="s" with-clear [formField]="filtersForm.trainingOrder"
-			           [attr.label]="'planning.filters.trainingOrder' | translate"
-			           [attr.placeholder]="'common.filters.all' | translate">
-				@for (value of trainingOrders; track value) {
-				<wa-option [attr.value]="value">{{ 'planning.enums.trainingOrder' | translate: { value: value } }}</wa-option>
-				}
-			</wa-select>
 		</div>
-
-		<wa-button variant="brand" class="ml-auto" (click)="openCreate()">
-			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
-			{{ 'planning.actions.add' | translate }}
-		</wa-button>
 	</div>
 
-	@if (errorMessage()) {
-	<wa-callout variant="danger" role="alert" aria-live="assertive">
-		<wa-icon slot="icon" name="triangle-exclamation" aria-hidden="true"></wa-icon>
-		{{ errorMessage()! | translate }}
-	</wa-callout>
-	}
+	<div class="min-h-0 flex-1 overflow-auto">
+		<table class="w-full border-collapse">
+			<caption class="sr-only">{{ 'planning.table.caption' | translate }}</caption>
+			<thead>
+				<tr>
+					<th scope="col" class="px-3 py-2 text-left">{{ 'planning.grid.exerciceOrderHeader' | translate }}</th>
+					@for (training of grid().trainingOrders; track training) {
+					<th scope="col" class="px-3 py-2 text-left">{{ 'planning.grid.trainingHeader' | translate: { value: training } }}</th>
+					}
+				</tr>
+			</thead>
+			<tbody>
+				@for (row of grid().rows; track row.exerciceOrder) {
+				<tr>
+					<th scope="row" class="px-3 py-2 text-left">{{ row.exerciceOrder }}</th>
+					@for (cell of row.cells; track cell.trainingOrder) {
+					<td class="px-3 py-2">
+						<wa-select size="s" [value]="cell.exerciceType"
+						           [attr.aria-label]="'planning.grid.cellLabel' | translate: { exercice: cell.exerciceOrder, training: cell.trainingOrder }"
+						           (change)="onCellChange(cell, $any($event.target).value)">
+							<wa-option value="">{{ 'planning.grid.emptyOption' | translate }}</wa-option>
+							@for (type of exerciceTypes; track type) {
+							<wa-option [attr.value]="type">{{ 'planning.enums.exerciceType.' + type | translate }}</wa-option>
+							}
+						</wa-select>
+					</td>
+					}
+				</tr>
+				}
+			</tbody>
+		</table>
+	</div>
 
-	<app-data-grid
-		[rows]="rows()"
-		[columns]="columns()"
-		[loading]="loading()"
-		[caption]="'planning.table.caption'"
-		[rowId]="rowId"
-		[pageable]="true"
-		[(page)]="page"
-		[(pageSize)]="pageSize"
-		[totalElements]="totalElements()"
-		[sort]="sort()"
-		(pageSizeChange)="onPageSizeChange()"
-		(sortChange)="onSortChange($event)"
-		(cellClick)="onCellClick($event)">
-	</app-data-grid>
+	<wa-toast #errorToast></wa-toast>
 </section>
-
-<!-- Templates de cellule -->
-
-<ng-template #weeksNumbersCell let-row>
-	<span>{{ 'planning.enums.weeksNumbers' | translate: { value: row.weeksNumbers } }}</span>
-</ng-template>
-
-<ng-template #trainingOrderCell let-row>
-	<span>{{ 'planning.enums.trainingOrder' | translate: { value: row.trainingOrder } }}</span>
-</ng-template>
-
-<ng-template #exerciceTypeCell let-row>
-	<wa-tag variant="brand">{{ 'planning.enums.exerciceType.' + row.exerciceType | translate }}</wa-tag>
-</ng-template>
-
-<ng-template #actionsCell let-row>
-	<wa-dropdown (wa-select)="onRowAction(row, $event)">
-		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
-			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
-		</wa-button>
-		<wa-dropdown-item value="edit">
-			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
-			{{ 'common.actions.edit' | translate }}
-		</wa-dropdown-item>
-		<wa-dropdown-item value="delete" variant="danger">
-			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
-			{{ 'common.actions.delete' | translate }}
-		</wa-dropdown-item>
-	</wa-dropdown>
-</ng-template>
-
-<!-- Modale de gestion -->
-<app-planning-form-dialog
-	[open]="dialogOpen()"
-	[mode]="dialogMode()"
-	[planningRow]="selectedRow()"
-	(save)="onSave($event)"
-	(close)="closeDialog()">
-</app-planning-form-dialog>
-
-<!-- Confirmation de suppression -->
-<app-confirm-dialog
-	[open]="confirmOpen()"
-	titleKey="planning.delete.title"
-	messageKey="planning.delete.message"
-	confirmKey="common.actions.delete"
-	(confirmed)="confirmDelete()"
-	(cancelled)="cancelDelete()">
-</app-confirm-dialog>

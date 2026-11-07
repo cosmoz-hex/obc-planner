@@ -189,27 +189,21 @@
     }
   },
   "planning": {
-    "actions": {
-      "add": "Ajouter une ligne"
-    },
     "filters": {
       "label": "Filtres",
-      "weeksNumbers": "Format hebdomadaire",
-      "trainingOrder": "N° séance"
+      "weeksNumbers": "Format hebdomadaire"
     },
     "table": {
       "caption": "Liste des lignes de planning"
     },
-    "fields": {
-      "weeksNumbers": "Format hebdomadaire",
-      "trainingOrder": "N° séance",
-      "exerciceOrder": "N° exercice",
-      "exerciceType": "Catégorie",
-      "actions": "Actions"
+    "grid": {
+      "exerciceOrderHeader": "N° Exercice",
+      "trainingHeader": "Séance {{value}}",
+      "cellLabel": "Exercice {{exercice}}, séance {{training}}",
+      "emptyOption": "— Aucun —"
     },
     "enums": {
       "weeksNumbers": "{{value}} jours",
-      "trainingOrder": "Séance {{value}}",
       "exerciceType": {
         "SN": "Arraché",
         "CJ": "Épaulé-Jeté",
@@ -219,22 +213,6 @@
         "MS": "Muscul",
         "PC": "Pliométrie / Cardio"
       }
-    },
-    "form": {
-      "title": {
-        "create": "Nouvelle ligne de planning",
-        "edit": "Modifier la ligne de planning"
-      },
-      "errors": {
-        "weeksNumbers": "Le format hebdomadaire est obligatoire.",
-        "trainingOrder": "Le n° de séance est obligatoire.",
-        "exerciceOrder": "Le n° d'exercice est obligatoire.",
-        "exerciceType": "La catégorie est obligatoire."
-      }
-    },
-    "delete": {
-      "title": "Supprimer la ligne de planning",
-      "message": "Cette action est irréversible. Confirmez-vous la suppression de cette ligne ?"
     },
     "errors": {
       "save": "L'enregistrement a échoué. Veuillez réessayer.",

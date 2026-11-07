@@ -74,15 +74,11 @@ src/app/
 │   └── wizard/         # Wizard à étapes générique : contenu projeté (app-wizard-step),
 │                       # avancement (barre + compteur), navigation précédent/suivant/valider
 ├── pages/              # Pages principales
-│   ├── athletes/       # Gestion des athlètes
-│   ├── evaluations/    # Consultation des évaluations + wizard de saisie (étapes
-│   │                   # techniques arraché/épaulé/jeté, synthèse à présélections
-│   │                   # écrasables). La synthèse présélectionne les points faibles
-│   │                   # techniques (EXT/CATCH/PATH) via summary/technical-weakness.ts
-│   │                   # (ratios réalisé/attendu ; `expected` transitoire front, non persisté)
+│   ├── athletes/       # Gestion des athlètes (liste + modale CRUD)
+│   ├── evaluations/    # Consultation des évaluations + wizard de saisie
 │   └── referentiel/    # Référentiel avec onglets routés
-│       ├── archetypes/
-│       └── planning/
+│       ├── archetypes/ # Profils archétypes (liste + modale CRUD)
+│       └── planning/   # Grille pivot hebdomadaire du planning de référence, édition inline par cellule
 ├── models/             # Interfaces TypeScript correspondant aux DTOs backend
 ├── services/           # Services HTTP par domaine métier + loader i18n custom
 ├── directives/         # Directives transverses (ex. value accessors Signal Forms pour les composants WebAwesome)
@@ -98,7 +94,7 @@ src/app/
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
-| `/referentiel/planning` | `PlanningComponent` | Planning de programmation |
+| `/referentiel/planning` | `PlanningComponent` | Grille pivot hebdomadaire du planning de référence, édition inline par cellule (persistance immédiate) |
 
 ---
 

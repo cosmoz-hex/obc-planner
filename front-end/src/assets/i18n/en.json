@@ -189,27 +189,21 @@
     }
   },
   "planning": {
-    "actions": {
-      "add": "Add a row"
-    },
     "filters": {
       "label": "Filters",
-      "weeksNumbers": "Weekly format",
-      "trainingOrder": "Session no."
+      "weeksNumbers": "Weekly format"
     },
     "table": {
       "caption": "Planning rows list"
     },
-    "fields": {
-      "weeksNumbers": "Weekly format",
-      "trainingOrder": "Session no.",
-      "exerciceOrder": "Exercise no.",
-      "exerciceType": "Category",
-      "actions": "Actions"
+    "grid": {
+      "exerciceOrderHeader": "Exercise #",
+      "trainingHeader": "Session {{value}}",
+      "cellLabel": "Exercise {{exercice}}, session {{training}}",
+      "emptyOption": "— None —"
     },
     "enums": {
       "weeksNumbers": "{{value}} days",
-      "trainingOrder": "Session {{value}}",
       "exerciceType": {
         "SN": "Snatch",
         "CJ": "Clean & Jerk",
@@ -219,22 +213,6 @@
         "MS": "Bodybuilding / Accessory",
         "PC": "Plyometrics / Cardio"
       }
-    },
-    "form": {
-      "title": {
-        "create": "New planning row",
-        "edit": "Edit planning row"
-      },
-      "errors": {
-        "weeksNumbers": "The weekly format is required.",
-        "trainingOrder": "The session number is required.",
-        "exerciceOrder": "The exercise number is required.",
-        "exerciceType": "The category is required."
-      }
-    },
-    "delete": {
-      "title": "Delete planning row",
-      "message": "This action is irreversible. Do you confirm the deletion of this row?"
     },
     "errors": {
       "save": "Saving failed. Please try again.",

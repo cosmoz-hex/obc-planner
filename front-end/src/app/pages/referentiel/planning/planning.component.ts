@@ -3,43 +3,38 @@ import {
 	Component,
 	computed,
 	CUSTOM_ELEMENTS_SCHEMA,
-	effect,
+	ElementRef,
 	inject,
 	signal,
-	TemplateRef,
 	viewChild
 } from '@angular/core';
-import {form} from '@angular/forms/signals';
-import {FormField} from '@angular/forms/signals';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {DataGridComponent} from '../../../components/data-grid/data-grid.component';
-import {CellClickEvent, ColumnDef, GridFilter, SortState} from '../../../models/data-grid.model';
-import {PlanningFormDialogComponent, PlanningFormMode} from './planning-form-dialog/planning-form-dialog.component';
-import {ConfirmDialogComponent} from '../../../components/confirm-dialog/confirm-dialog.component';
-import {WaSelectControlDirective} from '../../../directives/wa-forms/wa-select-control.directive';
+import {GridFilter} from '../../../models/data-grid.model';
 import {PlanningService} from '../../../services/planning.service';
 import {
+	EXERCICE_ORDERS,
+	EXERCICE_TYPES,
+	ExerciceType,
+	ExerciceTypeOrEmpty,
+	PlanningCell,
 	PlanningFilter,
+	PlanningGrid,
+	PlanningRow,
 	RefPlanning,
-	RefPlanningRequest,
-	TRAINING_ORDERS,
 	WEEKS_NUMBERS
 } from '../../../models/planning.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/option/option.js';
-import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
-import '@awesome.me/webawesome/dist/components/tag/tag.js';
-import '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
-import '@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js';
-import '@awesome.me/webawesome/dist/components/callout/callout.js';
+import '@awesome.me/webawesome/dist/components/toast/toast.js';
+import type WaToast from '@awesome.me/webawesome/dist/components/toast/toast.js';
 
 @Component({
 	selector: 'app-planning',
 	standalone: true,
-	imports: [TranslatePipe, FormField, WaSelectControlDirective, DataGridComponent, PlanningFormDialogComponent, ConfirmDialogComponent],
+	imports: [TranslatePipe],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	templateUrl: './planning.component.html',
@@ -50,199 +45,165 @@ export class PlanningComponent {
 	private readonly planningService = inject(PlanningService);
 	private readonly translate = inject(TranslateService);
 
+	/** Formats hebdomadaires proposés par le filtre (3 / 4 / 5). */
 	protected readonly weeksNumbers = WEEKS_NUMBERS;
-	protected readonly trainingOrders = TRAINING_ORDERS;
 
-	/** Identité d'une ligne du grid : l'identifiant de la ligne de planning. */
-	protected readonly rowId = (row: RefPlanning): number => row.refPlanningId;
+	/** Types d'exercice proposés dans chaque cellule (hors option vide). */
+	protected readonly exerciceTypes = EXERCICE_TYPES;
 
-	/** Traduction impérative (pour aria-label). */
-	protected t(key: string): string {
-		return this.translate.instant(key);
-	}
+	/** Format hebdomadaire sélectionné (toujours défini — défaut 3, RG1). */
+	protected readonly selectedWeeksNumbers = signal<number>(3);
 
-	// --- Critères de recherche (pilotent la ressource HTTP) ---
+	/** Toast d'erreur transitoire (notification non bloquante). */
+	private readonly errorToast = viewChild<ElementRef<WaToast>>('errorToast');
 
-	/** Filtre métier (chaînes vides = pas de filtre ; wa-select renvoie des chaînes). */
-	private readonly filtersModel = signal<{
-		weeksNumbers: string;
-		trainingOrder: string;
-	}>({weeksNumbers: '', trainingOrder: ''});
+	// --- Lecture (size=0 : toutes les lignes du format en un seul appel) ---
 
-	/** Formulaire de filtres (Signal Forms) — sans validation, source des critères. */
-	protected readonly filtersForm = form(this.filtersModel);
-
-	protected readonly page = signal(0);
-	protected readonly pageSize = signal(10);
-	/**
-	 * Aucun tri explicite au chargement : le backend applique alors son tri par
-	 * défaut composite (format hebdomadaire, n° séance, n° exercice). Un clic sur
-	 * un en-tête définit ensuite un tri mono-colonne.
-	 */
-	protected readonly sort = signal<SortState | null>(null);
-
-	/** Filtre métier normalisé (chaînes vides → null, sinon converties en nombre). */
-	private readonly planningFilter = computed<PlanningFilter>(() => {
-		const {weeksNumbers, trainingOrder} = this.filtersModel();
-		return {
-			weeksNumbers: weeksNumbers ? Number(weeksNumbers) : null,
-			trainingOrder: trainingOrder ? Number(trainingOrder) : null
-		};
-	});
-
-	/** Filtre de grille (pagination + tri). */
-	private readonly gridFilter = computed<GridFilter>(() => ({
-		page: this.page(),
-		size: this.pageSize(),
-		sort: this.sort() ? `${this.sort()!.key},${this.sort()!.direction}` : null
-	}));
-
-	/** Requête complète : combinaison du filtre métier et du filtre de grille. */
+	/** Requête figée : tout le format sélectionné, sans pagination ni tri. */
 	protected readonly query = computed<PlanningFilter & GridFilter>(() => ({
-		...this.planningFilter(),
-		...this.gridFilter()
+		weeksNumbers: this.selectedWeeksNumbers(),
+		trainingOrder: null,
+		page: 0,
+		size: 0,
+		sort: null
 	}));
 
-	/** Ressource réactive : se recharge automatiquement quand `query` change. */
+	/** Ressource réactive : se recharge automatiquement quand le format change. */
 	protected readonly planningResource = this.planningService.getAll(this.query);
 
-	protected readonly rows = computed<readonly RefPlanning[]>(() => this.planningResource.value()?.content ?? []);
-	protected readonly totalElements = computed(() => this.planningResource.value()?.totalElements ?? 0);
-	protected readonly loading = computed(() => this.planningResource.isLoading());
-
-	// --- Modale de formulaire ---
-	protected readonly dialogOpen = signal(false);
-	protected readonly dialogMode = signal<PlanningFormMode>('create');
-	protected readonly selectedRow = signal<RefPlanning | null>(null);
-
-	// --- Confirmation de suppression ---
-	protected readonly confirmOpen = signal(false);
-	protected readonly rowToDelete = signal<RefPlanning | null>(null);
-
-	// --- Message d'erreur (aria-live) ---
-	protected readonly errorMessage = signal<string | null>(null);
-
-	// Templates de cellule déclarés dans le HTML de la page.
-	private readonly exerciceTypeTpl = viewChild<TemplateRef<{ $implicit: RefPlanning }>>('exerciceTypeCell');
-	private readonly weeksNumbersTpl = viewChild<TemplateRef<{ $implicit: RefPlanning }>>('weeksNumbersCell');
-	private readonly trainingOrderTpl = viewChild<TemplateRef<{ $implicit: RefPlanning }>>('trainingOrderCell');
-	private readonly actionsTpl = viewChild<TemplateRef<{ $implicit: RefPlanning }>>('actionsCell');
-
-	/**
-	 * Définition des colonnes, dérivée des templates de cellule. Retourne `[]` tant
-	 * que les templates ne sont pas disponibles (premier rendu).
-	 */
-	protected readonly columns = computed<readonly ColumnDef<RefPlanning>[]>(() => {
-		const weeksNumbers = this.weeksNumbersTpl();
-		const trainingOrder = this.trainingOrderTpl();
-		const exerciceType = this.exerciceTypeTpl();
-		const actions = this.actionsTpl();
-		if (!weeksNumbers || !trainingOrder || !exerciceType || !actions) {
-			return [];
+	/** Index des lignes existantes par clé `${trainingOrder}:${exerciceOrder}`. */
+	private readonly index = computed<Map<string, RefPlanning>>(() => {
+		const content = this.planningResource.value()?.content ?? [];
+		const map = new Map<string, RefPlanning>();
+		for (const row of content) {
+			map.set(this.key(row.trainingOrder, row.exerciceOrder), row);
 		}
-		return [
-			{key: 'weeksNumbers', headerLabel: 'planning.fields.weeksNumbers', cellClass: 'cursor-pointer', sortable: true, hideable: false, align: 'start', cellTemplate: weeksNumbers},
-			{key: 'trainingOrder', headerLabel: 'planning.fields.trainingOrder', sortable: true, align: 'start', hideable: false, cellTemplate: trainingOrder},
-			{key: 'exerciceOrder', headerLabel: 'planning.fields.exerciceOrder', sortable: true, align: 'start', hideable: false},
-			{key: 'exerciceType', headerLabel: 'planning.fields.exerciceType', sortable: true, align: 'start', hideable: false, cellTemplate: exerciceType},
-			{key: 'actions', headerLabel: 'planning.fields.actions', hideable: false, align: 'end', width: '80px', cellTemplate: actions}
-		];
+		return map;
 	});
 
-	constructor() {
-		// Revenir à la première page dès que les filtres changent.
-		effect(() => {
-			this.filtersModel();
-			this.page.set(0);
+	/** Overrides optimistes : état transitoire des cellules éditées depuis le dernier chargement. */
+	private readonly optimisticOverrides = signal<Map<string, PlanningCell>>(new Map());
+
+	/**
+	 * Grille pivot : 6 lignes fixes (n° exercice 1..6) × N colonnes (séances 1..format).
+	 * Chaque cellule est résolue d'abord via l'override optimiste, sinon via l'index
+	 * issu de la ressource, sinon par une cellule vide.
+	 */
+	protected readonly grid = computed<PlanningGrid>(() => {
+		const weeksNumbers = this.selectedWeeksNumbers();
+		const index = this.index();
+		const overrides = this.optimisticOverrides();
+		const trainingOrders = Array.from({length: weeksNumbers}, (_, i) => i + 1);
+
+		const rows: PlanningRow[] = EXERCICE_ORDERS.map((exerciceOrder) => {
+			const cells: PlanningCell[] = trainingOrders.map((trainingOrder) => {
+				const k = this.key(trainingOrder, exerciceOrder);
+				const override = overrides.get(k);
+				if (override) {
+					return override;
+				}
+				const existing = index.get(k);
+				if (existing) {
+					return {
+						exerciceOrder,
+						trainingOrder,
+						refPlanningId: existing.refPlanningId,
+						exerciceType: existing.exerciceType
+					};
+				}
+				return {exerciceOrder, trainingOrder, refPlanningId: null, exerciceType: ''};
+			});
+			return {exerciceOrder, cells};
 		});
+
+		return {weeksNumbers, trainingOrders, rows};
+	});
+
+	/** Clé d'index/override d'une cellule. */
+	private key(trainingOrder: number, exerciceOrder: number): string {
+		return `${trainingOrder}:${exerciceOrder}`;
 	}
 
-	// --- Pagination / tri (server-side) ---
-	protected onPageSizeChange(): void {
-		this.page.set(0);
-	}
+	// --- Filtre format hebdomadaire ---
 
-	protected onSortChange(sort: SortState): void {
-		this.sort.set(sort);
-		this.page.set(0);
-	}
-
-	// --- Modale ---
-	protected openCreate(): void {
-		this.selectedRow.set(null);
-		this.dialogMode.set('create');
-		this.dialogOpen.set(true);
-	}
-
-	protected openEdit(row: RefPlanning): void {
-		this.selectedRow.set(row);
-		this.dialogMode.set('edit');
-		this.dialogOpen.set(true);
-	}
-
-	/** Ouvre la fiche en modification lors d'un clic sur la cellule « format hebdo » ou « catégorie ». */
-	protected onCellClick(event: CellClickEvent<RefPlanning>): void {
-		if (event.column.key === 'weeksNumbers' || event.column.key === 'exerciceType') {
-			this.openEdit(event.row);
-		}
-	}
-
-	protected closeDialog(): void {
-		this.dialogOpen.set(false);
-	}
-
-	protected async onSave(request: RefPlanningRequest): Promise<void> {
-		this.errorMessage.set(null);
-		try {
-			const current = this.selectedRow();
-			if (current) {
-				await this.planningService.update(current.refPlanningId, request);
-			} else {
-				await this.planningService.create(request);
-			}
-			this.dialogOpen.set(false);
-			this.planningResource.reload();
-		} catch {
-			this.errorMessage.set('planning.errors.save');
-		}
-	}
-
-	// --- Suppression ---
-	protected askDelete(row: RefPlanning): void {
-		this.rowToDelete.set(row);
-		this.confirmOpen.set(true);
-	}
-
-	/** Route l'action choisie dans l'action-menu (souris ou clavier via wa-dropdown). */
-	protected onRowAction(row: RefPlanning, event: Event): void {
-		const detail = (event as CustomEvent<{ item?: Element }>).detail;
-		const action = detail?.item?.getAttribute('value');
-		if (action === 'edit') {
-			this.openEdit(row);
-		} else if (action === 'delete') {
-			this.askDelete(row);
-		}
-	}
-
-	protected cancelDelete(): void {
-		this.confirmOpen.set(false);
-		this.rowToDelete.set(null);
-	}
-
-	protected async confirmDelete(): Promise<void> {
-		const row = this.rowToDelete();
-		this.confirmOpen.set(false);
-		if (!row) {
+	/**
+	 * Change le format hebdomadaire sélectionné. La valeur est normalisée en nombre ;
+	 * une valeur invalide / vide est ignorée pour garantir qu'un format reste toujours
+	 * sélectionné (RG1). Le changement recharge la ressource via `query`.
+	 */
+	protected onWeeksNumbersChange(value: number | string): void {
+		const n = Number(value);
+		if (!Number.isFinite(n) || !this.weeksNumbers.includes(n)) {
 			return;
 		}
-		this.errorMessage.set(null);
-		try {
-			await this.planningService.delete(row.refPlanningId);
-			this.planningResource.reload();
-		} catch {
-			this.errorMessage.set('planning.errors.delete');
-		} finally {
-			this.rowToDelete.set(null);
+		this.selectedWeeksNumbers.set(n);
+		this.optimisticOverrides.set(new Map());
+	}
+
+	// --- Édition inline (persistance optimiste + rollback) ---
+
+	/**
+	 * Applique le changement de type d'une cellule : mise à jour optimiste immédiate,
+	 * persistance (POST / PUT / DELETE selon l'état, RG6), puis réconciliation ou
+	 * rollback + toast en cas d'échec.
+	 */
+	protected async onCellChange(cell: PlanningCell, newValue: string): Promise<void> {
+		const prevType = cell.exerciceType;
+		const prevId = cell.refPlanningId;
+		const value = newValue as ExerciceTypeOrEmpty;
+		const weeksNumbers = this.selectedWeeksNumbers();
+
+		// Aucun changement effectif : rien à persister.
+		if (value === prevType) {
+			return;
 		}
+
+		// Mise à jour optimiste immédiate.
+		this.setOverride({...cell, exerciceType: value});
+
+		try {
+			if (prevId == null && value !== '') {
+				// Création.
+				const created = await this.planningService.create({
+					weeksNumbers,
+					trainingOrder: cell.trainingOrder,
+					exerciceOrder: cell.exerciceOrder,
+					exerciceType: value as ExerciceType
+				});
+				this.setOverride({...cell, refPlanningId: created.refPlanningId, exerciceType: value});
+			} else if (prevId != null && value !== '') {
+				// Modification.
+				await this.planningService.update(prevId, {
+					weeksNumbers,
+					trainingOrder: cell.trainingOrder,
+					exerciceOrder: cell.exerciceOrder,
+					exerciceType: value as ExerciceType
+				});
+				this.setOverride({...cell, refPlanningId: prevId, exerciceType: value});
+			} else if (prevId != null && value === '') {
+				// Suppression.
+				await this.planningService.delete(prevId);
+				this.setOverride({...cell, refPlanningId: null, exerciceType: ''});
+			}
+		} catch {
+			// Rollback de la cellule à son état antérieur + notification.
+			this.setOverride({...cell, refPlanningId: prevId, exerciceType: prevType});
+			this.showError(value === '' ? 'planning.errors.delete' : 'planning.errors.save');
+		}
+	}
+
+	/** Écrit/met à jour une entrée d'override de façon immuable (recrée la Map). */
+	private setOverride(cell: PlanningCell): void {
+		const next = new Map(this.optimisticOverrides());
+		next.set(this.key(cell.trainingOrder, cell.exerciceOrder), cell);
+		this.optimisticOverrides.set(next);
+	}
+
+	/** Affiche un toast d'erreur (message déjà traduit, texte brut — pas d'allowHtml). */
+	private showError(key: string): void {
+		this.errorToast()?.nativeElement.create(this.translate.instant(key), {
+			variant: 'danger',
+			icon: 'triangle-exclamation'
+		});
 	}
 }
