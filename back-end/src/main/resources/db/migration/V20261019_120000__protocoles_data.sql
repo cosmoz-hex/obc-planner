@@ -3714,11 +3714,11 @@ UNION ALL
 UNION ALL
     SELECT ref_exercice_id, 'ROUGH', 1, '2', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '4', 90 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '4', 85 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '6', 90 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '6', 75 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '8', 90 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '8', 65 FROM ins
 UNION ALL
     SELECT ref_exercice_id, 'TECH', 2, '5', 80 FROM ins
 UNION ALL
@@ -3785,9 +3785,9 @@ UNION ALL
 UNION ALL
     SELECT ref_exercice_id, 'MID', 1, '1', 95 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'MID', 1, '3', 95 FROM ins
+    SELECT ref_exercice_id, 'MID', 1, '3', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'MID', 1, '5', 95 FROM ins
+    SELECT ref_exercice_id, 'MID', 1, '5', 80 FROM ins
 UNION ALL
     SELECT ref_exercice_id, 'CYCLE', 1, '5', 80 FROM ins
 UNION ALL
@@ -3795,9 +3795,9 @@ UNION ALL
 UNION ALL
     SELECT ref_exercice_id, 'CYCLE', 1, '1', 95 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'CYCLE', 1, '3', 95 FROM ins
+    SELECT ref_exercice_id, 'CYCLE', 1, '3', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'CYCLE', 1, '5', 95 FROM ins
+    SELECT ref_exercice_id, 'CYCLE', 1, '5', 80 FROM ins
 UNION ALL
     SELECT ref_exercice_id, 'ROUGH', 1, '5', 80 FROM ins
 UNION ALL
@@ -3807,11 +3807,11 @@ UNION ALL
 UNION ALL
     SELECT ref_exercice_id, 'ROUGH', 1, '1', 95 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '3', 95 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '3', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '3', 95 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '3', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '5', 95 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '5', 80 FROM ins
 UNION ALL
     SELECT ref_exercice_id, 'TECH', 2, '5', 80 FROM ins
 UNION ALL
@@ -3953,9 +3953,9 @@ UNION ALL
 UNION ALL
     SELECT ref_exercice_id, 'ROUGH', 1, '1', 100 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '3', 100 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '3', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '3', 100 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '3', 90 FROM ins
 UNION ALL
     SELECT ref_exercice_id, 'TECH', 3, '3', 90 FROM ins
 UNION ALL
@@ -4053,9 +4053,9 @@ UNION ALL
 UNION ALL
     SELECT ref_exercice_id, 'ROUGH', 1, '1', 100 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '3', 100 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '3', 90 FROM ins
 UNION ALL
-    SELECT ref_exercice_id, 'ROUGH', 1, '3', 100 FROM ins
+    SELECT ref_exercice_id, 'ROUGH', 1, '3', 90 FROM ins
 UNION ALL
     SELECT ref_exercice_id, 'TECH', 3, '3', 90 FROM ins
 UNION ALL
