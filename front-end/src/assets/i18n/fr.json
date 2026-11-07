@@ -219,6 +219,115 @@
       "delete": "La suppression a échoué. Veuillez réessayer."
     }
   },
+  "protocoles": {
+    "actions": {
+      "add": "Ajouter un protocole"
+    },
+    "filters": {
+      "label": "Filtres",
+      "movement": "Mouvement",
+      "weekType": "Semaine type",
+      "goal": "Objectif",
+      "archetype": "Archétype"
+    },
+    "table": {
+      "caption": "Liste des protocoles"
+    },
+    "columns": {
+      "movement": "Mouvement",
+      "weekType": "Semaine type",
+      "goal": "Objectif",
+      "trainingOrder": "N° séance",
+      "exercice": "Exercice",
+      "archetype": "Archétype",
+      "sets": "Séries",
+      "actions": "Actions"
+    },
+    "enums": {
+      "movement": {
+        "SN": "Arraché",
+        "CL": "Épaulé",
+        "JK": "Jeté",
+        "SQ": "Squat",
+        "PL": "Tirage",
+        "MS": "Musculation"
+      },
+      "weekType": {
+        "F": "Foncier",
+        "T": "Technique",
+        "S": "Surcharge",
+        "A": "Affûtage",
+        "D": "Deload"
+      },
+      "goal": {
+        "EXT": "Extension",
+        "CATCH": "Passage & Réception",
+        "PATH": "Trajectoire",
+        "KEEP": "Maintien",
+        "STR": "Force",
+        "SPD": "Vitesse",
+        "GEN": "Général",
+        "LEGS": "Jambes",
+        "POST": "Chaîne postérieure",
+        "UPPER": "Haut du corps"
+      },
+      "archetype": {
+        "MID": "Mixte",
+        "ROUGH": "Bourrin",
+        "TECH": "Technicien",
+        "CYCLE": "Cyclique",
+        "LEARN": "Apprentissage"
+      },
+      "reference": {
+        "BS": "Squat Nuque",
+        "FS": "Squat Clavicule",
+        "SN": "Arraché",
+        "CJ": "Épaulé-Jeté"
+      }
+    },
+    "delete": {
+      "title": "Supprimer le protocole",
+      "message": "Cette action est irréversible. Confirmez-vous la suppression de ce protocole ?"
+    },
+    "errors": {
+      "save": "L'enregistrement a échoué. Veuillez réessayer.",
+      "delete": "La suppression a échoué. Veuillez réessayer."
+    },
+    "form": {
+      "title": {
+        "create": "Nouveau protocole",
+        "edit": "Modifier le protocole"
+      },
+      "fields": {
+        "movement": "Mouvement",
+        "weekType": "Semaine type",
+        "goal": "Objectif",
+        "archetype": "Archétype",
+        "trainingOrder": "N° séance",
+        "exerciceName": "Exercice",
+        "reference": "Exercice de référence"
+      },
+      "errors": {
+        "movement": "Le mouvement est obligatoire.",
+        "weekType": "La semaine type est obligatoire.",
+        "goal": "L'objectif est obligatoire.",
+        "archetype": "L'archétype est obligatoire.",
+        "trainingOrder": "Le numéro de séance est obligatoire.",
+        "exerciceName": "L'exercice est obligatoire.",
+        "setNumber": "Le nombre de séries est obligatoire.",
+        "weight": "La charge est obligatoire."
+      }
+    },
+    "series": {
+      "legend": "Séries",
+      "setNumber": "Séries",
+      "repNumber": "Répétitions",
+      "repNumberPlaceholder": "ex. 6, 30s, 1 + 1",
+      "weight": "Charge",
+      "add": "Ajouter une ligne",
+      "remove": "Supprimer la ligne"
+    }
+  },
   "evaluations": {
     "title": "Evaluations",
     "wizard": {
@@ -553,7 +662,8 @@
       "title": "Référentiel",
       "tabs": {
         "archetypes": "Archétypes",
-        "planning": "Planning"
+        "planning": "Planning",
+        "protocoles": "Protocoles"
       },
       "archetypes": {
         "placeholder": "La gestion des archétypes sera disponible ici."

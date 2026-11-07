@@ -7,6 +7,8 @@ inclusion: always
 
 > Ce fichier doit être mis à jour à chaque modification structurelle (libs, packages, tables, APIs).
 
+> **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `doc-writer`) pour la feature « Référentiel > Protocoles » (spec `.kiro/specs/referentiel-protocoles/`) : API `/ref-exercices`, route `/referentiel/protocoles`, évolutions de schéma `ref_exercices` / `ref_exercice_sets` et relation One-Many associée. État documenté = état réel du code.
+
 ---
 
 ## Backend — Spring Boot 4.1 / Java 25
@@ -50,6 +52,12 @@ Base URL: `/api`
 | `POST` | `/ref-plannings` | `RefPlanningController` | Création d'une ligne de planning de référence |
 | `PUT` | `/ref-plannings/{id}` | `RefPlanningController` | Modification d'une ligne de planning de référence. Introuvable → 404 |
 | `DELETE` | `/ref-plannings/{id}` | `RefPlanningController` | Suppression d'une ligne de planning de référence. Introuvable → 404 |
+| `GET` | `/ref-exercices` | `RefExerciceController` | Liste paginée, filtrée (`exerciceType`, `weekType`, `goal`, `archetype`) et triée (tri par défaut `exerciceType`, `weekType`, `goal`, `trainingOrder`) ; réponse imbriquée exercice + ses séries (`sets`). `size=0` désactive la pagination |
+| `GET` | `/ref-exercices/{id}` | `RefExerciceController` | Consultation d'un exercice de référence (avec ses séries). Introuvable → 404 |
+| `POST` | `/ref-exercices` | `RefExerciceController` | Création d'un exercice de référence et de ses séries (201) |
+| `PUT` | `/ref-exercices/{id}` | `RefExerciceController` | Modification d'un exercice de référence : libellé + remplacement en bloc des séries des archétypes présents dans le payload (les autres archétypes restent intacts). Introuvable → 404 |
+| `DELETE` | `/ref-exercices/{id}` | `RefExerciceController` | Suppression d'un exercice de référence et de toutes ses séries (cascade). Introuvable → 404 |
+| `DELETE` | `/ref-exercices/{id}/sets?archetype=` | `RefExerciceController` | Suppression des séries d'un archétype donné ; si l'exercice n'a plus aucune série, il est supprimé. Introuvable → 404 |
 | `GET` | `/evaluations` | `EvaluationController` | Liste paginée et triée des évaluations (lecture seule, une ligne par évaluation ; tri par défaut date décroissante). `size=0` désactive la pagination |
 | `GET` | `/evaluations/{id}` | `EvaluationController` | Relecture complète d'une évaluation (bilan `eval_summaries` + détail `eval_details`) pour l'édition. Évaluation introuvable → 404 |
 | `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`, points faibles techniques `snatch`/`clean`/`jerk`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
@@ -78,7 +86,9 @@ src/app/
 │   ├── evaluations/    # Consultation des évaluations + wizard de saisie
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── archetypes/ # Profils archétypes (liste + modale CRUD)
-│       └── planning/   # Grille pivot hebdomadaire du planning de référence, édition inline par cellule
+│       ├── planning/   # Grille pivot hebdomadaire du planning de référence, édition inline par cellule
+│       └── protocoles/ # Exercices de référence et leurs séries par mouvement
+│                       # (liste + modale protocole-form-dialog)
 ├── models/             # Interfaces TypeScript correspondant aux DTOs backend
 ├── services/           # Services HTTP par domaine métier + loader i18n custom
 ├── directives/         # Directives transverses (ex. value accessors Signal Forms pour les composants WebAwesome)
@@ -92,9 +102,10 @@ src/app/
 | `/` | redirect → `/athletes` | Redirection par défaut |
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
-| `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel |
+| `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel (Archétypes, Planning, Protocoles) |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
 | `/referentiel/planning` | `PlanningComponent` | Grille pivot hebdomadaire du planning de référence, édition inline par cellule (persistance immédiate) |
+| `/referentiel/protocoles` | `ProtocolesComponent` | Exercices de référence et leurs séries par mouvement : grille serveur (une ligne par exercice × archétype), filtres Mouvement / Semaine Type / Objectif (dynamique selon le mouvement) / Archétype, édition inline restreinte (libellé + séries) et modale d'ajout complète, suppression. Référence non affichée (déduite dans la modale) |
 
 ---
 
@@ -249,22 +260,24 @@ Planning de référence du moteur de génération : séances type par nombre de 
 ---
 
 #### `ref_exercices`
-Catalogue de référence des exercices du moteur de génération. Table autonome (aucune FK).
+Catalogue de référence des exercices du moteur de génération. Porte la collection de ses séries (`ref_exercice_sets`) en relation **One-Many** (1 — N) exposée par l'API (exercice + ses séries). Aucune FK sortante.
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
 | `ref_exercice_id` | `INTEGER` | PK | Identifiant auto-généré (`GENERATED BY DEFAULT AS IDENTITY`) |
-| `exercice_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type d'exercice : `SN`, `CJ`, `SQ`, `PL`, `RF`, `MS` |
+| `exercice_type` | `VARCHAR(10)` | NOT NULL, CHECK (`chk_ref_exercices_1`) | Type d'exercice : `SN`, `CJ`, `CL`, `JK`, `SQ`, `PL`, `RF`, `MS`. `CJ` = Clean & Jerk (épaulé-jeté complet, conservé) ; `CL` = Clean / Épaulé et `JK` = Jerk / Jeté distinguent les deux mouvements en cohérence avec le wizard |
 | `week_type` | `VARCHAR(10)` | NOT NULL, CHECK | Type de semaine : `F` (Volume), `T` (Tech), `S` (Strength), `A` (Peak), `D` (Deload) |
-| `goal` | `VARCHAR(10)` | NOT NULL, CHECK | Objectif : `EXT`, `CATCH`, `PATH`, `KEEP`, `STR`, `SPD` |
+| `goal` | `VARCHAR(10)` | NOT NULL, CHECK (`chk_ref_exercices_3`) | Objectif : `EXT`, `CATCH`, `PATH` (technique), `KEEP`, `STR`, `SPD` (squat/tirage), `GEN` (Général), `LEGS` (Jambes), `POST` (Chaîne postérieure), `UPPER` (Haut du corps) (musculation) |
 | `training_order` | `INTEGER` | NOT NULL, CHECK > 0 | Ordre de l'exercice dans la séance |
 | `exercice_name` | `VARCHAR(100)` | NOT NULL | Nom de l'exercice de référence |
-| `reference` | `VARCHAR(10)` | NOT NULL, CHECK | Exercice de référence pour le calcul de charge : `SN`, `CJ`, `FS`, `BS`, `SP`, `CP` |
+| `reference` | `VARCHAR(10)` | NULL, CHECK (`chk_ref_exercices_5`) | Exercice de référence pour le calcul de charge : `SN`, `CJ`, `FS`, `BS`, `SP`, `CP` (domaine inchangé). **Nullable** : NULL pour la Musculation |
+
+Index : `idx_ref_exercices_1 (exercice_type, week_type, goal, training_order)` pour le filtre/tri serveur.
 
 ---
 
 #### `ref_exercice_sets`
-Séries/répétitions de référence par exercice et archétype.
+Séries/répétitions de référence par exercice et archétype. Côté « N » de la relation One-Many avec `ref_exercices`.
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
@@ -272,5 +285,17 @@ Séries/répétitions de référence par exercice et archétype.
 | `ref_exercice_id` | `INTEGER` | NOT NULL, FK → ref_exercices | Exercice de référence parent (index `idx_ref_exercice_sets_1`) |
 | `archetype` | `VARCHAR(10)` | NOT NULL, CHECK | Archétype de l'athlète : `MID`, `ROUGH`, `TECH`, `CYCLE`, `LEARN` |
 | `set_number` | `INTEGER` | NOT NULL, CHECK > 0 | Nombre de séries de référence |
-| `rep_number` | `INTEGER` | NOT NULL, CHECK > 0 | Nombre de répétitions de référence |
+| `rep_number` | `VARCHAR(20)` | — | Répétitions de référence au format libre : `'6'`, `'30s'`, `'12m'`, `'(1 + 1)'`, `'6 / 6'`, ou NULL (combinés / volumes sans reps). **Nullable** ; CHECK `rep_number > 0` supprimé |
 | `weight` | `NUMERIC(6, 2)` | — | Charge de référence en kg (ou % selon usage du moteur) |
+
+---
+
+## Risques & dettes connus
+
+### Moteur de génération vs données « Protocoles »
+L'écran Référentiel > Protocoles et son schéma introduisent de nouvelles valeurs que le **moteur de génération de programme n'exploite pas encore** :
+- `exercice_type` `CL` (Épaulé) et `JK` (Jeté) — le moteur raisonne encore sur l'ancien domaine ;
+- objectifs de musculation `GEN` / `LEGS` / `POST` / `UPPER` sur `ref_exercices.goal` ;
+- `ref_exercice_sets.rep_number` désormais **textuel** (`'30s'`, `'(1 + 1)'`, NULL…) alors que le moteur attendait un entier.
+
+Tant que le moteur n'a pas évolué, les exercices/séries saisis avec ces nouvelles valeurs peuvent ne pas être pris en compte (ou mal interprétés) lors de la génération d'un programme. Évolution du moteur à planifier hors périmètre de la feature Protocoles.

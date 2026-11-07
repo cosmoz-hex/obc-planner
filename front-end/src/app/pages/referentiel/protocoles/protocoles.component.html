@@ -1,0 +1,136 @@
+<section class="flex flex-1 min-h-0 flex-col gap-4 px-4">
+
+	<div class="flex flex-wrap items-end gap-3">
+		<div role="group" [attr.aria-label]="'protocoles.filters.label' | translate"
+		     class="flex flex-wrap items-end gap-3">
+			<wa-select size="s" with-clear [formField]="filtersForm.exerciceType"
+			           [attr.label]="'protocoles.filters.movement' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of movements; track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.movement.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.weekType"
+			           [attr.label]="'protocoles.filters.weekType' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of weekTypes; track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.weekType.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.goal"
+			           [attr.label]="'protocoles.filters.goal' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of goalOptions(); track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.goal.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select size="s" with-clear [formField]="filtersForm.archetype"
+			           [attr.label]="'protocoles.filters.archetype' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (value of archetypes; track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.archetype.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+		</div>
+
+		<wa-button variant="brand" class="ml-auto" (click)="openCreate()">
+			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+			{{ 'protocoles.actions.add' | translate }}
+		</wa-button>
+	</div>
+
+	<app-data-grid
+		[rows]="rows()"
+		[columns]="columns()"
+		[loading]="loading()"
+		[caption]="'protocoles.table.caption'"
+		[rowId]="rowId"
+		[pageable]="true"
+		[(page)]="page"
+		[(pageSize)]="pageSize"
+		[totalElements]="totalElements()"
+		[sort]="sort()"
+		(pageSizeChange)="onPageSizeChange()"
+		(sortChange)="onSortChange($event)"
+		(cellClick)="onCellClick($event)">
+	</app-data-grid>
+</section>
+
+<!-- Templates de cellule -->
+
+<ng-template #movementCell let-row>
+	<wa-tag variant="brand">{{ 'protocoles.enums.movement.' + row.exercice.exerciceType | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #weekTypeCell let-row>
+	<wa-tag variant="neutral">{{ 'protocoles.enums.weekType.' + row.exercice.weekType | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #goalCell let-row>
+	<wa-tag variant="neutral">{{ 'protocoles.enums.goal.' + row.exercice.goal | translate }}</wa-tag>
+</ng-template>
+
+<ng-template #trainingOrderCell let-row>
+	<span>{{ row.exercice.trainingOrder }}</span>
+</ng-template>
+
+<ng-template #exerciceCell let-row>
+	<span>{{ row.exercice.exerciceName }}</span>
+</ng-template>
+
+<ng-template #archetypeCell let-row>
+	<wa-tag variant="neutral">{{ 'protocoles.enums.archetype.' + row.archetype | translate }}</wa-tag>
+</ng-template>
+
+<!-- Séries de l'archétype de la ligne : une série par élément de liste.
+     Format `setNumber x repNumber @ weight%` avec gestion rep/charge absents. -->
+<ng-template #setsCell let-row>
+	<ul class="m-0 list-none p-0 leading-relaxed">
+		@for (set of row.sets; track set.refExerciceSetId) {
+		<li>
+			<span>{{ set.setNumber }}</span>@if (set.repNumber) {<span> x {{ set.repNumber }}</span>}@if (set.weight != null) {<span> &#64; {{ set.weight }}%</span>}
+		</li>
+		}
+	</ul>
+</ng-template>
+
+<ng-template #actionsCell let-row>
+	<wa-dropdown (wa-select)="onRowAction(row, $event)">
+		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
+			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
+		</wa-button>
+		<wa-dropdown-item value="edit">
+			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.edit' | translate }}
+		</wa-dropdown-item>
+		<wa-dropdown-item value="delete" variant="danger">
+			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.delete' | translate }}
+		</wa-dropdown-item>
+	</wa-dropdown>
+</ng-template>
+
+<!-- Modale de création / édition d'un protocole (Lot 6). -->
+<app-protocole-form-dialog
+	[open]="dialogOpen()"
+	[mode]="dialogMode()"
+	[protocoleRow]="selectedRow()"
+	(save)="onSave($event)"
+	(close)="closeDialog()">
+</app-protocole-form-dialog>
+
+<!-- Confirmation de suppression -->
+<app-confirm-dialog
+	[open]="confirmOpen()"
+	titleKey="protocoles.delete.title"
+	messageKey="protocoles.delete.message"
+	confirmKey="common.actions.delete"
+	(confirmed)="confirmDelete()"
+	(cancelled)="cancelDelete()">
+</app-confirm-dialog>
+
+<!-- Notification d'erreur transitoire -->
+<wa-toast #errorToast></wa-toast>

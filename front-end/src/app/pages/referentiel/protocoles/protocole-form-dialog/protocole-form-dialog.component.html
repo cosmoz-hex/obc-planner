@@ -1,0 +1,108 @@
+<wa-dialog [attr.open]="open() ? true : null"
+           [attr.label]="title() | translate"
+           (wa-after-hide)="onDialogHide($event)"
+           style="--width: 40vw;"
+>
+
+	<form class="flex flex-col gap-1" (submit)="$event.preventDefault(); onSubmit()">
+		<div class="grid grid-cols-2 gap-1">
+
+			<wa-select [formField]="protocoleForm.exerciceType"
+			           [attr.label]="'protocoles.form.fields.movement' | translate">
+				@for (value of movements; track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.movement.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select [formField]="protocoleForm.weekType"
+			           [attr.label]="'protocoles.form.fields.weekType' | translate">
+				@for (value of weekTypes; track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.weekType.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select [formField]="protocoleForm.goal"
+			           [attr.label]="'protocoles.form.fields.goal' | translate">
+				@for (value of goalOptions(); track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.goal.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-select [formField]="protocoleForm.archetype"
+			           [attr.label]="'protocoles.form.fields.archetype' | translate">
+				@for (value of archetypes; track value) {
+				<wa-option [attr.value]="value">{{ 'protocoles.enums.archetype.' + value | translate }}</wa-option>
+				}
+			</wa-select>
+
+			<wa-input type="number"
+			          [formField]="protocoleForm.trainingOrder"
+			          [attr.label]="'protocoles.form.fields.trainingOrder' | translate"></wa-input>
+
+
+
+			<!-- Exercice de référence (charge) : non applicable à la Musculation.
+			     Liste déroulante pré-sélectionnée selon le mouvement mais modifiable. -->
+			@if (!isMusculation()) {
+				<wa-select [formField]="protocoleForm.reference"
+				           [attr.label]="'protocoles.form.fields.reference' | translate">
+					@for (value of referenceOptions; track value) {
+					<wa-option [attr.value]="value">{{ 'protocoles.enums.reference.' + value | translate }}</wa-option>
+					}
+				</wa-select>
+			}
+		</div>
+
+		<wa-input [formField]="protocoleForm.exerciceName"
+		          [attr.label]="'protocoles.form.fields.exerciceName' | translate"></wa-input>
+
+		<!-- Bloc Séries : liste dynamique de lignes (séries / répétitions / charge %). -->
+		<fieldset class="m-0 flex flex-col gap-1 border-0 p-0 m-0">
+			@for (set of protocoleForm.sets; track $index; let i = $index) {
+			<div class="grid grid-cols-4 gap-1">
+				<wa-input type="number"
+				          [formField]="protocoleForm.sets[i].setNumber"
+				          [attr.label]="'protocoles.series.setNumber' | translate"></wa-input>
+
+				<wa-input [formField]="protocoleForm.sets[i].repNumber"
+				          [attr.label]="'protocoles.series.repNumber' | translate"
+				          [attr.placeholder]="'protocoles.series.repNumberPlaceholder' | translate"></wa-input>
+
+				@if (!isMusculation()) {
+				<wa-input type="number"
+				          [formField]="protocoleForm.sets[i].weight"
+				          [attr.label]="'protocoles.series.weight' | translate">
+					<span slot="end">%</span>
+				</wa-input>
+				}
+
+				<wa-button appearance="plain"
+				           type="button"
+									 class="self-top mt-1"
+				           [attr.hidden]="i == 0 ? true : null"
+				           [attr.aria-label]="t('protocoles.series.remove')"
+				           (click)="removeSeries(i)">
+					<wa-icon name="trash" aria-hidden="true"></wa-icon>
+				</wa-button>
+			</div>
+			}
+
+			<div>
+				<wa-button appearance="plain" size="small" type="button" (click)="addSeries()">
+					<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+					{{ 'protocoles.series.add' | translate }}
+				</wa-button>
+			</div>
+		</fieldset>
+
+		<div slot="footer" class="flex justify-end gap-1">
+			<wa-button appearance="plain" type="button" (click)="onClose()">
+				{{ 'common.actions.cancel' | translate }}
+			</wa-button>
+
+			<wa-button variant="brand" type="submit" [attr.disabled]="protocoleForm().invalid() ? true : null">
+				{{ 'common.actions.save' | translate }}
+			</wa-button>
+		</div>
+	</form>
+</wa-dialog>

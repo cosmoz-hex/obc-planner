@@ -31,6 +31,10 @@ export const routes: Routes = [
 						path: 'planning',
 						loadComponent: () => import('./pages/referentiel/planning/planning.component').then(m => m.PlanningComponent),
 						data: {title: 'pages.referentiel.title'}
+					}, {
+						path: 'protocoles',
+						loadComponent: () => import('./pages/referentiel/protocoles/protocoles.component').then(m => m.ProtocolesComponent),
+						data: {title: 'pages.referentiel.title'}
 					}
 				]
 			}

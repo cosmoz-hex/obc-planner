@@ -24,7 +24,8 @@ import java.math.BigDecimal;
  * Jeu de séries de référence rattaché à un {@link RefExercice}, mappé sur la
  * table {@code ref_exercice_sets}.
  *
- * <p>Porte l'archétype ({@code archetype}), le nombre de séries / répétitions et
+ * <p>Porte l'archétype ({@code archetype}), le nombre de séries, le nombre de
+ * répétitions (texte libre : {@code 6}, {@code 30s}, {@code 1 + 1}, ou NULL) et
  * la charge associée. La seule relation autorisée entre tables de référence est
  * la FK {@code ref_exercice_id} vers {@code ref_exercices}.</p>
  */
@@ -55,9 +56,8 @@ public class RefExerciceSet {
     @Column(name = "set_number", nullable = false)
     private Integer setNumber;
 
-    @NotNull
-    @Column(name = "rep_number", nullable = false)
-    private Integer repNumber;
+    @Column(name = "rep_number", length = 20)
+    private String repNumber;
 
     @Column(name = "weight", precision = 6, scale = 2)
     private BigDecimal weight;

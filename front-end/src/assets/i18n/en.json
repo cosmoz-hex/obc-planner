@@ -219,6 +219,115 @@
       "delete": "Deletion failed. Please try again."
     }
   },
+  "protocoles": {
+    "actions": {
+      "add": "Add a protocol"
+    },
+    "filters": {
+      "label": "Filters",
+      "movement": "Movement",
+      "weekType": "Week type",
+      "goal": "Goal",
+      "archetype": "Archetype"
+    },
+    "table": {
+      "caption": "Protocol list"
+    },
+    "columns": {
+      "movement": "Movement",
+      "weekType": "Week type",
+      "goal": "Goal",
+      "trainingOrder": "Session #",
+      "exercice": "Exercise",
+      "archetype": "Archetype",
+      "sets": "Sets",
+      "actions": "Actions"
+    },
+    "enums": {
+      "movement": {
+        "SN": "Snatch",
+        "CL": "Clean",
+        "JK": "Jerk",
+        "SQ": "Squat",
+        "PL": "Pull",
+        "MS": "Bodybuilding / Accessory"
+      },
+      "weekType": {
+        "F": "Volume",
+        "T": "Technique",
+        "S": "Overload",
+        "A": "Peaking",
+        "D": "Deload"
+      },
+      "goal": {
+        "EXT": "Extension",
+        "CATCH": "Pull-under & Catch",
+        "PATH": "Bar path",
+        "KEEP": "Hold",
+        "STR": "Strength",
+        "SPD": "Speed",
+        "GEN": "General",
+        "LEGS": "Legs",
+        "POST": "Posterior chain",
+        "UPPER": "Upper body"
+      },
+      "archetype": {
+        "MID": "Mixed",
+        "ROUGH": "Bruiser",
+        "TECH": "Technician",
+        "CYCLE": "Cyclic",
+        "LEARN": "Learning"
+      },
+      "reference": {
+        "BS": "Back squat",
+        "FS": "Front squat",
+        "SN": "Snatch",
+        "CJ": "Clean & Jerk"
+      }
+    },
+    "delete": {
+      "title": "Delete protocol",
+      "message": "This action cannot be undone. Do you confirm the deletion of this protocol?"
+    },
+    "errors": {
+      "save": "Saving failed. Please try again.",
+      "delete": "Deletion failed. Please try again."
+    },
+    "form": {
+      "title": {
+        "create": "New protocol",
+        "edit": "Edit protocol"
+      },
+      "fields": {
+        "movement": "Movement",
+        "weekType": "Week type",
+        "goal": "Goal",
+        "archetype": "Archetype",
+        "trainingOrder": "Session #",
+        "exerciceName": "Exercise",
+        "reference": "Reference exercise"
+      },
+      "errors": {
+        "movement": "Movement is required.",
+        "weekType": "Week type is required.",
+        "goal": "Goal is required.",
+        "archetype": "Archetype is required.",
+        "trainingOrder": "Session number is required.",
+        "exerciceName": "Exercise is required.",
+        "setNumber": "Number of sets is required.",
+        "weight": "Load is required."
+      }
+    },
+    "series": {
+      "legend": "Sets",
+      "setNumber": "Sets",
+      "repNumber": "Reps",
+      "repNumberPlaceholder": "e.g. 6, 30s, 1 + 1",
+      "weight": "Load",
+      "add": "Add a row",
+      "remove": "Remove row"
+    }
+  },
   "evaluations": {
     "title": "Evaluations",
     "wizard": {
@@ -553,7 +662,8 @@
       "title": "Reference Data",
       "tabs": {
         "archetypes": "Archetypes",
-        "planning": "Planning"
+        "planning": "Planning",
+        "protocoles": "Protocols"
       },
       "archetypes": {
         "placeholder": "Archetype management will be available here."

@@ -38,7 +38,8 @@ export class ReferentielComponent {
 
 	protected readonly tabs = [
 		{path: 'archetypes', labelKey: 'pages.referentiel.tabs.archetypes'},
-		{path: 'planning', labelKey: 'pages.referentiel.tabs.planning'}
+		{path: 'planning', labelKey: 'pages.referentiel.tabs.planning'},
+		{path: 'protocoles', labelKey: 'pages.referentiel.tabs.protocoles'}
 	] as const;
 
 	/** Segment de route actif (ex. "exercices"), dérivé de l'URL courante. */
