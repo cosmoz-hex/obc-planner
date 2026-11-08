@@ -122,6 +122,12 @@
 		<wa-button appearance="plain" type="button" (click)="onClose()">
 			{{ 'programmes.detail.actions.close' | translate }}
 		</wa-button>
+		<wa-button variant="brand" type="button"
+		           [attr.aria-label]="t('programmes.detail.actions.printAriaLabel')"
+		           (click)="onPrint()">
+			<wa-icon slot="start" name="print" aria-hidden="true"></wa-icon>
+			{{ 'programmes.detail.actions.print' | translate }}
+		</wa-button>
 	</div>
 </wa-dialog>
 

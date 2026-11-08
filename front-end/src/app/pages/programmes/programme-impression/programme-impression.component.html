@@ -1,0 +1,180 @@
+<!--
+	Page d'impression (vue de restitution, lecture seule).
+	Clés i18n référencées, à AJOUTER au Lot 3 (fr.json / en.json) :
+	  - programmes.impression.title          (titre document / data.title de la route)
+	  - programmes.impression.loading        (état de chargement)
+	  - programmes.impression.errors.load    (erreur de chargement / introuvable)
+	  - programmes.impression.grid.caption   (légende de table, paramètre {week})
+	Clés RÉUTILISÉES de la consultation (déjà existantes) :
+	  programmes.detail.header.*, programmes.enums.weekType.*, programmes.detail.grid.*,
+	  programmes.detail.cell.* (or, setsWithWeight, sets, setsNoRepsWithWeight, setsNoReps),
+	  programmes.detail.weekSelector.label
+-->
+<main class="flex flex-col gap-2">
+
+	@if (loading()) {
+	<p role="status" aria-live="polite">{{ 'programmes.impression.loading' | translate }}</p>
+	} @else if (error()) {
+	<p role="alert">{{ 'programmes.impression.errors.load' | translate }}</p>
+	} @else if (detail(); as d) {
+
+	@for (iw of weeks(); track iw.week.weekNumber) {
+	<section class="programme-week flex flex-col">
+
+		<!-- En-tête de semaine (numéro + plage de dates) -->
+		<h2 class="text-xl text-center">
+			{{ 'programmes.detail.weekSelector.label' | translate: {
+			current: iw.week.weekNumber,
+			total: d.weeks,
+			start: (iw.week.startDate | localizedDate),
+			end: (iw.week.endDate | localizedDate)
+			} }}
+		</h2>
+
+		<!-- En-tête de semaine (type / base % / 6 objectifs) — mêmes clés que la consultation -->
+		<dl class="grid grid-cols-7 gap-1 text-center">
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.type' | translate }}</dt>
+				<dd>{{ 'programmes.enums.weekType.' + iw.week.weekType | translate }} ({{ iw.week.basePercent }}%)</dd>
+			</div>
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.snatch' | translate }}</dt>
+				<dd>{{ iw.week.snatchGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
+			</div>
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.cj' | translate }}</dt>
+				<dd>{{ iw.week.cjGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
+			</div>
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.backSquat' | translate }}</dt>
+				<dd>{{ iw.week.backSquatGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
+			</div>
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.frontSquat' | translate }}</dt>
+				<dd>{{ iw.week.frontSquatGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
+			</div>
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.snatchPull' | translate }}</dt>
+				<dd>{{ iw.week.snatchPullGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
+			</div>
+			<div class="grid grid-rows-2">
+				<dt>{{ 'programmes.detail.header.cjPull' | translate }}</dt>
+				<dd>{{ iw.week.cjPullGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
+			</div>
+		</dl>
+
+		<!-- Grille pivot : colonnes = séances, lignes = positions d'exercice -->
+		<table class="programme-table w-full border-collapse text-sm">
+			<thead>
+			<tr>
+				<th scope="col" class="text-left align-top border p-2">
+					{{ 'programmes.detail.grid.exerciceOrderHeader' | translate }}
+				</th>
+				@for (tn of iw.trainingNumbers; track tn) {
+				<th scope="col" class="text-left align-top border p-2">
+					{{ 'programmes.detail.grid.trainingHeader' | translate: {value: tn} }}
+				</th>
+				}
+			</tr>
+			</thead>
+			<tbody>
+			<!-- Ligne « État de forme du jour » : une cellule identique par séance (gabarit à remplir à la main). -->
+			<tr>
+				<th class="align-top border p-2 text-sm whitespace-break">
+					{{ 'programmes.impression.form.title' | translate }}
+				</th>
+				@for (tn of iw.trainingNumbers; track tn) {
+				<td class="align-top border p-2">
+					<div class="programme-form grid grid-cols-2 gap-1">
+						<span>{{ 'programmes.impression.form.energy' | translate }} ⚡ ........ / 3</span>
+						<span>{{ 'programmes.impression.form.nutrition' | translate }} 🍽 ........ / 3</span>
+						<span class="col-span-2">{{ 'programmes.impression.form.previousDifficulty' | translate }} 😣 ........ / 3</span>
+						<span class="col-span-2">{{ 'programmes.impression.form.conditions' | translate }} 🌡️ ........ / 3</span>
+						<span>&nbsp;</span>
+						<span class="font-semibold col-span-2">{{ 'programmes.impression.form.total' | translate }} ........ / 12</span>
+						<span class="col-span-2">{{ 'programmes.impression.form.scale.excellent' | translate }}🔥</span>
+						<span class="col-span-2">{{ 'programmes.impression.form.scale.good' | translate }}🔋</span>
+						<span class="col-span-2">{{ 'programmes.impression.form.scale.medium' | translate }} 🪫</span>
+						<span class="col-span-2">{{ 'programmes.impression.form.scale.low' | translate }} 😴</span>
+					</div>
+				</td>
+				}
+			</tr>
+			@for (row of iw.rows; track row.exerciceOrder) {
+			<tr>
+				<th scope="row" class="text-left align-top border p-2 text-sm">
+					{{ 'programmes.detail.grid.exerciceRow' | translate: {value: row.exerciceOrder} }}
+				</th>
+				@for (cell of row.cells; track cell.trainingNumber) {
+				<td class="programme-cell align-top border p-2">
+					<div class="programme-cell-inner">
+						<div>
+							@for (exercice of cell.exercices; track exercice.programmeExerciceId; let idx = $index) {
+							<div>
+								@if (idx > 0) {
+								<span class="font-semibold">{{ 'programmes.detail.cell.or' | translate }}</span>
+								}
+								<span class="font-semibold">{{ exercice.exerciceName }}</span>
+								@if (exercice.series.length > 0) {
+								<ul class="list-none m-0 p-0 italic">
+									@for (serie of exercice.series; track serie.programmeSeriesId) {
+									<li class="m-0 p-0">
+										@if (serie.repNumber) {
+										@if (serie.minWeight != null && serie.maxWeight != null) {
+										{{ 'programmes.detail.cell.setsWithWeight' | translate: {sets: serie.setNumber, reps:
+										serie.repNumber, min: serie.minWeight, max: serie.maxWeight} }}
+										} @else {
+										{{ 'programmes.detail.cell.sets' | translate: {sets: serie.setNumber, reps: serie.repNumber} }}
+										}
+										} @else {
+										@if (serie.minWeight != null && serie.maxWeight != null) {
+										{{ 'programmes.detail.cell.setsNoRepsWithWeight' | translate: {sets: serie.setNumber, min:
+										serie.minWeight, max: serie.maxWeight} }}
+										} @else {
+										{{ 'programmes.detail.cell.setsNoReps' | translate: {sets: serie.setNumber} }}
+										}
+										}
+									</li>
+									}
+								</ul>
+								}
+							</div>
+							}
+						</div>
+						<!-- Gabarit de saisie manuscrite des charges (décoratif, poussé en bas de cellule). -->
+						<div class="programme-cell-notes" aria-hidden="true">
+							......../......../......../......../......../......../......../........
+						</div>
+					</div>
+				</td>
+				}
+			</tr>
+			}
+			<!-- Ligne « Bilan séance » : une cellule identique par séance (gabarits à remplir à la main). -->
+			<tr>
+				<th scope="row" class="text-left align-top border p-2 text-sm font-semibold whitespace-break">
+					{{ 'programmes.impression.endOfSession.rowHeader' | translate }}
+				</th>
+				@for (tn of iw.trainingNumbers; track tn) {
+				<td class="align-top border p-2">
+					<div class="grid grid-cols-[1fr_auto] w-full">
+						<span class="font-semibold">
+							{{ 'programmes.impression.endOfSession.difficulty' | translate }}
+						</span>
+						<span>......../ 3</span>
+						<span class="font-semibold">
+							{{ 'programmes.impression.endOfSession.duration' | translate }}
+						</span>
+						<span>........ h ........</span>
+					</div>
+				</td>
+				}
+			</tr>
+			</tbody>
+		</table>
+	</section>
+	}
+
+	}
+
+</main>

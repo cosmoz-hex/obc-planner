@@ -25,12 +25,14 @@ import {ProgrammeService} from '../../../services/programme.service';
 import {ProgrammeCellDialogComponent} from '../programme-cell-dialog/programme-cell-dialog.component';
 import {DataGridComponent} from '../../../components/data-grid/data-grid.component';
 import {CellClickEvent, ColumnDef} from '../../../models/data-grid.model';
+import {gridRowsOf, ProgrammeGridCell, ProgrammeGridRow, trainingNumbersOf} from '../programme-grid.util';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
 import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/option/option.js';
 import '@awesome.me/webawesome/dist/components/button/button.js';
+import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/toast/toast.js';
 import type WaToast from '@awesome.me/webawesome/dist/components/toast/toast.js';
 
@@ -47,39 +49,6 @@ export interface EditCellEvent {
   readonly trainingNumber: number;
   readonly exerciceOrder: number;
   readonly exercices: readonly ProgrammeExercice[];
-}
-
-/**
- * Ligne de la grille de détail = une **position d'exercice** (`exerciceOrder`)
- * commune à toutes les séances de la semaine.
- *
- * NB : le champ `exercices` ne contient PAS des exercices mais la liste des
- * **cellules** de la ligne (une par séance `trainingNumber`). Le nom est
- * conservé tel que fixé par l'utilisateur, d'où ce commentaire clarifiant.
- */
-export interface ProgrammeGridRow {
-	readonly exerciceOrder: number;
-	/** Cellules de la ligne, une par séance de la semaine (triées par trainingNumber). */
-	readonly exercices: readonly ProgrammeGridCell[];
-}
-
-/**
- * Cellule de la grille = intersection d'une séance (`trainingNumber`) et d'une
- * position (`exerciceOrder`). Elle regroupe les **exercices alternatifs**
- * (« au choix ») de cette séance à cette position.
- *
- * Choix de typage : on conserve directement les {@link ProgrammeExercice}
- * d'origine (pas de `CellExercice`). Raison : `ProgrammeExercice` porte déjà tous
- * les champs nécessaires à l'affichage (nom + séries), et {@link EditCellEvent}
- * attend précisément `readonly ProgrammeExercice[]`. Garder une seule
- * représentation évite une conversion et une divergence de types entre affichage
- * et édition ; la conversion vers `CellExercice`/`CellSeries` est faite par la
- * popup d'édition au moment de bâtir le `ProgrammeCellUpdateRequest`.
- */
-export interface ProgrammeGridCell {
-	readonly trainingNumber: number;
-	readonly exerciceOrder: number;
-	readonly exercices: readonly ProgrammeExercice[];
 }
 
 /**
@@ -174,7 +143,7 @@ export class ProgrammeDetailDialogComponent {
 		if (!week) {
 			return [];
 		}
-		return [...new Set(week.trainings.map((trn) => trn.trainingNumber))].sort((a, b) => a - b);
+		return trainingNumbersOf(week);
 	});
 
 	/**
@@ -187,21 +156,7 @@ export class ProgrammeDetailDialogComponent {
 		if (!week) {
 			return [];
 		}
-		const trainingNumbers = this.trainingNumbers();
-		// Positions distinctes (toutes séances confondues), triées croissant.
-		const orders = [...new Set(
-			week.trainings.flatMap((trn) => trn.exercices.map((ex) => ex.exerciceOrder))
-		)].sort((a, b) => a - b);
-
-		return orders.map((exerciceOrder) => ({
-			exerciceOrder,
-			exercices: trainingNumbers.map((trainingNumber) => {
-				const training = week.trainings.find((trn) => trn.trainingNumber === trainingNumber);
-				const exercices = (training?.exercices ?? [])
-					.filter((ex) => ex.exerciceOrder === exerciceOrder);
-				return {trainingNumber, exerciceOrder, exercices} satisfies ProgrammeGridCell;
-			})
-		} satisfies ProgrammeGridRow));
+		return gridRowsOf(week);
 	});
 
 	/**
@@ -272,7 +227,7 @@ export class ProgrammeDetailDialogComponent {
 
   /** Cellule d'une ligne pour une séance donnée (template séance). */
   protected cellFor(row: ProgrammeGridRow, trainingNumber: number): ProgrammeGridCell | null {
-    return row.exercices.find((c) => c.trainingNumber === trainingNumber) ?? null;
+    return row.cells.find((c) => c.trainingNumber === trainingNumber) ?? null;
   }
 
   /** Formate une date selon la langue active (sélecteur de semaines). */
@@ -302,7 +257,7 @@ export class ProgrammeDetailDialogComponent {
     if (Number.isNaN(trainingNumber)) {
       return;
     }
-    const cell = event.row.exercices.find((c) => c.trainingNumber === trainingNumber);
+    const cell = event.row.cells.find((c) => c.trainingNumber === trainingNumber);
     const editEvent: EditCellEvent = {
       weekNumber: this.selectedWeekNumber(),
       trainingNumber,
@@ -334,6 +289,18 @@ export class ProgrammeDetailDialogComponent {
 
   protected onClose(): void {
     this.close.emit();
+  }
+
+  /**
+   * Ouvre la version imprimable du programme consulté dans un nouvel onglet (RG3).
+   * La popup reste ouverte (aucun appel à {@link onClose}).
+   */
+  protected onPrint(): void {
+    const id = this.programmeId();
+    if (id === null) {
+      return;
+    }
+    window.open('/programmes/' + id + '/impression', '_blank', 'noopener');
   }
 
   /**

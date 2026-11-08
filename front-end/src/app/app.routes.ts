@@ -3,6 +3,10 @@ import {LayoutComponent} from './components/layout/layout.component';
 
 export const routes: Routes = [
 	{
+		path: 'programmes/:id/impression',
+		loadComponent: () => import('./pages/programmes/programme-impression/programme-impression.component').then(m => m.ProgrammeImpressionComponent)
+	},
+	{
 		path: '',
 		component: LayoutComponent,
 		children: [

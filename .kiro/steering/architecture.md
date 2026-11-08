@@ -13,6 +13,8 @@ inclusion: always
 
 > **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `doc-writer`) pour la feature « Refonte du modèle Programme en 3 niveaux (Séance → Exercice → Série) » (spec `.kiro/specs/refonte-modele-programme-series/`) : hiérarchie `ProgrammeTraining` (séance) **1 — N** `ProgrammeExercice` **1 — N** `ProgrammeSeries` ; `programme_trainings` recentrée sur la séance, nouvelles tables `programme_exercices` / `programme_series` (migration destructive `V20261021_100000__refonte_modele_programme_series.sql` + rollback) ; `GET /programmes/{id}` renvoyant une structure à 3 niveaux et `PUT /programmes/{id}/cell` acceptant `exercices[]` (`CellExerciceRequest`/`CellSeriesRequest`, suppression de `CellLineRequest`) ; DTOs `ProgrammeTrainingResponse` refondu + nouveaux `ProgrammeExerciceResponse`/`ProgrammeSeriesResponse` ; correction du moteur (musculation multi-exercices, `MusculationQueueBuilder` réduit à `bitmaskToGoals`) ; front `programme-detail-dialog` / `programme-cell-dialog` + `programme.model.ts`. État documenté = état réel du code.
 
+> **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `doc-writer`) pour la feature « Programme imprimable » (spec `.kiro/specs/programme-impression/`) : **frontend only — aucun impact backend/BD**. Nouvelle route `/programmes/:id/impression` **hors `LayoutComponent`** (page nue, lazy-loaded) rendant `ProgrammeImpressionComponent` ; nouveau module `pages/programmes/programme-impression/` (vue imprimable en lecture seule de toutes les semaines, tables sémantiques, rupture de page CSS par semaine) ; nouvel utilitaire partagé `pages/programmes/programme-grid.util.ts` (pivot pur `trainingNumbersOf`/`gridRowsOf` + types `ProgrammeGridRow`/`ProgrammeGridCell`, champ ligne renommé `exercices`→`cells`) consommé par `programme-detail-dialog` ET la page d'impression ; deux déclencheurs `window.open(..., '_blank', 'noopener')` (entrée « Imprimer » du menu d'actions de la liste + bouton « Imprimer » du footer de la popup de consultation) ; clés i18n `common.actions.print`, `programmes.list.actions.printAriaLabel`, `programmes.detail.actions.print`/`printAriaLabel` et bloc `programmes.impression.*`. État documenté = état réel du code.
+
 ---
 
 ## Backend — Spring Boot 4.1 / Java 25
@@ -108,7 +110,12 @@ src/app/
 │   │                   #    exercices alternatifs séparés par « ou », séries empilées,
 │   │                   #    libellé multi-lignes, pas de scroll horizontal) ;
 │   │                   #    programme-cell-dialog : édition hiérarchique d'une case
-│   │                   #    (nom d'exercice + ses séries, ajout/suppression des deux))
+│   │                   #    (nom d'exercice + ses séries, ajout/suppression des deux) ;
+│   │                   #    programme-impression/ : vue imprimable (route hors layout)
+│   │                   #    de toutes les semaines en lecture seule, tables sémantiques,
+│   │                   #    rupture de page CSS par semaine (impression navigateur) ;
+│   │                   #    programme-grid.util.ts : pivot pur partagé (dialog + impression),
+│   │                   #    trainingNumbersOf/gridRowsOf + types ProgrammeGridRow/Cell)
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── archetypes/ # Profils archétypes (liste + modale CRUD)
 │       ├── planning/   # Grille pivot hebdomadaire du planning de référence, édition inline par cellule
@@ -128,6 +135,7 @@ src/app/
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
 | `/programmes` | `ProgrammesComponent` | Liste des programmes générés (grille serveur, filtre athlète, tri) + popups de création/génération, de consultation/édition (grille hebdomadaire calquée sur l'écran Planning, sélecteur de semaines) et d'édition de cellule |
+| `/programmes/:id/impression` | `ProgrammeImpressionComponent` | Vue imprimable d'un programme (toutes les semaines, lecture seule, **hors du conteneur `LayoutComponent`** — page nue, ouverte dans un nouvel onglet ; impression via le navigateur, rupture de page par semaine) |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel (Archétypes, Planning, Protocoles) |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
 | `/referentiel/planning` | `PlanningComponent` | Grille pivot hebdomadaire du planning de référence, édition inline par cellule (persistance immédiate) |

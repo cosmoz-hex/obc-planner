@@ -31,7 +31,8 @@
       "edit": "Modifier",
       "delete": "Supprimer",
       "confirm": "Confirmer",
-      "menu": "Actions"
+      "menu": "Actions",
+      "print": "Imprimer"
     },
     "confirm": {
       "title": "Confirmation",
@@ -336,7 +337,8 @@
         "athlete": "Athlète"
       },
       "actions": {
-        "add": "Générer un programme"
+        "add": "Générer un programme",
+        "printAriaLabel": "Imprimer le programme (ouvre un nouvel onglet)"
       },
       "columns": {
         "athlete": "Athlète",
@@ -424,10 +426,42 @@
         "or": "ou "
       },
       "actions": {
-        "close": "Fermer"
+        "close": "Fermer",
+        "print": "Imprimer",
+        "printAriaLabel": "Imprimer le programme (ouvre un nouvel onglet)"
       },
       "errors": {
         "load": "Le chargement du programme a échoué. Veuillez réessayer."
+      }
+    },
+    "impression": {
+      "title": "Impression du programme",
+      "loading": "Chargement du programme…",
+      "errors": {
+        "load": "Impossible de charger le programme."
+      },
+      "grid": {
+        "caption": "Programme de la semaine {{week}}"
+      },
+      "form": {
+        "title": "État de forme du jour",
+        "rowHeader": "État de forme",
+        "energy": "Énergie",
+        "nutrition": "Alimentation",
+        "previousDifficulty": "Difficulté séance précédente",
+        "conditions": "Conditions d'entraînement",
+        "total": "Total",
+        "scale": {
+          "excellent": "10 - 12 : Let's go",
+          "good": "7 - 9 : -1 série par mouvement",
+          "medium": "4 - 6 : -10% sur les charges",
+          "low": "0 - 3 : séance récupération adaptée"
+        }
+      },
+      "endOfSession": {
+        "rowHeader": "Bilan séance",
+        "difficulty": "Difficulté du jour (0 = difficile, 3 = facile)",
+        "duration": "Durée d'entraînement"
       }
     },
     "enums": {

@@ -31,7 +31,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "confirm": "Confirm",
-      "menu": "Actions"
+      "menu": "Actions",
+      "print": "Print"
     },
     "confirm": {
       "title": "Confirmation",
@@ -336,7 +337,8 @@
         "athlete": "Athlete"
       },
       "actions": {
-        "add": "Generate a program"
+        "add": "Generate a program",
+        "printAriaLabel": "Print the programme (opens in a new tab)"
       },
       "columns": {
         "athlete": "Athlete",
@@ -424,10 +426,42 @@
         "or": "or "
       },
       "actions": {
-        "close": "Close"
+        "close": "Close",
+        "print": "Print",
+        "printAriaLabel": "Print the programme (opens in a new tab)"
       },
       "errors": {
         "load": "Loading the program failed. Please try again."
+      }
+    },
+    "impression": {
+      "title": "Programme printout",
+      "loading": "Loading programme…",
+      "errors": {
+        "load": "Unable to load the programme."
+      },
+      "grid": {
+        "caption": "Week {{week}} programme"
+      },
+      "form": {
+        "title": "Daily readiness",
+        "rowHeader": "Daily form",
+        "energy": "Energy",
+        "nutrition": "Nutrition",
+        "previousDifficulty": "Previous session difficulty",
+        "conditions": "Training conditions",
+        "total": "Total",
+        "scale": {
+          "excellent": "10 - 12: Let's go",
+          "good": "7 - 9: -1 set per movement",
+          "medium": "4 - 6: -10% on loads",
+          "low": "0 - 3: adapted recovery session"
+        }
+      },
+      "endOfSession": {
+        "rowHeader": "Session review",
+        "difficulty": "Daily difficulty (0 = hard, 3 = easy)",
+        "duration": "Training duration"
       }
     },
     "enums": {

@@ -226,9 +226,16 @@ export class ProgrammesComponent {
 		const action = detail?.item?.getAttribute('value');
 		if (action === 'edit') {
 			this.openDetail(row);
+		} else if (action === 'print') {
+			this.openPrint(row);
 		} else if (action === 'delete') {
 			this.askDelete(row);
 		}
+	}
+
+	/** Ouvre la version imprimable du programme dans un nouvel onglet (RG3). */
+	protected openPrint(row: ProgrammeRow): void {
+		window.open('/programmes/' + row.programmeId + '/impression', '_blank', 'noopener');
 	}
 
 	// --- Suppression ---

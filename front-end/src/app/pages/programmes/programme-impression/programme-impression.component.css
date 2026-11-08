@@ -1,0 +1,53 @@
+main {
+	background: none;
+	background-color: white;
+	color: black;
+}
+
+.programme-table {
+	table-layout: fixed;
+}
+
+.programme-table th,
+.programme-table td {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.programme-table thead th:first-child,
+.programme-table tbody th:first-child {
+	width: 7rem;
+}
+
+/* Le <td> conserve son comportement natif de cellule (ne JAMAIS lui mettre `display:flex`
+   sous peine de casser la mise en page tableau). Astuce : `height: 1px` sur le <td> — le
+   navigateur l'étire malgré tout à la hauteur réelle de la ligne, mais cela donne à la
+   cellule une hauteur RÉSOLUBLE, ce qui permet au wrapper interne `height: 100%` de prendre
+   toute la hauteur (un simple `height: 100%` sur le <td> n'est pas propagé de façon fiable).
+   Le wrapper (`.programme-cell-inner`) porte le flex colonne pleine hauteur : le contenu
+   reste en haut et le gabarit de saisie des charges est poussé tout en bas via
+   `margin-top: auto`. Les cellules d'une même ligne ayant la même hauteur, les pointillés
+   s'alignent en bas de la ligne. */
+.programme-table td.programme-cell {
+	height: 1px;
+}
+
+.programme-cell-inner {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.programme-cell-notes {
+	margin-top: auto;
+	white-space: nowrap;
+}
+
+@media print {
+	.programme-week:not(:first-of-type) {
+		break-before: page;
+	}
+	.programme-table tr {
+		break-inside: avoid;
+	}
+}

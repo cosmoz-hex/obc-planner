@@ -70,6 +70,10 @@
 			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
 			{{ 'common.actions.edit' | translate }}
 		</wa-dropdown-item>
+		<wa-dropdown-item value="print" [attr.aria-label]="t('programmes.list.actions.printAriaLabel')">
+			<wa-icon slot="icon" name="print" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.print' | translate }}
+		</wa-dropdown-item>
 		<wa-dropdown-item value="delete" variant="danger">
 			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
 			{{ 'common.actions.delete' | translate }}
