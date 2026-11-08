@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * Accès aux données des lignes de planning de référence.
  * La liste paginée est projetée dans {@link RefPlanningResponse} (projection DTO
@@ -36,4 +38,11 @@ public interface RefPlanningRepository extends JpaRepository<RefPlanning, Intege
             @Param("trainingOrder") Integer trainingOrder,
             Pageable pageable
     );
+
+    /**
+     * Trame de séances d'un format hebdomadaire donné, ordonnée par séance puis par
+     * ordre d'exercice. Consommée par le moteur de génération pour parcourir les
+     * cases de chaque semaine.
+     */
+    List<RefPlanning> findByWeeksNumbersOrderByTrainingOrderAscExerciceOrderAsc(Integer weeksNumbers);
 }

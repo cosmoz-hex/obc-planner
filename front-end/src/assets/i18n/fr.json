@@ -328,6 +328,142 @@
       "remove": "Supprimer la ligne"
     }
   },
+  "programmes": {
+    "list": {
+      "caption": "Liste des programmes",
+      "filter": {
+        "label": "Filtres",
+        "athlete": "Athlète"
+      },
+      "actions": {
+        "add": "Générer un programme"
+      },
+      "columns": {
+        "athlete": "Athlète",
+        "startDate": "Date de début",
+        "weeks": "Durée",
+        "frequency": "Fréquence",
+        "snatchGoal": "Arraché",
+        "cjGoal": "Épaulé-Jeté",
+        "actions": "Actions"
+      },
+      "units": {
+        "weeks": "sem.",
+        "frequency": "/ sem.",
+        "kg": "kg"
+      }
+    },
+    "confirm": {
+      "delete": {
+        "title": "Supprimer le programme",
+        "message": "Cette action est irréversible. Confirmez-vous la suppression de ce programme ?"
+      }
+    },
+    "errors": {
+      "generate": "La génération du programme a échoué. Veuillez réessayer.",
+      "delete": "La suppression a échoué. Veuillez réessayer."
+    },
+    "create": {
+      "title": "Générer un programme",
+      "fields": {
+        "athlete": "Athlète",
+        "evaluation": "Évaluation",
+        "weeks": "Durée (semaines)",
+        "frequency": "Séances / semaine",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "duration": "Durée d'une séance (min)",
+        "snatchGoal": "Objectif Arraché",
+        "cjGoal": "Objectif Épaulé-Jeté"
+      },
+      "actions": {
+        "generate": "Générer",
+        "cancel": "Annuler"
+      },
+      "errors": {
+        "athlete": "L'athlète est obligatoire.",
+        "evaluation": "L'évaluation est obligatoire.",
+        "weeks": "La durée est obligatoire.",
+        "frequency": "La fréquence est obligatoire.",
+        "startDate": "La date de début est obligatoire.",
+        "snatchGoal": "L'objectif Arraché est obligatoire.",
+        "snatchGoalMin": "L'objectif Arraché doit être strictement positif.",
+        "cjGoal": "L'objectif Épaulé-Jeté est obligatoire.",
+        "cjGoalMin": "L'objectif Épaulé-Jeté doit être strictement positif."
+      }
+    },
+    "detail": {
+      "title": "Programme",
+      "weekSelector": {
+        "title": "Semaine",
+        "label": "Semaine {{current}}/{{total}} — {{start}} → {{end}}"
+      },
+      "header": {
+        "type": "Type",
+        "base": "Base",
+        "snatch": "Arraché",
+        "cj": "Épaulé-Jeté",
+        "backSquat": "Flexion Nuque",
+        "frontSquat": "Flexion Clavicule",
+        "snatchPull": "Tirage Arraché",
+        "cjPull": "Tirage Épaulé",
+        "kg": "kg"
+      },
+      "grid": {
+        "caption": "Détail des séances de la semaine",
+        "exerciceOrderHeader": "Exercice",
+        "trainingHeader": "Séance {{value}}",
+        "exerciceRow": "Exercice {{value}}",
+        "cellLabel": "Modifier l'exercice {{exercice}} de la séance {{training}}"
+      },
+      "cell": {
+        "setsWithWeight": "{{sets}} x {{reps}} @ {{min}} - {{max}} kg",
+        "sets": "{{sets}} x {{reps}}",
+        "setsNoRepsWithWeight": "{{sets}} @ {{min}} - {{max}} kg",
+        "setsNoReps": "{{sets}} séries",
+        "or": "ou"
+      },
+      "actions": {
+        "close": "Fermer"
+      },
+      "errors": {
+        "load": "Le chargement du programme a échoué. Veuillez réessayer."
+      }
+    },
+    "enums": {
+      "weekType": {
+        "F": "Foncier",
+        "T": "Technique",
+        "S": "Surcharge",
+        "A": "Affûtage",
+        "D": "Deload",
+        "PC": "Pré-Compétition"
+      }
+    },
+    "cell": {
+      "title": "Modifier la case",
+      "linesGroup": "Lignes de la case",
+      "fields": {
+        "name": "Exercice",
+        "setNumber": "Séries",
+        "repNumber": "Répétitions",
+        "repNumberPlaceholder": "ex. 6, 30s, 1 + 1",
+        "minWeight": "Charge min.",
+        "maxWeight": "Charge max."
+      },
+      "actions": {
+        "addLine": "Ajouter une ligne",
+        "removeLine": "Supprimer la ligne",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      },
+      "errors": {
+        "name": "L'exercice est obligatoire.",
+        "weightRange": "La charge max. doit être supérieure ou égale à la charge min.",
+        "save": "L'enregistrement a échoué. Veuillez réessayer."
+      }
+    }
+  },
   "evaluations": {
     "title": "Evaluations",
     "wizard": {
@@ -657,6 +793,9 @@
     "athletes": {
       "title": "Athlètes",
       "placeholder": "La gestion des athlètes sera disponible ici."
+    },
+    "programmes": {
+      "title": "Programmes"
     },
     "referentiel": {
       "title": "Référentiel",

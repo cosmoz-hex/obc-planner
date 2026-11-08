@@ -1,0 +1,106 @@
+<section class="flex flex-1 min-h-0 flex-col gap-4 px-4">
+
+	<div class="flex flex-wrap items-end gap-3">
+		<div role="group" [attr.aria-label]="'programmes.list.filter.label' | translate"
+		     class="flex flex-wrap items-end gap-3">
+			<wa-select size="s" with-clear [formField]="filtersForm.athleteId"
+			           [attr.label]="'programmes.list.filter.athlete' | translate"
+			           [attr.placeholder]="'common.filters.all' | translate">
+				@for (athlete of athletes(); track athlete.athleteId) {
+				<wa-option [attr.value]="athlete.athleteId.toString()">{{ athlete.lastName }} {{ athlete.firstName }}</wa-option>
+				}
+			</wa-select>
+		</div>
+
+		<wa-button variant="brand" class="ml-auto" (click)="openCreate()">
+			<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+			{{ 'programmes.list.actions.add' | translate }}
+		</wa-button>
+	</div>
+
+	<app-data-grid
+		[rows]="rows()"
+		[columns]="columns()"
+		[loading]="loading()"
+		[caption]="'programmes.list.caption'"
+		[rowId]="rowId"
+		[pageable]="true"
+		[(page)]="page"
+		[(pageSize)]="pageSize"
+		[totalElements]="totalElements()"
+		[sort]="sort()"
+		(pageSizeChange)="onPageSizeChange()"
+		(sortChange)="onSortChange($event)"
+		(cellClick)="onCellClick($event)">
+	</app-data-grid>
+</section>
+
+<!-- Templates de cellule -->
+
+<ng-template #athleteCell let-row>
+	<span class="cursor-pointer">{{ row.athleteLastName }} {{ row.athleteFirstName }}</span>
+</ng-template>
+
+<ng-template #startDateCell let-row>
+	<span>{{ row.startDate | localizedDate }}</span>
+</ng-template>
+
+<ng-template #weeksCell let-row>
+	<span>{{ row.weeks }} {{ 'programmes.list.units.weeks' | translate }}</span>
+</ng-template>
+
+<ng-template #frequencyCell let-row>
+	<span>{{ row.frequency }} {{ 'programmes.list.units.frequency' | translate }}</span>
+</ng-template>
+
+<ng-template #snatchGoalCell let-row>
+	<span>{{ row.snatchGoal }} {{ 'programmes.list.units.kg' | translate }}</span>
+</ng-template>
+
+<ng-template #cjGoalCell let-row>
+	<span>{{ row.cjGoal }} {{ 'programmes.list.units.kg' | translate }}</span>
+</ng-template>
+
+<ng-template #actionsCell let-row>
+	<wa-dropdown (wa-select)="onRowAction(row, $event)">
+		<wa-button slot="trigger" appearance="plain" size="s" [attr.aria-label]="t('common.actions.menu')">
+			<wa-icon name="ellipsis-vertical" aria-hidden="true"></wa-icon>
+		</wa-button>
+		<wa-dropdown-item value="edit">
+			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.edit' | translate }}
+		</wa-dropdown-item>
+		<wa-dropdown-item value="delete" variant="danger">
+			<wa-icon slot="icon" name="trash" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.delete' | translate }}
+		</wa-dropdown-item>
+	</wa-dropdown>
+</ng-template>
+
+<!-- Popup de génération (création) -->
+<app-programme-create-dialog
+	[open]="createOpen()"
+	(save)="onCreate($event)"
+	(close)="createOpen.set(false)">
+</app-programme-create-dialog>
+
+<!-- Popup de consultation/édition -->
+<app-programme-detail-dialog
+	[open]="detailOpen()"
+	[programmeId]="selectedProgrammeId()"
+	(close)="detailOpen.set(false)">
+</app-programme-detail-dialog>
+
+<!-- Confirmation de suppression -->
+<app-confirm-dialog
+	[open]="confirmOpen()"
+	titleKey="programmes.confirm.delete.title"
+	messageKey="programmes.confirm.delete.message"
+	confirmKey="common.actions.delete"
+	(confirmed)="confirmDelete()"
+	(cancelled)="cancelDelete()">
+</app-confirm-dialog>
+
+<!-- Notification d'erreur transitoire -->
+<wa-toast #errorToast></wa-toast>
+

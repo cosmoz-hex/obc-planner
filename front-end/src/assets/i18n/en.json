@@ -328,6 +328,142 @@
       "remove": "Remove row"
     }
   },
+  "programmes": {
+    "list": {
+      "caption": "Programs list",
+      "filter": {
+        "label": "Filters",
+        "athlete": "Athlete"
+      },
+      "actions": {
+        "add": "Generate a program"
+      },
+      "columns": {
+        "athlete": "Athlete",
+        "startDate": "Start date",
+        "weeks": "Duration",
+        "frequency": "Frequency",
+        "snatchGoal": "Snatch",
+        "cjGoal": "Clean & Jerk",
+        "actions": "Actions"
+      },
+      "units": {
+        "weeks": "wk",
+        "frequency": "/ wk",
+        "kg": "kg"
+      }
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete program",
+        "message": "This action is irreversible. Do you confirm the deletion of this program?"
+      }
+    },
+    "errors": {
+      "generate": "Program generation failed. Please try again.",
+      "delete": "Deletion failed. Please try again."
+    },
+    "create": {
+      "title": "Generate a program",
+      "fields": {
+        "athlete": "Athlete",
+        "evaluation": "Evaluation",
+        "weeks": "Duration (weeks)",
+        "frequency": "Sessions / week",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "duration": "Session duration (min)",
+        "snatchGoal": "Snatch goal",
+        "cjGoal": "Clean & Jerk goal"
+      },
+      "actions": {
+        "generate": "Generate",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "athlete": "Athlete is required.",
+        "evaluation": "Evaluation is required.",
+        "weeks": "Duration is required.",
+        "frequency": "Frequency is required.",
+        "startDate": "Start date is required.",
+        "snatchGoal": "Snatch goal is required.",
+        "snatchGoalMin": "Snatch goal must be strictly positive.",
+        "cjGoal": "Clean & Jerk goal is required.",
+        "cjGoalMin": "Clean & Jerk goal must be strictly positive."
+      }
+    },
+    "detail": {
+      "title": "Program",
+      "weekSelector": {
+        "title": "Week",
+        "label": "Week {{current}}/{{total}} — {{start}} → {{end}}"
+      },
+      "header": {
+        "type": "Type",
+        "base": "Base",
+        "snatch": "Snatch",
+        "cj": "Clean & Jerk",
+        "backSquat": "Back Squat",
+        "frontSquat": "Front Squat",
+        "snatchPull": "Snatch Pull",
+        "cjPull": "Clean Pull",
+        "kg": "kg"
+      },
+      "grid": {
+        "caption": "Week sessions details",
+        "exerciceOrderHeader": "Exercise",
+        "trainingHeader": "Session {{value}}",
+        "exerciceRow": "Exercise {{value}}",
+        "cellLabel": "Edit exercise {{exercice}} of session {{training}}"
+      },
+      "cell": {
+        "setsWithWeight": "{{sets}} x {{reps}} @ {{min}} - {{max}} kg",
+        "sets": "{{sets}} x {{reps}}",
+        "setsNoRepsWithWeight": "{{sets}} @ {{min}} - {{max}} kg",
+        "setsNoReps": "{{sets}} sets",
+        "or": "or"
+      },
+      "actions": {
+        "close": "Close"
+      },
+      "errors": {
+        "load": "Loading the program failed. Please try again."
+      }
+    },
+    "enums": {
+      "weekType": {
+        "F": "Volume",
+        "T": "Technique",
+        "S": "Strength",
+        "A": "Peaking",
+        "D": "Deload",
+        "PC": "Pre-Competition"
+      }
+    },
+    "cell": {
+      "title": "Edit cell",
+      "linesGroup": "Cell rows",
+      "fields": {
+        "name": "Exercise",
+        "setNumber": "Sets",
+        "repNumber": "Reps",
+        "repNumberPlaceholder": "e.g. 6, 30s, 1 + 1",
+        "minWeight": "Min load",
+        "maxWeight": "Max load"
+      },
+      "actions": {
+        "addLine": "Add a row",
+        "removeLine": "Remove row",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "name": "Exercise is required.",
+        "weightRange": "Max load must be greater than or equal to min load.",
+        "save": "Saving failed. Please try again."
+      }
+    }
+  },
   "evaluations": {
     "title": "Evaluations",
     "wizard": {
@@ -657,6 +793,9 @@
     "athletes": {
       "title": "Athletes",
       "placeholder": "Athlete management will be available here."
+    },
+    "programmes": {
+      "title": "Programs"
     },
     "referentiel": {
       "title": "Reference Data",

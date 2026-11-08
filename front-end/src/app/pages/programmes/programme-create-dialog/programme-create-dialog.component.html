@@ -1,0 +1,87 @@
+<wa-dialog [attr.open]="open() ? true : null"
+           [attr.label]="title() | translate"
+           (wa-after-hide)="onDialogHide($event)"
+           style="--width: 40vw;"
+>
+
+	<form class="flex flex-col gap-2" (submit)="$event.preventDefault(); onSubmit()">
+
+		<!-- Athlète -->
+		<wa-select [formField]="createForm.athleteId"
+		           [attr.label]="'programmes.create.fields.athlete' | translate">
+			@for (athlete of athletes(); track athlete.athleteId) {
+			<wa-option [attr.value]="athlete.athleteId.toString()">{{ athlete.lastName }} {{ athlete.firstName }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Évaluation (restreinte à l'athlète sélectionné) -->
+		<wa-select [formField]="createForm.evaluationId"
+		           [attr.label]="'programmes.create.fields.evaluation' | translate">
+			@for (evaluation of evaluationsForAthlete(); track evaluation.evaluationId) {
+			<wa-option [attr.value]="evaluation.evaluationId.toString()">{{ evaluation.evaluationDate | localizedDate }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Durée du programme (nombre de semaines) -->
+		<wa-select [formField]="createForm.weeks"
+		           [attr.label]="'programmes.create.fields.weeks' | translate">
+			@for (value of weeksOptions; track value) {
+			<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Fréquence hebdomadaire -->
+		<wa-select [formField]="createForm.frequency"
+		           [attr.label]="'programmes.create.fields.frequency' | translate">
+			@for (value of frequencyOptions; track value) {
+			<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Dates : début (saisie) + fin (calculée, lecture seule) côte à côte -->
+		<div class="flex flex-row gap-2">
+			<wa-input type="date"
+			          class="flex-1"
+			          [formField]="createForm.startDate"
+			          [attr.label]="'programmes.create.fields.startDate' | translate"></wa-input>
+
+			<wa-input type="date"
+			          class="flex-1"
+			          readonly
+			          [attr.value]="endDate()"
+			          [attr.label]="'programmes.create.fields.endDate' | translate"></wa-input>
+		</div>
+
+		<!-- Durée d'une séance (optionnelle) -->
+		<wa-select [formField]="createForm.duration"
+		           with-clear
+		           [attr.label]="'programmes.create.fields.duration' | translate">
+			@for (value of durationOptions; track value) {
+			<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
+			}
+		</wa-select>
+
+		<!-- Objectifs -->
+		<wa-input type="number"
+		          [formField]="createForm.snatchGoal"
+		          [attr.label]="'programmes.create.fields.snatchGoal' | translate">
+			<span slot="end">kg</span>
+		</wa-input>
+
+		<wa-input type="number"
+		          [formField]="createForm.cjGoal"
+		          [attr.label]="'programmes.create.fields.cjGoal' | translate">
+			<span slot="end">kg</span>
+		</wa-input>
+
+		<div slot="footer" class="flex justify-end gap-1">
+			<wa-button appearance="plain" type="button" (click)="onClose()">
+				{{ 'programmes.create.actions.cancel' | translate }}
+			</wa-button>
+
+			<wa-button variant="brand" type="submit" [attr.disabled]="createForm().invalid() ? true : null">
+				{{ 'programmes.create.actions.generate' | translate }}
+			</wa-button>
+		</div>
+	</form>
+</wa-dialog>

@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * Accès aux données des exercices de référence et de leurs séries.
  *
@@ -45,4 +47,26 @@ public interface RefExerciceRepository extends JpaRepository<RefExercice, Intege
             @Param("archetype") Archetype archetype,
             Pageable pageable
     );
+
+    /**
+     * Exercices de référence (avec leurs séries) correspondant exactement à une case
+     * de génération : type d'exercice, type de semaine, objectif et ordre dans la
+     * séance. Plusieurs résultats = alternatives « au choix ». La collection
+     * {@code sets} est chargée via {@link EntityGraph} pour éviter le N+1 lors du
+     * parcours des séries par le moteur.
+     */
+    @EntityGraph(attributePaths = "sets")
+    List<RefExercice> findByExerciceTypeAndWeekTypeAndGoalAndTrainingOrder(
+            ExerciceType exerciceType, WeekTypeRef weekType, RefGoal goal, Integer trainingOrder);
+
+    /**
+     * Exercices de référence (avec leurs séries) d'un type d'exercice, d'un type de
+     * semaine et d'un objectif donnés, ordonnés par numéro d'ordre dans la séance.
+     * Utilisé par le moteur de génération pour constituer la file de musculation
+     * (round-robin par objectif), sans filtrer sur le numéro d'ordre. La collection
+     * {@code sets} est chargée via {@link EntityGraph} pour éviter le N+1.
+     */
+    @EntityGraph(attributePaths = "sets")
+    List<RefExercice> findByExerciceTypeAndWeekTypeAndGoalOrderByTrainingOrderAsc(
+            ExerciceType exerciceType, WeekTypeRef weekType, RefGoal goal);
 }

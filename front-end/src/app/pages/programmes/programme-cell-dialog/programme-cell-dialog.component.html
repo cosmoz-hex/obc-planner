@@ -1,0 +1,64 @@
+<wa-dialog [attr.open]="open() ? true : null"
+           [attr.label]="'programmes.cell.title' | translate"
+           (wa-after-hide)="onDialogHide($event)"
+           style="--width: 60vw;">
+
+	<form class="flex flex-col gap-2" (submit)="$event.preventDefault(); onSubmit()">
+
+		<!-- Bloc de lignes : chaque ligne = une alternative « au choix » ou un set. -->
+		<fieldset class="m-0 flex flex-col gap-2 border-0 p-0"
+		          [attr.aria-label]="'programmes.cell.linesGroup' | translate">
+			<legend class="sr-only">{{ 'programmes.cell.linesGroup' | translate }}</legend>
+
+			@for (line of cellForm.lines; track $index; let i = $index) {
+			<div class="flex flex-wrap items-start gap-2">
+				<wa-input class="flex-[3] min-w-40"
+				          [formField]="cellForm.lines[i].exerciceName"
+				          [attr.label]="'programmes.cell.fields.name' | translate"></wa-input>
+
+				<wa-input type="number" class="flex-1 min-w-20"
+				          [formField]="cellForm.lines[i].setNumber"
+				          [attr.label]="'programmes.cell.fields.setNumber' | translate"></wa-input>
+
+				<wa-input class="flex-1 min-w-24"
+				          [formField]="cellForm.lines[i].repNumber"
+				          [attr.label]="'programmes.cell.fields.repNumber' | translate"
+				          [attr.placeholder]="'programmes.cell.fields.repNumberPlaceholder' | translate"></wa-input>
+
+				<wa-input type="number" class="flex-1 min-w-20"
+				          [formField]="cellForm.lines[i].minWeight"
+				          [attr.label]="'programmes.cell.fields.minWeight' | translate"></wa-input>
+
+				<wa-input type="number" class="flex-1 min-w-20"
+				          [formField]="cellForm.lines[i].maxWeight"
+				          [attr.label]="'programmes.cell.fields.maxWeight' | translate"></wa-input>
+
+				<wa-button appearance="plain"
+				           type="button"
+				           class="mt-1"
+				           [attr.aria-label]="t('programmes.cell.actions.removeLine')"
+				           (click)="removeLine(i)">
+					<wa-icon name="trash" aria-hidden="true"></wa-icon>
+				</wa-button>
+			</div>
+			}
+
+			<div>
+				<wa-button appearance="plain" size="small" type="button" (click)="addLine()">
+					<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+					{{ 'programmes.cell.actions.addLine' | translate }}
+				</wa-button>
+			</div>
+		</fieldset>
+
+		<div slot="footer" class="flex justify-end gap-1">
+			<wa-button appearance="plain" type="button" (click)="onClose()">
+				{{ 'programmes.cell.actions.cancel' | translate }}
+			</wa-button>
+
+			<wa-button variant="brand" type="submit" [attr.disabled]="cellForm().invalid() ? true : null">
+				{{ 'programmes.cell.actions.save' | translate }}
+			</wa-button>
+		</div>
+	</form>
+</wa-dialog>

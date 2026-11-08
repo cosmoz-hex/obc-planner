@@ -9,6 +9,8 @@ inclusion: always
 
 > **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `doc-writer`) pour la feature « Référentiel > Protocoles » (spec `.kiro/specs/referentiel-protocoles/`) : API `/ref-exercices`, route `/referentiel/protocoles`, évolutions de schéma `ref_exercices` / `ref_exercice_sets` et relation One-Many associée. État documenté = état réel du code.
 
+> **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `code-explorer` + `doc-writer`) pour la feature « Génération de programme d'entraînement » (spec `.kiro/specs/generation-programme/`) : API `/programmes` (`ProgrammeController`, 5 endpoints), route `/programmes` + module `pages/programmes/` (liste + 3 popups), entités `Programme` / `ProgrammeWeek` / `ProgrammeTraining` (One-Many en cascade) et `RefTimeline` (mappage de `ref_timelines`), enum `ProgrammeWeekType`, moteur de génération (`ProgrammeGenerationService`) + utilitaires, exception `ValidationException` (400), évolution de schéma `programme_trainings` (`rep_number` VARCHAR nullable, `set_number` nullable). État documenté = état réel du code.
+
 ---
 
 ## Backend — Spring Boot 4.1 / Java 25
@@ -28,8 +30,14 @@ com.example.backend
 ├── interceptor/        # Intercepteurs MVC (contrôle d'accès par annotation)
 ├── repositories/       # Interfaces Spring Data JPA
 ├── services/           # Interfaces métier + implémentations (sous-dossier impl/)
+│                       #   dont le moteur de génération de programme
+│                       #   (ProgrammeGenerationService) + le service CRUD (ProgrammeService)
 └── utils/              # Utilitaires transversaux (dates, strings, numbers, objects)
+                        #   dont les calculateurs de génération : WeekPercentCalculator,
+                        #   ProgrammeChargeCalculator, MusculationQueueBuilder
 ```
+
+Entités JPA de la génération de programme : `Programme` **1 — N** `ProgrammeWeek` **1 — N** `ProgrammeTraining` (relations `@OneToMany` en cascade ALL + `orphanRemoval`, fetch `LAZY`, `@BatchSize` sur `ProgrammeWeek.programmeTrainings`, relations exclues de `equals`/`hashCode`/`toString`). `RefTimeline` mappe la table `ref_timelines` (seedée) consommée par le moteur. Enum `ProgrammeWeekType {F,T,S,A,D,PC}` (distinct de `WeekTypeRef`, sans `PC`). Exception `ValidationException` → HTTP 400 (domaine fonctionnel hors bornes), mappée dans l'advice existant.
 
 ### API REST
 
@@ -63,6 +71,11 @@ Base URL: `/api`
 | `POST` | `/evaluations` | `EvaluationController` | Création d'une évaluation : bilan synthétique (`eval_summaries`, points faibles techniques `snatch`/`clean`/`jerk`) + détail des mesures (`eval_details`). Athlète introuvable → 404 |
 | `PUT` | `/evaluations/{id}` | `EvaluationController` | Modification d'une évaluation : bilan mis à jour en place (PK et FK préservées, points faibles techniques `snatch`/`clean`/`jerk`), détail `eval_details` entièrement remplacé (delete + insert). Évaluation introuvable → 404 |
 | `DELETE` | `/evaluations/{id}` | `EvaluationController` | Suppression d'une évaluation (détail `eval_details` supprimé en cascade). Évaluation introuvable → 404 |
+| `GET` | `/programmes` | `ProgrammeController` | Liste paginée, filtrée (`athleteId`) et triée (tri par défaut date de début décroissante `startDate,DESC`) ; une ligne par programme avec nom/prénom de l'athlète joint. `size=0` désactive la pagination |
+| `GET` | `/programmes/{id}` | `ProgrammeController` | Détail imbriqué d'un programme (semaines + séances planifiées). Introuvable → 404 |
+| `POST` | `/programmes` | `ProgrammeController` | Génère un programme complet à partir d'une évaluation (201). Évaluation introuvable → 404 ; paramètres hors domaine (`weeks` ∉ {8,12,16}, `frequency` ∉ {3,4,5}, `duration` ∉ {90,120,150}) → 400 |
+| `PUT` | `/programmes/{id}/cell` | `ProgrammeController` | Édition en bloc d'une case (nom/séries/répétitions/charges des alternatives) ; renvoie le détail à jour. Programme ou semaine introuvable → 404 |
+| `DELETE` | `/programmes/{id}` | `ProgrammeController` | Suppression d'un programme (semaines + séances supprimées en cascade). 204. Introuvable → 404 |
 
 ---
 
@@ -84,6 +97,11 @@ src/app/
 ├── pages/              # Pages principales
 │   ├── athletes/       # Gestion des athlètes (liste + modale CRUD)
 │   ├── evaluations/    # Consultation des évaluations + wizard de saisie
+│   ├── programmes/     # Programmes d'entraînement générés : liste + 3 popups
+│   │                   #   (programme-create-dialog : création/génération ;
+│   │                   #    programme-detail-dialog : consultation/édition, grille
+│   │                   #    hebdomadaire + sélecteur de semaines ;
+│   │                   #    programme-cell-dialog : édition d'une cellule)
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── archetypes/ # Profils archétypes (liste + modale CRUD)
 │       ├── planning/   # Grille pivot hebdomadaire du planning de référence, édition inline par cellule
@@ -102,6 +120,7 @@ src/app/
 | `/` | redirect → `/athletes` | Redirection par défaut |
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
+| `/programmes` | `ProgrammesComponent` | Liste des programmes générés (grille serveur, filtre athlète, tri) + popups de création/génération, de consultation/édition (grille hebdomadaire calquée sur l'écran Planning, sélecteur de semaines) et d'édition de cellule |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel (Archétypes, Planning, Protocoles) |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |
 | `/referentiel/planning` | `PlanningComponent` | Grille pivot hebdomadaire du planning de référence, édition inline par cellule (persistance immédiate) |
@@ -226,16 +245,16 @@ Exercices planifiés dans une semaine de programme.
 | `training_number` | `INTEGER` | NOT NULL | Numéro de la séance hebdomadaire (1 à 5) |
 | `exercice_order` | `INTEGER` | NOT NULL | Ordre de l'exercice dans la séance (même ordre = "Au choix") |
 | `exercice_name` | `VARCHAR(100)` | NOT NULL | Nom de l'exercice planifié (libellé libre, non lié au catalogue) |
-| `set_number` | `INTEGER` | NOT NULL | Nombre de séries |
-| `rep_number` | `INTEGER` | NOT NULL | Nombre de répétitions par série |
+| `set_number` | `INTEGER` | CHECK (`set_number IS NULL OR set_number > 0`) | Nombre de séries. **Nullable** (cases sans série : RF, PC, « à définir ») |
+| `rep_number` | `VARCHAR(20)` | — | Répétitions au format libre : `'6'`, `'30s'`, `'(1 + 1)'`, ou NULL (aligné sur `ref_exercice_sets.rep_number`). **Nullable** ; CHECK `rep_number > 0` supprimé |
 | `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
 | `min_weight` | `NUMERIC(6, 2)` | — | Charge minimale en kg |
-| `max_weight` | `NUMERIC(6, 2)` | — | Charge maximale en kg |
+| `max_weight` | `NUMERIC(6, 2)` | CHECK (`max_weight IS NULL OR max_weight >= min_weight`) | Charge maximale en kg |
 
 ---
 
 #### `ref_timelines`
-Timelines de référence par archétype et durée de programme.
+Timelines de référence par archétype et durée de programme. Mappée par l'entité JPA `RefTimeline` (repository `RefTimelineRepository`) depuis la feature « Génération de programme » ; table autonome (aucune relation), consommée par le moteur de génération.
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
@@ -299,3 +318,9 @@ L'écran Référentiel > Protocoles et son schéma introduisent de nouvelles val
 - `ref_exercice_sets.rep_number` désormais **textuel** (`'30s'`, `'(1 + 1)'`, NULL…) alors que le moteur attendait un entier.
 
 Tant que le moteur n'a pas évolué, les exercices/séries saisis avec ces nouvelles valeurs peuvent ne pas être pris en compte (ou mal interprétés) lors de la génération d'un programme. Évolution du moteur à planifier hors périmètre de la feature Protocoles.
+
+### Génération de programme : couverture incomplète de la trame
+Le moteur de génération (`ProgrammeGenerationService`) présente les limites suivantes, assumées dans le périmètre actuel :
+- `RF` (renfo spécifique) et `PC` (pliométrie / cardio) **n'ont aucun protocole** dans `ref_exercices` : les cases correspondantes sont générées avec des **libellés fixes en français stockés en base** (décision : application locale, libellés FR assumés, non internationalisés).
+- Une **semaine de type `PC`** (pré-compétition) voit **toutes ses cases générées en « (à définir) »** : la trame spécifique de la semaine PC sera fournie ultérieurement (hors périmètre actuel).
+- Si **aucun protocole** ne correspond à une combinaison (`exercice_type` / `week_type` / `goal` / ordre), la case est générée en **« (à définir) »**.
