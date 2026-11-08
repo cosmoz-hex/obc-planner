@@ -5,51 +5,71 @@
 
 	<form class="flex flex-col gap-2" (submit)="$event.preventDefault(); onSubmit()">
 
-		<!-- Bloc de lignes : chaque ligne = une alternative « au choix » ou un set. -->
-		<fieldset class="m-0 flex flex-col gap-2 border-0 p-0"
-		          [attr.aria-label]="'programmes.cell.linesGroup' | translate">
-			<legend class="sr-only">{{ 'programmes.cell.linesGroup' | translate }}</legend>
+		<!-- Un bloc par exercice de la case : nom + sous-liste de séries. -->
+		@for (exercice of cellForm.exercices; track $index; let exIndex = $index) {
+		<fieldset class="grid gap-1 border-0 p-0 m-0"
+		          [attr.aria-label]="'programmes.cell.exerciceGroup' | translate: { index: exIndex + 1 }">
 
-			@for (line of cellForm.lines; track $index; let i = $index) {
-			<div class="flex flex-wrap items-start gap-2">
-				<wa-input class="flex-[3] min-w-40"
-				          [formField]="cellForm.lines[i].exerciceName"
+			<div class="grid grid-cols-5 gap-1">
+				<wa-input [formField]="cellForm.exercices[exIndex].exerciceName"
+									class="col-span-4"
 				          [attr.label]="'programmes.cell.fields.name' | translate"></wa-input>
 
-				<wa-input type="number" class="flex-1 min-w-20"
-				          [formField]="cellForm.lines[i].setNumber"
+				<wa-button appearance="plain"
+				           class="mt-1"
+				           type="button"
+									 [class.hidden]="exIndex == 0"
+				           [attr.aria-label]="t('programmes.cell.actions.removeExercice')"
+				           (click)="removeExercice(exIndex)">
+					<wa-icon name="trash" aria-hidden="true"></wa-icon>
+				</wa-button>
+			</div>
+
+			<!-- Séries de l'exercice : empilées, sans « ou ». -->
+			@for (series of cellForm.exercices[exIndex].series; track $index; let sIndex = $index) {
+			<div class="grid grid-cols-5 gap-1">
+				<wa-input type="number"
+				          [formField]="cellForm.exercices[exIndex].series[sIndex].setNumber"
 				          [attr.label]="'programmes.cell.fields.setNumber' | translate"></wa-input>
 
-				<wa-input class="flex-1 min-w-24"
-				          [formField]="cellForm.lines[i].repNumber"
+				<wa-input [formField]="cellForm.exercices[exIndex].series[sIndex].repNumber"
 				          [attr.label]="'programmes.cell.fields.repNumber' | translate"
 				          [attr.placeholder]="'programmes.cell.fields.repNumberPlaceholder' | translate"></wa-input>
 
-				<wa-input type="number" class="flex-1 min-w-20"
-				          [formField]="cellForm.lines[i].minWeight"
+				<wa-input type="number"
+				          [formField]="cellForm.exercices[exIndex].series[sIndex].minWeight"
 				          [attr.label]="'programmes.cell.fields.minWeight' | translate"></wa-input>
 
-				<wa-input type="number" class="flex-1 min-w-20"
-				          [formField]="cellForm.lines[i].maxWeight"
+				<wa-input type="number"
+				          [formField]="cellForm.exercices[exIndex].series[sIndex].maxWeight"
 				          [attr.label]="'programmes.cell.fields.maxWeight' | translate"></wa-input>
 
 				<wa-button appearance="plain"
+				           class="flex mt-1"
 				           type="button"
-				           class="mt-1"
-				           [attr.aria-label]="t('programmes.cell.actions.removeLine')"
-				           (click)="removeLine(i)">
+				           [class.hidden]="sIndex == 0"
+				           [attr.aria-label]="t('programmes.cell.actions.removeSeries')"
+				           (click)="removeSeries(exIndex, sIndex)">
 					<wa-icon name="trash" aria-hidden="true"></wa-icon>
 				</wa-button>
 			</div>
 			}
 
 			<div>
-				<wa-button appearance="plain" size="small" type="button" (click)="addLine()">
+				<wa-button appearance="plain" size="small" type="button" (click)="addSeries(exIndex)">
 					<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
-					{{ 'programmes.cell.actions.addLine' | translate }}
+					{{ 'programmes.cell.actions.addSeries' | translate }}
 				</wa-button>
 			</div>
 		</fieldset>
+		}
+
+		<div>
+			<wa-button appearance="plain" size="small" type="button" (click)="addExercice()">
+				<wa-icon slot="start" name="plus" aria-hidden="true"></wa-icon>
+				{{ 'programmes.cell.actions.addExercice' | translate }}
+			</wa-button>
+		</div>
 
 		<div slot="footer" class="flex justify-end gap-1">
 			<wa-button appearance="plain" type="button" (click)="onClose()">

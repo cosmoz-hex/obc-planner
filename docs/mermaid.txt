@@ -8,6 +8,8 @@ classDiagram
 
     PROG <-- PROG_WEEK
     PROG_WEEK <-- PROG_TRAINING
+    PROG_TRAINING <-- PROG_EXERCICE
+    PROG_EXERCICE <-- PROG_SERIES
 
     REF_EXERCICE <-- REF_EXERCICE_SET
 
@@ -74,8 +76,16 @@ classDiagram
         # PROGRAMME_TRAINING_ID
         + PROGRAMME_WEEK_ID
         TRAINING_NUMBER
+    }
+    class PROG_EXERCICE {
+        # PROGRAMME_EXERCICE_ID
+        + PROGRAMME_TRAINING_ID
         EXERCICE_ORDER
         EXERCICE_NAME
+    }
+    class PROG_SERIES {
+        # PROGRAMME_SERIES_ID
+        + PROGRAMME_EXERCICE_ID
         SET_NUMBER
         REP_NUMBER
         MIN_WEIGHT

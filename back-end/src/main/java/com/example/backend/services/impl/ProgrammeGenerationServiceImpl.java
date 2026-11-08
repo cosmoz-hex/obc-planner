@@ -1,28 +1,14 @@
 package com.example.backend.services.impl;
 
 import com.example.backend.dto.ProgrammeCreateRequest;
-import com.example.backend.entities.EvalSummary;
-import com.example.backend.entities.Programme;
-import com.example.backend.entities.ProgrammeTraining;
-import com.example.backend.entities.ProgrammeWeek;
-import com.example.backend.entities.RefExercice;
-import com.example.backend.entities.RefExerciceSet;
-import com.example.backend.entities.RefPlanning;
-import com.example.backend.entities.RefTimeline;
-import com.example.backend.enums.Archetype;
-import com.example.backend.enums.ExerciceType;
-import com.example.backend.enums.ProgrammeWeekType;
-import com.example.backend.enums.RefGoal;
-import com.example.backend.enums.RefReference;
-import com.example.backend.enums.StrengthSpeed;
-import com.example.backend.enums.WeekTypeRef;
+import com.example.backend.entities.*;
+import com.example.backend.enums.*;
 import com.example.backend.exception.BusinessRuleException;
 import com.example.backend.repositories.RefExerciceRepository;
 import com.example.backend.repositories.RefPlanningRepository;
 import com.example.backend.repositories.RefTimelineRepository;
 import com.example.backend.services.apis.ProgrammeGenerationService;
 import com.example.backend.utils.MusculationQueueBuilder;
-import com.example.backend.utils.MusculationQueueBuilder.MusculationQueue;
 import com.example.backend.utils.ProgrammeChargeCalculator;
 import com.example.backend.utils.WeekPercentCalculator;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Implémentation du moteur de génération de programme (RG1..RG12).
@@ -58,7 +41,9 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
 
     private static final String TIMELINE_SEPARATOR = "/";
 
-    /** Libellés fixes (sans catalogue) et marqueurs « à définir ». */
+    /**
+     * Libellés fixes (sans catalogue) et marqueurs « à définir ».
+     */
     private static final String LABEL_RENFO = "Renfo spécifique";
     private static final String LABEL_PLYO_CARDIO = "Pliométrie / Cardio";
     private static final String SUFFIX_TO_DEFINE = " (à définir)";
@@ -102,8 +87,14 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         RefGoal goalSQ = strengthSpeedGoal(eval.getSquat());
         RefGoal goalPL = strengthSpeedGoal(eval.getPull());
 
-        // --- ÉTAPE 5 : file de musculation (RG9), construite une seule fois ---
-        MusculationQueue musculationQueue = musculationQueueBuilder.build(eval.getMusculation());
+        // --- ÉTAPE 5 : objectifs de musculation (RG9), calculés une seule fois ---
+        List<RefGoal> musculationGoals = musculationQueueBuilder.bitmaskToGoals(eval.getMusculation());
+
+        // File rotative GLOBALE de groupes de musculation, construite UNE SEULE FOIS
+        // avant la boucle des semaines : chaque élément est un groupe d'exercices
+        // alternatifs (« ou ») correspondant à un (goal, trainingOrder). Le curseur
+        // rotatif est partagé pour toute la génération (pas de reset inter-semaines).
+        Deque<List<RefExercice>> musculationGroups = buildMusculationGroups(musculationGoals);
 
         // Trame de séances chargée une fois ; cache local des exercices de référence.
         List<RefPlanning> planning =
@@ -119,9 +110,12 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
 
             ProgrammeWeek week = buildWeek(programme, weekNumber, weekType, bp, finalGoals);
 
+            // Séances de la semaine, indexées par numéro de séance (créées à la demande).
+            Map<Integer, ProgrammeTraining> trainings = new HashMap<>();
+
             if (weekType == ProgrammeWeekType.PC) {
                 // Semaine de pré-compétition : toutes les cases « à définir ».
-                planning.forEach(row -> addPlaceholder(week, row, toDefineLabel(row.getExerciceType())));
+                planning.forEach(row -> addPlaceholder(week, trainings, row, toDefineLabel(row.getExerciceType())));
                 continue;
             }
 
@@ -129,148 +123,220 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             Map<ExerciceType, Integer> counters = new HashMap<>();
 
             for (RefPlanning row : planning) {
-                resolveCase(week, row, weekTypeRef, bp, finalGoals, archetype, counters,
-                        goalSN, goalCL, goalJK, goalSQ, goalPL, musculationQueue, exerciceCache);
+                resolveCase(week, trainings, row, weekTypeRef, bp, finalGoals, archetype, counters,
+                        goalSN, goalCL, goalJK, goalSQ, goalPL, musculationGroups, exerciceCache);
             }
         }
         return programme;
     }
 
-    /** Résout une case du planning selon le type d'exercice attendu. */
-    private void resolveCase(ProgrammeWeek week, RefPlanning row, WeekTypeRef weekTypeRef, int basePercent,
+    /**
+     * Résout une case du planning selon le type d'exercice attendu.
+     */
+    private void resolveCase(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                             WeekTypeRef weekTypeRef, int basePercent,
                              Map<RefReference, Double> finalGoals, Archetype archetype,
                              Map<ExerciceType, Integer> counters,
                              RefGoal goalSN, RefGoal goalCL, RefGoal goalJK, RefGoal goalSQ, RefGoal goalPL,
-                             MusculationQueue musculationQueue,
+                             Deque<List<RefExercice>> musculationGroups,
                              Map<ExerciceCacheKey, List<RefExercice>> cache) {
         ExerciceType type = row.getExerciceType();
         switch (type) {
-            case SN -> resolveSimple(week, row, weekTypeRef, basePercent, finalGoals, archetype,
+            case SN -> resolveSimple(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
                     counters, ExerciceType.SN, goalSN, LABEL_SNATCH, cache);
-            case SQ -> resolveSimple(week, row, weekTypeRef, basePercent, finalGoals, archetype,
+            case SQ -> resolveSimple(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
                     counters, ExerciceType.SQ, goalSQ, LABEL_SQUAT, cache);
-            case PL -> resolveSimple(week, row, weekTypeRef, basePercent, finalGoals, archetype,
+            case PL -> resolveSimple(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
                     counters, ExerciceType.PL, goalPL, LABEL_PULL, cache);
-            case CJ -> resolveCleanJerk(week, row, weekTypeRef, basePercent, finalGoals, archetype,
+            case CJ -> resolveCleanJerk(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
                     counters, goalCL, goalJK, cache);
-            case MS -> resolveMusculation(week, row, archetype, musculationQueue);
-            case RF -> addFixedLabel(week, row, LABEL_RENFO);
-            case PC -> addFixedLabel(week, row, LABEL_PLYO_CARDIO);
-            default -> addPlaceholder(week, row, toDefineLabel(type));
+            case MS -> resolveMusculation(week, trainings, row, archetype, musculationGroups);
+            case RF -> addFixedLabel(week, trainings, row, LABEL_RENFO);
+            case PC -> addFixedLabel(week, trainings, row, LABEL_PLYO_CARDIO);
+            default -> addPlaceholder(week, trainings, row, toDefineLabel(type));
         }
     }
 
-    /** Cases Arraché / Squat / Tirage : un seul mouvement, compteur d'ordre dédié. */
-    private void resolveSimple(ProgrammeWeek week, RefPlanning row, WeekTypeRef weekTypeRef, int basePercent,
+    /**
+     * Cases Arraché / Squat / Tirage : un seul mouvement, compteur d'ordre dédié.
+     */
+    private void resolveSimple(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                               WeekTypeRef weekTypeRef, int basePercent,
                                Map<RefReference, Double> finalGoals, Archetype archetype,
                                Map<ExerciceType, Integer> counters, ExerciceType type, RefGoal goal,
                                String movementLabel, Map<ExerciceCacheKey, List<RefExercice>> cache) {
         int order = increment(counters, type);
         if (goal == null) {
-            addPlaceholder(week, row, movementLabel + SUFFIX_TO_DEFINE);
+            addPlaceholder(week, trainings, row, movementLabel + SUFFIX_TO_DEFINE);
             return;
         }
         List<RefExercice> exercices = findExercices(cache, type, weekTypeRef, goal, order);
         if (exercices.isEmpty()) {
-            addPlaceholder(week, row, movementLabel + SUFFIX_TO_DEFINE);
+            addPlaceholder(week, trainings, row, movementLabel + SUFFIX_TO_DEFINE);
             return;
         }
-        exercices.forEach(ex -> emitTrainings(week, row, ex, basePercent, finalGoals, archetype));
+        exercices.forEach(ex -> emitExercice(week, trainings, row, ex, basePercent, finalGoals, archetype));
     }
 
-    /** Case Épaulé-Jeté (RG8) : appariement des mouvements CL et JK par index. */
-    private void resolveCleanJerk(ProgrammeWeek week, RefPlanning row, WeekTypeRef weekTypeRef, int basePercent,
+    /**
+     * Case Épaulé-Jeté (RG8) : appariement des mouvements CL et JK par index.
+     */
+    private void resolveCleanJerk(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                                  WeekTypeRef weekTypeRef, int basePercent,
                                   Map<RefReference, Double> finalGoals, Archetype archetype,
                                   Map<ExerciceType, Integer> counters, RefGoal goalCL, RefGoal goalJK,
                                   Map<ExerciceCacheKey, List<RefExercice>> cache) {
         int order = increment(counters, ExerciceType.CJ);
         if (goalCL == null || goalJK == null) {
-            addPlaceholder(week, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
+            addPlaceholder(week, trainings, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
             return;
         }
         List<RefExercice> cleans = findExercices(cache, ExerciceType.CL, weekTypeRef, goalCL, order);
         List<RefExercice> jerks = findExercices(cache, ExerciceType.JK, weekTypeRef, goalJK, order);
         if (cleans.isEmpty() || jerks.isEmpty()) {
-            addPlaceholder(week, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
+            addPlaceholder(week, trainings, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
             return;
         }
         int pairs = Math.min(cleans.size(), jerks.size());
         for (int i = 0; i < pairs; i++) {
-            emitCombined(week, row, cleans.get(i), jerks.get(i), basePercent, finalGoals, archetype);
+            emitCombined(week, trainings, row, cleans.get(i), jerks.get(i), basePercent, finalGoals, archetype);
         }
     }
 
-    /** Case Musculation (RG9) : pioche rotative dans la file, volume sans charge. */
-    private void resolveMusculation(ProgrammeWeek week, RefPlanning row, Archetype archetype,
-                                    MusculationQueue musculationQueue) {
-        RefExercice exercice = musculationQueue.rotate();
-        if (exercice == null) {
-            addPlaceholder(week, row, LABEL_MUSCULATION + SUFFIX_TO_DEFINE);
+    /**
+     * Case Musculation (RG9 / RG5) : pioche <b>un seul groupe</b> d'exercices
+     * alternatifs (« au choix ») dans la file rotative GLOBALE de groupes, construite
+     * une fois pour toute la génération par {@link #buildMusculationGroups}. Le
+     * curseur avance à chaque case MS (rotation tête → queue) et ne se réinitialise
+     * <b>jamais</b> entre les cases ni entre les semaines : la séquence de groupes est
+     * consommée de façon continue (puis boucle). Chaque {@link RefExercice} du groupe
+     * produit un {@link ProgrammeExercice} (volume sans charge) au même
+     * {@code exerciceOrder} que la case → affichage « ex. 1 ou ex. 2 ». File vide
+     * (aucune orientation n'a d'exercice MS/F) → case « à définir ».
+     */
+    private void resolveMusculation(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                                    Archetype archetype, Deque<List<RefExercice>> musculationGroups) {
+        if (musculationGroups.isEmpty()) {
+            addPlaceholder(week, trainings, row, LABEL_MUSCULATION + SUFFIX_TO_DEFINE);
             return;
         }
-        // Volume only : pas de charge (finalGoals ignorés via charge=false).
-        emitTrainings(week, row, exercice, 0, null, archetype);
+        // Rotation : pioche le groupe en tête et le replace en fin de file (curseur global).
+        List<RefExercice> group = musculationGroups.poll();
+        musculationGroups.offer(group);
+        // Chaque exercice du groupe = une alternative « ou », volume sans charge (finalGoals null).
+        group.forEach(exercice -> emitExercice(week, trainings, row, exercice, 0, null, archetype));
     }
 
     /**
-     * Émet un {@link ProgrammeTraining} par série de l'exercice (RG11) pour
-     * l'archétype de l'évaluation. Calcule les charges si une référence et un
-     * poids sont présents et que la charge est demandée ({@code finalGoals} non
-     * null).
+     * Construit la file rotative GLOBALE de groupes de musculation (RG9 / RG5),
+     * <b>une seule fois</b> avant la génération des semaines. Un <b>groupe</b> =
+     * l'ensemble des exercices de référence {@code MS}/{@link WeekTypeRef#F} d'une
+     * orientation ({@code goal}) à un même {@code trainingOrder} (= alternatives « au
+     * choix »). La musculation n'étant peuplée qu'en semaine {@code F}, le filtre de
+     * type de semaine est constant.
+     *
+     * <p>La file entrelace les groupes par {@code trainingOrder} croissant puis par
+     * {@code goal} (ordre de {@code musculationGoals}) : pour chaque
+     * {@code trainingOrder} présent (toutes orientations confondues), on ajoute le
+     * groupe de chaque goal qui en possède un (un goal absent à ce cran est sauté).
+     * Les exercices d'un groupe sont triés par identifiant croissant pour un ordre
+     * déterministe. File vide si aucune orientation n'a d'exercice MS/F.</p>
      */
-    private void emitTrainings(ProgrammeWeek week, RefPlanning row, RefExercice exercice, int basePercent,
-                               Map<RefReference, Double> finalGoals, Archetype archetype) {
+    private Deque<List<RefExercice>> buildMusculationGroups(List<RefGoal> musculationGoals) {
+        // Pour chaque goal : groupes indexés par trainingOrder, exercices triés par id.
+        Map<RefGoal, Map<Integer, List<RefExercice>>> groupsByGoal = new LinkedHashMap<>();
+        Set<Integer> trainingOrders = new TreeSet<>();
+        for (RefGoal goal : musculationGoals) {
+            List<RefExercice> exercices = refExerciceRepository
+                    .findByExerciceTypeAndWeekTypeAndGoalOrderByTrainingOrderAsc(
+                            ExerciceType.MS, WeekTypeRef.F, goal);
+            Map<Integer, List<RefExercice>> byOrder = new TreeMap<>();
+            for (RefExercice exercice : exercices) {
+                byOrder.computeIfAbsent(exercice.getTrainingOrder(), order -> new ArrayList<>()).add(exercice);
+            }
+            byOrder.values().forEach(group ->
+                    group.sort(Comparator.comparing(RefExercice::getRefExerciceId)));
+            groupsByGoal.put(goal, byOrder);
+            trainingOrders.addAll(byOrder.keySet());
+        }
+        // Entrelacement : trainingOrder croissant, puis goals dans l'ordre.
+        Deque<List<RefExercice>> queue = new ArrayDeque<>();
+        for (Integer trainingOrder : trainingOrders) {
+            for (RefGoal goal : musculationGoals) {
+                List<RefExercice> group = groupsByGoal.get(goal).get(trainingOrder);
+                if (group != null) {
+                    queue.offer(group);
+                }
+            }
+        }
+        return queue;
+    }
+
+    /**
+     * Émet <b>un</b> {@link ProgrammeExercice} (rattaché à la séance de la case,
+     * positionné par {@code exerciceOrder}) et <b>une</b> {@link ProgrammeSeries}
+     * par série de l'exercice (RG11) pour l'archétype de l'évaluation. Calcule les
+     * charges de chaque série si une référence et un poids sont présents et que la
+     * charge est demandée ({@code finalGoals} non null).
+     */
+    private void emitExercice(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                              RefExercice exercice, int basePercent,
+                              Map<RefReference, Double> finalGoals, Archetype archetype) {
+        ProgrammeExercice programmeExercice = addExercice(week, trainings, row, exercice.getExerciceName());
         List<RefExerciceSet> sets = setsForArchetype(exercice, archetype);
         for (RefExerciceSet set : sets) {
-            ProgrammeTraining training = baseTraining(week, row, exercice.getExerciceName());
-            training.setSetNumber(set.getSetNumber());
-            training.setRepNumber(set.getRepNumber());
-            training.setRepLabel(null);
-            applyCharge(training, finalGoals, exercice.getReference(), set.getWeight(), basePercent);
-            week.getProgrammeTrainings().add(training);
+            ProgrammeSeries series = baseSeries(programmeExercice);
+            series.setSetNumber(set.getSetNumber());
+            series.setRepNumber(set.getRepNumber());
+            applyCharge(series, finalGoals, exercice.getReference(), set.getWeight(), basePercent);
+            programmeExercice.getProgrammeSeries().add(series);
         }
     }
 
     /**
-     * Émet les lignes combinées Épaulé + Jeté (RG8 révisé) : le CJ peut être
+     * Émet un exercice combiné Épaulé + Jeté (RG8 révisé) : <b>un</b>
+     * {@link ProgrammeExercice} (nom {@code "{Épaulé} + {Jeté}"}) et <b>une</b>
+     * {@link ProgrammeSeries} par couple de séries. Le CJ peut être
      * <b>multi-séries</b>, comme l'Arraché. On boucle sur les séries de l'Épaulé
      * (CL prévaut) et on apparie, par index, la série du Jeté correspondante.
      *
      * <p>Les séries CL et JK sont normalement identiques en base. Si leurs
-     * nombres diffèrent, l'Épaulé fait foi : une ligne est émise par série CL ;
+     * nombres diffèrent, l'Épaulé fait foi : une série est émise par série CL ;
      * la série JK absente ({@code i >= jerkSets.size()}) est traitée comme nulle.
-     * Chaque ligne produit un {@link ProgrammeTraining} (même {@code exerciceOrder}
-     * / {@code trainingNumber} que la case). Le nombre de séries et la charge
-     * proviennent de la série CL courante (référence Épaulé-Jeté = CJ) ; le label
-     * associe les répétitions des deux mouvements, {@code repNumber} reste nul.</p>
+     * Le nombre de séries et la charge proviennent de la série CL courante
+     * (référence Épaulé-Jeté = CJ) ; le libellé combiné des répétitions des deux
+     * mouvements ({@code combinedRepLabel}) est désormais porté par
+     * {@code series.repNumber} (plus de {@code rep_label}).</p>
      */
-    private void emitCombined(ProgrammeWeek week, RefPlanning row, RefExercice clean, RefExercice jerk,
+    private void emitCombined(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                              RefExercice clean, RefExercice jerk,
                               int basePercent, Map<RefReference, Double> finalGoals, Archetype archetype) {
         List<RefExerciceSet> cleanSets = setsForArchetype(clean, archetype);
         List<RefExerciceSet> jerkSets = setsForArchetype(jerk, archetype);
         if (cleanSets.isEmpty() || jerkSets.isEmpty()) {
-            addPlaceholder(week, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
+            addPlaceholder(week, trainings, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
             return;
         }
         String combinedName = clean.getExerciceName() + " + " + jerk.getExerciceName();
+        ProgrammeExercice programmeExercice = addExercice(week, trainings, row, combinedName);
         for (int i = 0; i < cleanSets.size(); i++) {
             RefExerciceSet cleanSet = cleanSets.get(i);
             RefExerciceSet jerkSet = i < jerkSets.size() ? jerkSets.get(i) : null;
             String repsCL = cleanSet.getRepNumber();
             String repsJK = jerkSet == null ? null : jerkSet.getRepNumber();
 
-            ProgrammeTraining training = baseTraining(week, row, combinedName);
-            training.setSetNumber(cleanSet.getSetNumber());
-            training.setRepNumber(null);
-            training.setRepLabel(combinedRepLabel(repsCL, repsJK));
+            ProgrammeSeries series = baseSeries(programmeExercice);
+            series.setSetNumber(cleanSet.getSetNumber());
+            series.setRepNumber(combinedRepLabel(repsCL, repsJK));
             // Charge sur la série de l'Épaulé courante, référence Épaulé-Jeté (CJ).
-            applyCharge(training, finalGoals, clean.getReference(), cleanSet.getWeight(), basePercent);
-            week.getProgrammeTrainings().add(training);
+            applyCharge(series, finalGoals, clean.getReference(), cleanSet.getWeight(), basePercent);
+            programmeExercice.getProgrammeSeries().add(series);
         }
     }
 
     /**
-     * Label de répétitions d'une ligne combinée (RG8).
+     * Label de répétitions d'une série combinée (RG8), désormais porté par
+     * {@code repNumber}.
      *
      * <ul>
      *   <li>CL et JK nuls → {@code null} (aucun label).</li>
@@ -289,13 +355,17 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return "(" + nullToEmpty(repsCL) + " + " + nullToEmpty(repsJK) + ")";
     }
 
-    /** Remplace une valeur nulle par une chaîne vide (label combiné). */
+    /**
+     * Remplace une valeur nulle par une chaîne vide (label combiné).
+     */
     private String nullToEmpty(String value) {
         return value == null ? "" : value;
     }
 
-    /** Applique les charges min/max si référence + poids présents et charge demandée. */
-    private void applyCharge(ProgrammeTraining training, Map<RefReference, Double> finalGoals,
+    /**
+     * Applique les charges min/max d'une série si référence + poids présents et charge demandée.
+     */
+    private void applyCharge(ProgrammeSeries series, Map<RefReference, Double> finalGoals,
                              RefReference reference, BigDecimal weight, int basePercent) {
         if (finalGoals == null || reference == null || weight == null) {
             return;
@@ -305,28 +375,65 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             return;
         }
         double weekBase = chargeCalculator.weekBase(finalGoal, basePercent);
-        training.setMinWeight(chargeCalculator.minWeight(weekBase, weight));
-        training.setMaxWeight(chargeCalculator.maxWeight(weekBase, weight));
+        series.setMinWeight(chargeCalculator.minWeight(weekBase, weight));
+        series.setMaxWeight(chargeCalculator.maxWeight(weekBase, weight));
     }
 
-    /** Ajoute une case « à définir » (sans série ni charge). */
-    private void addPlaceholder(ProgrammeWeek week, RefPlanning row, String label) {
-        week.getProgrammeTrainings().add(baseTraining(week, row, label));
+    /**
+     * Ajoute une case « à définir » : un exercice libellé fixe, sans série.
+     */
+    private void addPlaceholder(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                                String label) {
+        addExercice(week, trainings, row, label);
     }
 
-    /** Ajoute une case à libellé fixe (RF / PC, sans série ni charge). */
-    private void addFixedLabel(ProgrammeWeek week, RefPlanning row, String label) {
-        week.getProgrammeTrainings().add(baseTraining(week, row, label));
+    /**
+     * Ajoute une case à libellé fixe (RF / PC) : un exercice libellé fixe, sans série.
+     */
+    private void addFixedLabel(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                               String label) {
+        addExercice(week, trainings, row, label);
     }
 
-    /** Crée un {@link ProgrammeTraining} rattaché à la semaine, sans série ni charge. */
-    private ProgrammeTraining baseTraining(ProgrammeWeek week, RefPlanning row, String name) {
-        ProgrammeTraining training = new ProgrammeTraining();
-        training.setProgrammeWeek(week);
-        training.setTrainingNumber(row.getTrainingOrder());
-        training.setExerciceOrder(row.getExerciceOrder());
-        training.setExerciceName(name);
-        return training;
+    /**
+     * Crée un {@link ProgrammeExercice} (nom + {@code exerciceOrder} de la case)
+     * rattaché à la séance de la case (récupérée ou créée via {@link #training}),
+     * et le retourne pour y accrocher ses séries.
+     */
+    private ProgrammeExercice addExercice(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings,
+                                          RefPlanning row, String name) {
+        ProgrammeTraining training = training(week, trainings, row.getTrainingOrder());
+        ProgrammeExercice exercice = new ProgrammeExercice();
+        exercice.setProgrammeTraining(training);
+        exercice.setExerciceOrder(row.getExerciceOrder());
+        exercice.setExerciceName(name);
+        training.getProgrammeExercices().add(exercice);
+        return exercice;
+    }
+
+    /**
+     * Récupère ou crée la {@link ProgrammeTraining} (séance) d'un
+     * {@code trainingNumber} donné dans une semaine (map locale par semaine). La
+     * séance créée est rattachée à la semaine et porte son {@code trainingNumber}.
+     */
+    private ProgrammeTraining training(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings,
+                                       Integer trainingNumber) {
+        return trainings.computeIfAbsent(trainingNumber, number -> {
+            ProgrammeTraining training = new ProgrammeTraining();
+            training.setProgrammeWeek(week);
+            training.setTrainingNumber(number);
+            week.getProgrammeTrainings().add(training);
+            return training;
+        });
+    }
+
+    /**
+     * Crée une {@link ProgrammeSeries} rattachée à un exercice (valeurs à compléter).
+     */
+    private ProgrammeSeries baseSeries(ProgrammeExercice exercice) {
+        ProgrammeSeries series = new ProgrammeSeries();
+        series.setProgrammeExercice(exercice);
+        return series;
     }
 
     private Programme buildProgramme(ProgrammeCreateRequest request, int weeks) {
@@ -362,7 +469,9 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return week;
     }
 
-    /** Timeline (RG1) : séquence de types de semaine ; absente → règle métier (409). */
+    /**
+     * Timeline (RG1) : séquence de types de semaine ; absente → règle métier (409).
+     */
     private List<String> resolveTimeline(Archetype archetype, int weeks) {
         RefTimeline timeline = refTimelineRepository.findByArchetypeAndWeeks(archetype, weeks)
                 .orElseThrow(() -> new BusinessRuleException(
@@ -376,7 +485,9 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return parts;
     }
 
-    /** base_percent[1..weeks] ; indice 0 inutilisé ; semaine PC (dernière) = 100. */
+    /**
+     * base_percent[1..weeks] ; indice 0 inutilisé ; semaine PC (dernière) = 100.
+     */
     private int[] computeBasePercents(int weeks) {
         int usefulWeeks = weeks - 1;
         int[] basePercent = new int[weeks + 1];
@@ -387,12 +498,16 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return basePercent;
     }
 
-    /** Objectif technique depuis la chaîne de l'évaluation (EXT|CATCH|PATH), null si absent. */
+    /**
+     * Objectif technique depuis la chaîne de l'évaluation (EXT|CATCH|PATH), null si absent.
+     */
     private RefGoal techniqueGoal(String value) {
         return value == null || value.isBlank() ? null : RefGoal.valueOf(value);
     }
 
-    /** Mapping profil force-vitesse → objectif squat/tirage (STRENGTH→STR, SPEED→SPD, MID|null→KEEP). */
+    /**
+     * Mapping profil force-vitesse → objectif squat/tirage (STRENGTH→STR, SPEED→SPD, MID|null→KEEP).
+     */
     private RefGoal strengthSpeedGoal(StrengthSpeed strengthSpeed) {
         if (strengthSpeed == StrengthSpeed.STRENGTH) {
             return RefGoal.STR;
@@ -403,7 +518,9 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return RefGoal.KEEP;
     }
 
-    /** Libellé « à définir » par type de case. */
+    /**
+     * Libellé « à définir » par type de case.
+     */
     private String toDefineLabel(ExerciceType type) {
         String movement = switch (type) {
             case SN -> LABEL_SNATCH;
@@ -434,7 +551,9 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
                 .toList();
     }
 
-    /** Recherche d'exercices de référence avec cache local (évite le N+1 sur les semaines). */
+    /**
+     * Recherche d'exercices de référence avec cache local (évite le N+1 sur les semaines).
+     */
     private List<RefExercice> findExercices(Map<ExerciceCacheKey, List<RefExercice>> cache,
                                             ExerciceType type, WeekTypeRef weekType, RefGoal goal, int order) {
         return cache.computeIfAbsent(
@@ -443,7 +562,9 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
                         key.type(), key.weekType(), key.goal(), key.order()));
     }
 
-    /** Clé de cache des exercices de référence par case de génération. */
+    /**
+     * Clé de cache des exercices de référence par case de génération.
+     */
     private record ExerciceCacheKey(ExerciceType type, WeekTypeRef weekType, RefGoal goal, Integer order) {
     }
 }

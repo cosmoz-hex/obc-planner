@@ -1,6 +1,7 @@
 package com.example.backend.services.impl;
 
-import com.example.backend.dto.CellLineRequest;
+import com.example.backend.dto.CellExerciceRequest;
+import com.example.backend.dto.CellSeriesRequest;
 import com.example.backend.dto.PageResponse;
 import com.example.backend.dto.ProgrammeCellUpdateRequest;
 import com.example.backend.dto.ProgrammeCreateRequest;
@@ -9,6 +10,8 @@ import com.example.backend.dto.ProgrammeResponse;
 import com.example.backend.entities.Athlete;
 import com.example.backend.entities.EvalSummary;
 import com.example.backend.entities.Programme;
+import com.example.backend.entities.ProgrammeExercice;
+import com.example.backend.entities.ProgrammeSeries;
 import com.example.backend.entities.ProgrammeTraining;
 import com.example.backend.entities.ProgrammeWeek;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -103,7 +106,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     @Transactional
     public void delete(Integer programmeId) {
         Programme programme = getOrThrow(programmeId);
-        // orphanRemoval + cascade ALL suppriment les semaines et exercices planifiés.
+        // orphanRemoval + cascade ALL suppriment semaines, séances, exercices et séries.
         programmeRepository.delete(programme);
     }
 
@@ -118,7 +121,8 @@ public class ProgrammeServiceImpl implements ProgrammeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Semaine introuvable : programme " + programmeId + ", semaine " + request.weekNumber()));
 
-        replaceCellTrainings(week, request);
+        ProgrammeTraining training = resolveOrCreateTraining(week, request.trainingNumber());
+        replaceCellExercices(training, request);
 
         Programme saved = programmeRepository.save(programme);
         Athlete athlete = resolveAthlete(saved.getEvaluationId());
@@ -126,66 +130,105 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     }
 
     /**
-     * Remplace en bloc les exercices planifiés de la case ciblée de la semaine :
-     * supprime ceux dont l'identifiant n'est plus présent dans le payload
-     * (orphanRemoval), met à jour les existants (par identifiant) et insère les
-     * nouveaux ({@code programmeTrainingId == null}).
+     * Récupère la séance ({@code trainingNumber}) de la semaine ou la crée si elle
+     * n'existe pas encore (cas limite — toutes les séances existent via le moteur).
      */
-    private void replaceCellTrainings(ProgrammeWeek week, ProgrammeCellUpdateRequest request) {
-        List<CellLineRequest> lines = Optional.ofNullable(request.lines()).orElseGet(List::of);
+    private ProgrammeTraining resolveOrCreateTraining(ProgrammeWeek week, Integer trainingNumber) {
+        return week.getProgrammeTrainings().stream()
+                .filter(t -> Objects.equals(t.getTrainingNumber(), trainingNumber))
+                .findFirst()
+                .orElseGet(() -> {
+                    ProgrammeTraining training = new ProgrammeTraining();
+                    training.setProgrammeWeek(week);
+                    training.setTrainingNumber(trainingNumber);
+                    week.getProgrammeTrainings().add(training);
+                    return training;
+                });
+    }
 
-        Set<Integer> keptIds = lines.stream()
-                .map(CellLineRequest::programmeTrainingId)
+    /**
+     * Remplace en bloc les exercices de la case ciblée ({@code exerciceOrder}) de la
+     * séance : supprime ceux dont l'identifiant n'est plus présent dans le payload
+     * (orphanRemoval), met à jour les existants (nom + séries, par identifiant) et
+     * insère les nouveaux ({@code programmeExerciceId == null}).
+     */
+    private void replaceCellExercices(ProgrammeTraining training, ProgrammeCellUpdateRequest request) {
+        List<CellExerciceRequest> exercices = Optional.ofNullable(request.exercices()).orElseGet(List::of);
+
+        Set<Integer> keptIds = exercices.stream()
+                .map(CellExerciceRequest::programmeExerciceId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(HashSet::new));
 
         // Index des exercices existants de la case (par identifiant) pour la mise à jour.
-        Map<Integer, ProgrammeTraining> existingById = week.getProgrammeTrainings().stream()
-                .filter(t -> isSameCell(t, request))
-                .filter(t -> t.getProgrammeTrainingId() != null)
-                .collect(Collectors.toMap(ProgrammeTraining::getProgrammeTrainingId, Function.identity()));
+        Map<Integer, ProgrammeExercice> existingById = training.getProgrammeExercices().stream()
+                .filter(e -> Objects.equals(e.getExerciceOrder(), request.exerciceOrder()))
+                .filter(e -> e.getProgrammeExerciceId() != null)
+                .collect(Collectors.toMap(ProgrammeExercice::getProgrammeExerciceId, Function.identity()));
 
         // Suppression (orphanRemoval) des exercices de la case absents du payload.
-        week.getProgrammeTrainings().removeIf(
-                t -> isSameCell(t, request)
-                        && t.getProgrammeTrainingId() != null
-                        && !keptIds.contains(t.getProgrammeTrainingId()));
+        training.getProgrammeExercices().removeIf(
+                e -> Objects.equals(e.getExerciceOrder(), request.exerciceOrder())
+                        && e.getProgrammeExerciceId() != null
+                        && !keptIds.contains(e.getProgrammeExerciceId()));
 
         // Mise à jour des existants et insertion des nouveaux.
-        for (CellLineRequest line : lines) {
-            ProgrammeTraining training = Optional.ofNullable(line.programmeTrainingId())
+        for (CellExerciceRequest exerciceRequest : exercices) {
+            ProgrammeExercice exercice = Optional.ofNullable(exerciceRequest.programmeExerciceId())
                     .map(existingById::get)
-                    .orElseGet(() -> newTraining(week, request));
-            applyLine(training, line, request);
+                    .orElseGet(() -> newExercice(training, request.exerciceOrder()));
+            exercice.setExerciceOrder(request.exerciceOrder());
+            exercice.setExerciceName(exerciceRequest.exerciceName());
+            replaceExerciceSeries(exercice, exerciceRequest);
         }
     }
 
-    /** Teste si un exercice planifié appartient à la case ({@code trainingNumber}, {@code exerciceOrder}) ciblée. */
-    private boolean isSameCell(ProgrammeTraining training, ProgrammeCellUpdateRequest request) {
-        return Objects.equals(training.getTrainingNumber(), request.trainingNumber())
-                && Objects.equals(training.getExerciceOrder(), request.exerciceOrder());
+    /** Crée un nouvel exercice rattaché à la séance à la position ({@code exerciceOrder}) ciblée. */
+    private ProgrammeExercice newExercice(ProgrammeTraining training, Integer exerciceOrder) {
+        ProgrammeExercice exercice = new ProgrammeExercice();
+        exercice.setProgrammeTraining(training);
+        exercice.setExerciceOrder(exerciceOrder);
+        training.getProgrammeExercices().add(exercice);
+        return exercice;
     }
 
-    /** Crée un nouvel exercice planifié rattaché à la semaine et à la case ciblée. */
-    private ProgrammeTraining newTraining(ProgrammeWeek week, ProgrammeCellUpdateRequest request) {
-        ProgrammeTraining training = new ProgrammeTraining();
-        training.setProgrammeWeek(week);
-        training.setTrainingNumber(request.trainingNumber());
-        training.setExerciceOrder(request.exerciceOrder());
-        week.getProgrammeTrainings().add(training);
-        return training;
+    /**
+     * Remplace en bloc les séries d'un exercice : supprime celles absentes du
+     * payload (orphanRemoval), met à jour les existantes (par identifiant) et insère
+     * les nouvelles ({@code programmeSeriesId == null}).
+     */
+    private void replaceExerciceSeries(ProgrammeExercice exercice, CellExerciceRequest exerciceRequest) {
+        List<CellSeriesRequest> seriesRequests = Optional.ofNullable(exerciceRequest.series()).orElseGet(List::of);
+
+        Set<Integer> keptIds = seriesRequests.stream()
+                .map(CellSeriesRequest::programmeSeriesId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        Map<Integer, ProgrammeSeries> existingById = exercice.getProgrammeSeries().stream()
+                .filter(s -> s.getProgrammeSeriesId() != null)
+                .collect(Collectors.toMap(ProgrammeSeries::getProgrammeSeriesId, Function.identity()));
+
+        exercice.getProgrammeSeries().removeIf(
+                s -> s.getProgrammeSeriesId() != null && !keptIds.contains(s.getProgrammeSeriesId()));
+
+        for (CellSeriesRequest seriesRequest : seriesRequests) {
+            ProgrammeSeries series = Optional.ofNullable(seriesRequest.programmeSeriesId())
+                    .map(existingById::get)
+                    .orElseGet(() -> newSeries(exercice));
+            series.setSetNumber(seriesRequest.setNumber());
+            series.setRepNumber(seriesRequest.repNumber());
+            series.setMinWeight(seriesRequest.minWeight());
+            series.setMaxWeight(seriesRequest.maxWeight());
+        }
     }
 
-    /** Applique les valeurs d'une ligne du payload à un exercice planifié (position fixée par la case). */
-    private void applyLine(ProgrammeTraining training, CellLineRequest line, ProgrammeCellUpdateRequest request) {
-        training.setTrainingNumber(request.trainingNumber());
-        training.setExerciceOrder(request.exerciceOrder());
-        training.setExerciceName(line.exerciceName());
-        training.setSetNumber(line.setNumber());
-        training.setRepNumber(line.repNumber());
-        training.setRepLabel(line.repLabel());
-        training.setMinWeight(line.minWeight());
-        training.setMaxWeight(line.maxWeight());
+    /** Crée une nouvelle série rattachée à l'exercice. */
+    private ProgrammeSeries newSeries(ProgrammeExercice exercice) {
+        ProgrammeSeries series = new ProgrammeSeries();
+        series.setProgrammeExercice(exercice);
+        exercice.getProgrammeSeries().add(series);
+        return series;
     }
 
     /** Charge l'athlète via l'évaluation source du programme (le programme ne porte qu'une FK simple). */

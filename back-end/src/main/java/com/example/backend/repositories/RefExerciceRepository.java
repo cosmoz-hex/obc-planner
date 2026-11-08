@@ -60,11 +60,12 @@ public interface RefExerciceRepository extends JpaRepository<RefExercice, Intege
             ExerciceType exerciceType, WeekTypeRef weekType, RefGoal goal, Integer trainingOrder);
 
     /**
-     * Exercices de référence (avec leurs séries) d'un type d'exercice, d'un type de
-     * semaine et d'un objectif donnés, ordonnés par numéro d'ordre dans la séance.
-     * Utilisé par le moteur de génération pour constituer la file de musculation
-     * (round-robin par objectif), sans filtrer sur le numéro d'ordre. La collection
-     * {@code sets} est chargée via {@link EntityGraph} pour éviter le N+1.
+     * Tous les exercices de référence (avec leurs séries) d'un objectif donné pour
+     * un type d'exercice et un type de semaine, toutes séances confondues, triés par
+     * {@code trainingOrder} croissant. Utilisé par le moteur pour construire la file
+     * rotative de groupes de musculation (un groupe = les exercices « au choix » d'un
+     * même {@code trainingOrder}). La collection {@code sets} est chargée via
+     * {@link EntityGraph} pour éviter le N+1 lors de la lecture des séries.
      */
     @EntityGraph(attributePaths = "sets")
     List<RefExercice> findByExerciceTypeAndWeekTypeAndGoalOrderByTrainingOrderAsc(

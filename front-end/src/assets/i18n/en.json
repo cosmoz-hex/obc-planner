@@ -419,9 +419,9 @@
       "cell": {
         "setsWithWeight": "{{sets}} x {{reps}} @ {{min}} - {{max}} kg",
         "sets": "{{sets}} x {{reps}}",
-        "setsNoRepsWithWeight": "{{sets}} @ {{min}} - {{max}} kg",
+        "setsNoRepsWithWeight": "{{sets}} sets @ {{min}} - {{max}} kg",
         "setsNoReps": "{{sets}} sets",
-        "or": "or"
+        "or": "or "
       },
       "actions": {
         "close": "Close"
@@ -442,7 +442,7 @@
     },
     "cell": {
       "title": "Edit cell",
-      "linesGroup": "Cell rows",
+      "exerciceGroup": "Exercise {{index}}",
       "fields": {
         "name": "Exercise",
         "setNumber": "Sets",
@@ -452,8 +452,10 @@
         "maxWeight": "Max load"
       },
       "actions": {
-        "addLine": "Add a row",
-        "removeLine": "Remove row",
+        "addExercice": "Add an exercise",
+        "removeExercice": "Remove exercise",
+        "addSeries": "Add a series",
+        "removeSeries": "Remove series",
         "save": "Save",
         "cancel": "Cancel"
       },

@@ -419,9 +419,9 @@
       "cell": {
         "setsWithWeight": "{{sets}} x {{reps}} @ {{min}} - {{max}} kg",
         "sets": "{{sets}} x {{reps}}",
-        "setsNoRepsWithWeight": "{{sets}} @ {{min}} - {{max}} kg",
+        "setsNoRepsWithWeight": "{{sets}} séries @ {{min}} - {{max}} kg",
         "setsNoReps": "{{sets}} séries",
-        "or": "ou"
+        "or": "ou "
       },
       "actions": {
         "close": "Fermer"
@@ -442,7 +442,7 @@
     },
     "cell": {
       "title": "Modifier la case",
-      "linesGroup": "Lignes de la case",
+      "exerciceGroup": "Exercice {{index}}",
       "fields": {
         "name": "Exercice",
         "setNumber": "Séries",
@@ -452,8 +452,10 @@
         "maxWeight": "Charge max."
       },
       "actions": {
-        "addLine": "Ajouter une ligne",
-        "removeLine": "Supprimer la ligne",
+        "addExercice": "Ajouter un exercice",
+        "removeExercice": "Supprimer l'exercice",
+        "addSeries": "Ajouter une série",
+        "removeSeries": "Supprimer la série",
         "save": "Enregistrer",
         "cancel": "Annuler"
       },

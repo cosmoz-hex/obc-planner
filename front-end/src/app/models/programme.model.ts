@@ -26,17 +26,28 @@ export interface ProgrammeRow {
   readonly cjGoal: number;
 }
 
-/** Exercice planifié d'une séance (ProgrammeTrainingResponse). */
+/** Série d'un exercice planifié (ProgrammeSeriesResponse). */
+export interface ProgrammeSeries {
+  readonly programmeSeriesId: number;
+  readonly setNumber: number | null;
+  readonly repNumber: string | null;
+  readonly minWeight: number | null;
+  readonly maxWeight: number | null;
+}
+
+/** Exercice planifié d'une séance avec ses séries (ProgrammeExerciceResponse). */
+export interface ProgrammeExercice {
+  readonly programmeExerciceId: number;
+  readonly exerciceOrder: number;
+  readonly exerciceName: string;
+  readonly series: ProgrammeSeries[];
+}
+
+/** Séance planifiée d'une semaine avec ses exercices (ProgrammeTrainingResponse). */
 export interface ProgrammeTraining {
   readonly programmeTrainingId: number;
   readonly trainingNumber: number;
-  readonly exerciceOrder: number;
-  readonly exerciceName: string;
-  readonly setNumber: number | null;
-  readonly repNumber: string | null;
-  readonly repLabel: string | null;
-  readonly minWeight: number | null;
-  readonly maxWeight: number | null;
+  readonly exercices: ProgrammeExercice[];
 }
 
 /** Semaine d'un programme avec ses séances (ProgrammeWeekResponse). */
@@ -82,15 +93,20 @@ export interface ProgrammeCreateRequest {
   cjGoal: number;
 }
 
-/** Ligne d'exercice d'une cellule modifiée (CellLineRequest). */
-export interface CellLine {
-  programmeTrainingId: number | null;
-  exerciceName: string;
+/** Série éditée d'un exercice d'une cellule (CellSeriesRequest). */
+export interface CellSeries {
+  programmeSeriesId: number | null;
   setNumber: number | null;
   repNumber: string | null;
-  repLabel: string | null;
   minWeight: number | null;
   maxWeight: number | null;
+}
+
+/** Exercice édité d'une cellule, avec ses séries (CellExerciceRequest). */
+export interface CellExercice {
+  programmeExerciceId: number | null;
+  exerciceName: string;
+  series: CellSeries[];
 }
 
 /** Payload de mise à jour d'une cellule (séance) d'un programme (ProgrammeCellUpdateRequest). */
@@ -98,7 +114,7 @@ export interface ProgrammeCellUpdateRequest {
   weekNumber: number;
   trainingNumber: number;
   exerciceOrder: number;
-  lines: CellLine[];
+  exercices: CellExercice[];
 }
 
 /** Critères de recherche métier des programmes (hors pagination/tri). */

@@ -11,6 +11,8 @@ inclusion: always
 
 > **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `code-explorer` + `doc-writer`) pour la feature « Génération de programme d'entraînement » (spec `.kiro/specs/generation-programme/`) : API `/programmes` (`ProgrammeController`, 5 endpoints), route `/programmes` + module `pages/programmes/` (liste + 3 popups), entités `Programme` / `ProgrammeWeek` / `ProgrammeTraining` (One-Many en cascade) et `RefTimeline` (mappage de `ref_timelines`), enum `ProgrammeWeekType`, moteur de génération (`ProgrammeGenerationService`) + utilitaires, exception `ValidationException` (400), évolution de schéma `programme_trainings` (`rep_number` VARCHAR nullable, `set_number` nullable). État documenté = état réel du code.
 
+> **Traçabilité** — MàJ Documentaliste (skills `git-diff` + `doc-writer`) pour la feature « Refonte du modèle Programme en 3 niveaux (Séance → Exercice → Série) » (spec `.kiro/specs/refonte-modele-programme-series/`) : hiérarchie `ProgrammeTraining` (séance) **1 — N** `ProgrammeExercice` **1 — N** `ProgrammeSeries` ; `programme_trainings` recentrée sur la séance, nouvelles tables `programme_exercices` / `programme_series` (migration destructive `V20261021_100000__refonte_modele_programme_series.sql` + rollback) ; `GET /programmes/{id}` renvoyant une structure à 3 niveaux et `PUT /programmes/{id}/cell` acceptant `exercices[]` (`CellExerciceRequest`/`CellSeriesRequest`, suppression de `CellLineRequest`) ; DTOs `ProgrammeTrainingResponse` refondu + nouveaux `ProgrammeExerciceResponse`/`ProgrammeSeriesResponse` ; correction du moteur (musculation multi-exercices, `MusculationQueueBuilder` réduit à `bitmaskToGoals`) ; front `programme-detail-dialog` / `programme-cell-dialog` + `programme.model.ts`. État documenté = état réel du code.
+
 ---
 
 ## Backend — Spring Boot 4.1 / Java 25
@@ -35,9 +37,11 @@ com.example.backend
 └── utils/              # Utilitaires transversaux (dates, strings, numbers, objects)
                         #   dont les calculateurs de génération : WeekPercentCalculator,
                         #   ProgrammeChargeCalculator, MusculationQueueBuilder
+                        #   (réduit à bitmaskToGoals : conversion du bitmask de
+                        #    musculation en objectifs ; la file rotative a été retirée)
 ```
 
-Entités JPA de la génération de programme : `Programme` **1 — N** `ProgrammeWeek` **1 — N** `ProgrammeTraining` (relations `@OneToMany` en cascade ALL + `orphanRemoval`, fetch `LAZY`, `@BatchSize` sur `ProgrammeWeek.programmeTrainings`, relations exclues de `equals`/`hashCode`/`toString`). `RefTimeline` mappe la table `ref_timelines` (seedée) consommée par le moteur. Enum `ProgrammeWeekType {F,T,S,A,D,PC}` (distinct de `WeekTypeRef`, sans `PC`). Exception `ValidationException` → HTTP 400 (domaine fonctionnel hors bornes), mappée dans l'advice existant.
+Entités JPA de la génération de programme : `Programme` **1 — N** `ProgrammeWeek` **1 — N** `ProgrammeTraining` (séance) **1 — N** `ProgrammeExercice` (exercice) **1 — N** `ProgrammeSeries` (série) — relations `@OneToMany` en cascade ALL + `orphanRemoval`, fetch `LAZY`, `@BatchSize` sur chaque collection (`ProgrammeWeek.programmeTrainings`, `ProgrammeTraining.programmeExercices`, `ProgrammeExercice.programmeSeries`) permettant la descente des 3 niveaux via un seul `@EntityGraph` sur `programmeWeeks`, relations exclues de `equals`/`hashCode`/`toString`. `RefTimeline` mappe la table `ref_timelines` (seedée) consommée par le moteur. Enum `ProgrammeWeekType {F,T,S,A,D,PC}` (distinct de `WeekTypeRef`, sans `PC`). Exception `ValidationException` → HTTP 400 (domaine fonctionnel hors bornes), mappée dans l'advice existant.
 
 ### API REST
 
@@ -72,9 +76,9 @@ Base URL: `/api`
 | `PUT` | `/evaluations/{id}` | `EvaluationController` | Modification d'une évaluation : bilan mis à jour en place (PK et FK préservées, points faibles techniques `snatch`/`clean`/`jerk`), détail `eval_details` entièrement remplacé (delete + insert). Évaluation introuvable → 404 |
 | `DELETE` | `/evaluations/{id}` | `EvaluationController` | Suppression d'une évaluation (détail `eval_details` supprimé en cascade). Évaluation introuvable → 404 |
 | `GET` | `/programmes` | `ProgrammeController` | Liste paginée, filtrée (`athleteId`) et triée (tri par défaut date de début décroissante `startDate,DESC`) ; une ligne par programme avec nom/prénom de l'athlète joint. `size=0` désactive la pagination |
-| `GET` | `/programmes/{id}` | `ProgrammeController` | Détail imbriqué d'un programme (semaines + séances planifiées). Introuvable → 404 |
+| `GET` | `/programmes/{id}` | `ProgrammeController` | Détail imbriqué d'un programme à **3 niveaux** : semaines → séances (`trainings[] : { programmeTrainingId, trainingNumber, exercices[] }`) → exercices (`{ programmeExerciceId, exerciceOrder, exerciceName, series[] }`) → séries (`{ programmeSeriesId, setNumber, repNumber, minWeight, maxWeight }`). Introuvable → 404 |
 | `POST` | `/programmes` | `ProgrammeController` | Génère un programme complet à partir d'une évaluation (201). Évaluation introuvable → 404 ; paramètres hors domaine (`weeks` ∉ {8,12,16}, `frequency` ∉ {3,4,5}, `duration` ∉ {90,120,150}) → 400 |
-| `PUT` | `/programmes/{id}/cell` | `ProgrammeController` | Édition en bloc d'une case (nom/séries/répétitions/charges des alternatives) ; renvoie le détail à jour. Programme ou semaine introuvable → 404 |
+| `PUT` | `/programmes/{id}/cell` | `ProgrammeController` | Édition en bloc d'une case (`weekNumber` × `trainingNumber` × `exerciceOrder`) : body `ProgrammeCellUpdateRequest.exercices[]` (`CellExerciceRequest` : `programmeExerciceId` nullable, `exerciceName`, `series[]` de `CellSeriesRequest`). Remplacement en bloc par identifiant à chaque niveau (suppression/MAJ/insertion exercices puis séries) ; renvoie le détail à jour. Programme ou semaine introuvable → 404 |
 | `DELETE` | `/programmes/{id}` | `ProgrammeController` | Suppression d'un programme (semaines + séances supprimées en cascade). 204. Introuvable → 404 |
 
 ---
@@ -100,8 +104,11 @@ src/app/
 │   ├── programmes/     # Programmes d'entraînement générés : liste + 3 popups
 │   │                   #   (programme-create-dialog : création/génération ;
 │   │                   #    programme-detail-dialog : consultation/édition, grille
-│   │                   #    hebdomadaire + sélecteur de semaines ;
-│   │                   #    programme-cell-dialog : édition d'une cellule)
+│   │                   #    hebdomadaire (CSS display:grid, role table/row/cell ;
+│   │                   #    exercices alternatifs séparés par « ou », séries empilées,
+│   │                   #    libellé multi-lignes, pas de scroll horizontal) ;
+│   │                   #    programme-cell-dialog : édition hiérarchique d'une case
+│   │                   #    (nom d'exercice + ses séries, ajout/suppression des deux))
 │   └── referentiel/    # Référentiel avec onglets routés
 │       ├── archetypes/ # Profils archétypes (liste + modale CRUD)
 │       ├── planning/   # Grille pivot hebdomadaire du planning de référence, édition inline par cellule
@@ -236,18 +243,37 @@ Découpage hebdomadaire d'un programme.
 ---
 
 #### `programme_trainings`
-Exercices planifiés dans une semaine de programme.
+Séance planifiée d'une semaine de programme. Recentrée sur la séance depuis la refonte en 3 niveaux (les colonnes exercice/série ont migré vers `programme_exercices` / `programme_series`).
 
 | Colonne | Type | Contrainte | Description |
 |---|---|---|---|
 | `programme_training_id` | `INTEGER` | PK | Identifiant auto-généré |
-| `programme_week_id` | `INTEGER` | NOT NULL, FK → programme_weeks | Semaine parente |
-| `training_number` | `INTEGER` | NOT NULL | Numéro de la séance hebdomadaire (1 à 5) |
-| `exercice_order` | `INTEGER` | NOT NULL | Ordre de l'exercice dans la séance (même ordre = "Au choix") |
-| `exercice_name` | `VARCHAR(100)` | NOT NULL | Nom de l'exercice planifié (libellé libre, non lié au catalogue) |
+| `programme_week_id` | `INTEGER` | NOT NULL, FK → programme_weeks (`ON DELETE CASCADE`) | Semaine parente (index `idx_programme_trainings_1`) |
+| `training_number` | `INTEGER` | NOT NULL, CHECK BETWEEN 1 AND 5 | Numéro de la séance hebdomadaire (1 à 5) |
+
+---
+
+#### `programme_exercices`
+Exercice planifié dans une séance de programme. Côté « N » de la relation One-Many avec `programme_trainings`, porte lui-même ses séries (`programme_series`).
+
+| Colonne | Type | Contrainte | Description |
+|---|---|---|---|
+| `programme_exercice_id` | `INTEGER` | PK | Identifiant auto-généré (`GENERATED BY DEFAULT AS IDENTITY`) |
+| `programme_training_id` | `INTEGER` | NOT NULL, FK → programme_trainings (`ON DELETE CASCADE`) | Séance parente (index `idx_programme_exercices_1`) |
+| `exercice_order` | `INTEGER` | NOT NULL, CHECK > 0 | Ordre de l'exercice dans la séance (plusieurs exercices au même ordre = alternatives « Au choix ») |
+| `exercice_name` | `VARCHAR(255)` | NOT NULL | Nom de l'exercice planifié (libellé libre, non lié au catalogue ; dimensionné pour les libellés composés Épaulé + Jeté) |
+
+---
+
+#### `programme_series`
+Série d'un exercice planifié. Côté « N » de la relation One-Many avec `programme_exercices`.
+
+| Colonne | Type | Contrainte | Description |
+|---|---|---|---|
+| `programme_series_id` | `INTEGER` | PK | Identifiant auto-généré (`GENERATED BY DEFAULT AS IDENTITY`) |
+| `programme_exercice_id` | `INTEGER` | NOT NULL, FK → programme_exercices (`ON DELETE CASCADE`) | Exercice parent (index `idx_programme_series_1`) |
 | `set_number` | `INTEGER` | CHECK (`set_number IS NULL OR set_number > 0`) | Nombre de séries. **Nullable** (cases sans série : RF, PC, « à définir ») |
-| `rep_number` | `VARCHAR(20)` | — | Répétitions au format libre : `'6'`, `'30s'`, `'(1 + 1)'`, ou NULL (aligné sur `ref_exercice_sets.rep_number`). **Nullable** ; CHECK `rep_number > 0` supprimé |
-| `rep_label` | `VARCHAR(20)` | — | Label des répétitions si complexe (ex : "30s + 10 reps") |
+| `rep_number` | `VARCHAR(50)` | — | Répétitions au format libre : `'6'`, `'30s'`, `'(1 + 1)'`, le libellé combiné Épaulé-Jeté, ou NULL. **Nullable** ; VARCHAR(50) pour absorber le libellé combiné (ex-`rep_label`) |
 | `min_weight` | `NUMERIC(6, 2)` | — | Charge minimale en kg |
 | `max_weight` | `NUMERIC(6, 2)` | CHECK (`max_weight IS NULL OR max_weight >= min_weight`) | Charge maximale en kg |
 
@@ -314,13 +340,14 @@ Séries/répétitions de référence par exercice et archétype. Côté « N » 
 ### Moteur de génération vs données « Protocoles »
 L'écran Référentiel > Protocoles et son schéma introduisent de nouvelles valeurs que le **moteur de génération de programme n'exploite pas encore** :
 - `exercice_type` `CL` (Épaulé) et `JK` (Jeté) — le moteur raisonne encore sur l'ancien domaine ;
-- objectifs de musculation `GEN` / `LEGS` / `POST` / `UPPER` sur `ref_exercices.goal` ;
-- `ref_exercice_sets.rep_number` désormais **textuel** (`'30s'`, `'(1 + 1)'`, NULL…) alors que le moteur attendait un entier.
+- `ref_exercice_sets.rep_number` désormais **textuel** (`'30s'`, `'(1 + 1)'`, NULL…) : le moteur le recopie tel quel dans `programme_series.rep_number` (VARCHAR), mais ne l'interprète pas pour le calcul de volume.
 
-Tant que le moteur n'a pas évolué, les exercices/séries saisis avec ces nouvelles valeurs peuvent ne pas être pris en compte (ou mal interprétés) lors de la génération d'un programme. Évolution du moteur à planifier hors périmètre de la feature Protocoles.
+> **Corrigé (refonte modèle Programme 3 niveaux)** : les objectifs de musculation `GEN` / `LEGS` / `POST` / `UPPER` sont désormais exploités par le moteur. Une case Musculation (`MS`, semaine `F`) expose **plusieurs exercices alternatifs** « au choix » (un par orientation cochée, au même ordre de case), via `MusculationQueueBuilder.bitmaskToGoals(...)` + lookup `ref_exercices` par (`MS`, `F`, `goal`, ordre). L'ancienne file rotative « un exercice par semaine » (`MusculationQueue.rotate()`) a été supprimée.
+
+Tant que le moteur n'a pas évolué sur les points restants ci-dessus, les exercices/séries saisis avec ces nouvelles valeurs peuvent ne pas être pris en compte (ou mal interprétés) lors de la génération d'un programme. Évolution du moteur à planifier hors périmètre de la feature Protocoles.
 
 ### Génération de programme : couverture incomplète de la trame
-Le moteur de génération (`ProgrammeGenerationService`) présente les limites suivantes, assumées dans le périmètre actuel :
+Le moteur de génération (`ProgrammeGenerationService`) construit l'arbre séance → exercice → série en mémoire puis le persiste en cascade. Il présente les limites suivantes, assumées dans le périmètre actuel :
 - `RF` (renfo spécifique) et `PC` (pliométrie / cardio) **n'ont aucun protocole** dans `ref_exercices` : les cases correspondantes sont générées avec des **libellés fixes en français stockés en base** (décision : application locale, libellés FR assumés, non internationalisés).
 - Une **semaine de type `PC`** (pré-compétition) voit **toutes ses cases générées en « (à définir) »** : la trame spécifique de la semaine PC sera fournie ultérieurement (hors périmètre actuel).
 - Si **aucun protocole** ne correspond à une combinaison (`exercice_type` / `week_type` / `goal` / ordre), la case est générée en **« (à définir) »**.

@@ -1,26 +1,30 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  CUSTOM_ELEMENTS_SCHEMA,
-  effect,
-  ElementRef,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	CUSTOM_ELEMENTS_SCHEMA,
+	effect,
+	ElementRef,
+	inject,
+	input,
+	output,
+	signal,
+	TemplateRef,
+	viewChild,
+	viewChildren
 } from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {LocalizedDatePipe} from '../../../pipes/localized-date.pipe';
 import {
-  ProgrammeCellUpdateRequest,
-  ProgrammeDetail,
-  ProgrammeTraining,
-  ProgrammeWeek
+	ProgrammeCellUpdateRequest,
+	ProgrammeDetail,
+	ProgrammeExercice,
+	ProgrammeWeek
 } from '../../../models/programme.model';
 import {ProgrammeService} from '../../../services/programme.service';
 import {ProgrammeCellDialogComponent} from '../programme-cell-dialog/programme-cell-dialog.component';
+import {DataGridComponent} from '../../../components/data-grid/data-grid.component';
+import {CellClickEvent, ColumnDef} from '../../../models/data-grid.model';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
@@ -37,31 +41,45 @@ export interface WeekOption {
   readonly endDate: string;
 }
 
-/** Cellule de la grille pivot : toutes les séances d'un couple (séance × position). */
-export interface GridCell {
-  readonly trainingNumber: number;
-  readonly exerciceOrder: number;
-  readonly trainings: readonly ProgrammeTraining[];
-}
-
-/** Ligne de la grille pivot : une position d'exercice avec ses cellules par séance. */
-export interface GridRow {
-  readonly exerciceOrder: number;
-  readonly cells: readonly GridCell[];
-}
-
-/** Grille pivot d'une semaine : en-têtes de séances + lignes par position. */
-export interface PivotGrid {
-  readonly trainingNumbers: readonly number[];
-  readonly rows: readonly GridRow[];
-}
-
-/** Payload émis au clic sur une cellule (consommé par la popup d'édition au Lot 10). */
+/** Payload émis au clic sur une cellule (consommé par la popup d'édition). */
 export interface EditCellEvent {
   readonly weekNumber: number;
   readonly trainingNumber: number;
   readonly exerciceOrder: number;
-  readonly trainings: readonly ProgrammeTraining[];
+  readonly exercices: readonly ProgrammeExercice[];
+}
+
+/**
+ * Ligne de la grille de détail = une **position d'exercice** (`exerciceOrder`)
+ * commune à toutes les séances de la semaine.
+ *
+ * NB : le champ `exercices` ne contient PAS des exercices mais la liste des
+ * **cellules** de la ligne (une par séance `trainingNumber`). Le nom est
+ * conservé tel que fixé par l'utilisateur, d'où ce commentaire clarifiant.
+ */
+export interface ProgrammeGridRow {
+	readonly exerciceOrder: number;
+	/** Cellules de la ligne, une par séance de la semaine (triées par trainingNumber). */
+	readonly exercices: readonly ProgrammeGridCell[];
+}
+
+/**
+ * Cellule de la grille = intersection d'une séance (`trainingNumber`) et d'une
+ * position (`exerciceOrder`). Elle regroupe les **exercices alternatifs**
+ * (« au choix ») de cette séance à cette position.
+ *
+ * Choix de typage : on conserve directement les {@link ProgrammeExercice}
+ * d'origine (pas de `CellExercice`). Raison : `ProgrammeExercice` porte déjà tous
+ * les champs nécessaires à l'affichage (nom + séries), et {@link EditCellEvent}
+ * attend précisément `readonly ProgrammeExercice[]`. Garder une seule
+ * représentation évite une conversion et une divergence de types entre affichage
+ * et édition ; la conversion vers `CellExercice`/`CellSeries` est faite par la
+ * popup d'édition au moment de bâtir le `ProgrammeCellUpdateRequest`.
+ */
+export interface ProgrammeGridCell {
+	readonly trainingNumber: number;
+	readonly exerciceOrder: number;
+	readonly exercices: readonly ProgrammeExercice[];
 }
 
 /**
@@ -73,15 +91,15 @@ export interface EditCellEvent {
  * (type / base % / 6 objectifs) et une **grille pivot** calquée sur l'écran Planning
  * (colonnes = séances `trainingNumber`, lignes = positions `exerciceOrder`).
  *
- * Chaque cellule regroupe toutes les séances du couple (séance × position) :
- * plusieurs séances empilées correspondent à des alternatives « au choix » ou aux
- * sets d'un même exercice. Un clic sur une cellule émet {@link EditCellEvent} ; la
- * popup d'édition proprement dite est traitée au Lot 10 (ici on ne fait qu'émettre).
+ * Chaque cellule regroupe les **exercices alternatifs** (« au choix ») de la séance
+ * à une position donnée ; chaque exercice affiche son nom une seule fois puis ses
+ * **séries empilées**. Un clic sur une cellule émet {@link EditCellEvent} et ouvre la
+ * popup d'édition locale `app-programme-cell-dialog`.
  */
 @Component({
   selector: 'app-programme-detail-dialog',
   standalone: true,
-  imports: [TranslatePipe, ProgrammeCellDialogComponent],
+  imports: [TranslatePipe, ProgrammeCellDialogComponent, DataGridComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './programme-detail-dialog.component.html',
@@ -145,33 +163,97 @@ export class ProgrammeDetailDialogComponent {
     return d.programmeWeeks.find((w) => w.weekNumber === this.selectedWeekNumber()) ?? null;
   });
 
-  /**
-   * Grille pivot de la semaine sélectionnée : colonnes = numéros de séances distincts
-   * (triés), lignes = positions d'exercice distinctes (triées). Chaque cellule agrège
-   * toutes les séances du couple (séance × position) — alternatives / sets empilés.
-   */
-  protected readonly grid = computed<PivotGrid>(() => {
-    const week = this.selectedWeek();
-    if (!week) {
-      return {trainingNumbers: [], rows: []};
-    }
-    const trainings = week.trainings;
-    const trainingNumbers = [...new Set(trainings.map((t) => t.trainingNumber))].sort((a, b) => a - b);
-    const exerciceOrders = [...new Set(trainings.map((t) => t.exerciceOrder))].sort((a, b) => a - b);
+	/**
+	 * Numéros de séance de la semaine sélectionnée, triés croissant. Pilote À LA FOIS
+	 * le `@for` générant un `<ng-template #seanceCell>` par séance (dans le HTML) ET
+	 * la construction des colonnes séances, afin de garantir le MÊME ordre : la i-ème
+	 * colonne séance reçoit le i-ème template.
+	 */
+	protected readonly trainingNumbers = computed<readonly number[]>(() => {
+		const week = this.selectedWeek();
+		if (!week) {
+			return [];
+		}
+		return [...new Set(week.trainings.map((trn) => trn.trainingNumber))].sort((a, b) => a - b);
+	});
 
-    const rows: GridRow[] = exerciceOrders.map((exerciceOrder) => ({
-      exerciceOrder,
-      cells: trainingNumbers.map((trainingNumber) => ({
-        trainingNumber,
-        exerciceOrder,
-        trainings: trainings.filter(
-          (t) => t.trainingNumber === trainingNumber && t.exerciceOrder === exerciceOrder
-        )
-      }))
-    }));
+	/**
+	 * Lignes de la grille (une par `exerciceOrder` distinct, triées croissant).
+	 * Pour chaque ligne, une cellule par séance regroupe les exercices alternatifs
+	 * de cette séance à cette position (plusieurs = « au choix », RG3).
+	 */
+	protected readonly rows = computed<readonly ProgrammeGridRow[]>(() => {
+		const week = this.selectedWeek();
+		if (!week) {
+			return [];
+		}
+		const trainingNumbers = this.trainingNumbers();
+		// Positions distinctes (toutes séances confondues), triées croissant.
+		const orders = [...new Set(
+			week.trainings.flatMap((trn) => trn.exercices.map((ex) => ex.exerciceOrder))
+		)].sort((a, b) => a - b);
 
-    return {trainingNumbers, rows};
-  });
+		return orders.map((exerciceOrder) => ({
+			exerciceOrder,
+			exercices: trainingNumbers.map((trainingNumber) => {
+				const training = week.trainings.find((trn) => trn.trainingNumber === trainingNumber);
+				const exercices = (training?.exercices ?? [])
+					.filter((ex) => ex.exerciceOrder === exerciceOrder);
+				return {trainingNumber, exerciceOrder, exercices} satisfies ProgrammeGridCell;
+			})
+		} satisfies ProgrammeGridRow));
+	});
+
+	/**
+	 * Template de la 1re colonne (« Exercice N » par ligne). Reçoit la LIGNE.
+	 */
+	private readonly exerciceOrderCell = viewChild<TemplateRef<{ $implicit: ProgrammeGridRow }>>('exerciceOrderCell');
+
+	/**
+	 * Templates de cellule des colonnes séances, un par séance. Chaque template est
+	 * généré par un `@for (tn of trainingNumbers())` dans le HTML et capture SON
+	 * `trainingNumber` par closure lexicale ; la i-ème entrée correspond donc à la
+	 * i-ème séance de {@link trainingNumbers}.
+	 */
+	private readonly seanceCells = viewChildren<TemplateRef<{ $implicit: ProgrammeGridRow }>>('seanceCell');
+
+	/**
+	 * Définition des colonnes de la grille. Retourne `[]` tant que les templates ne
+	 * sont pas disponibles (premier rendu) ou tant que le nombre de templates séance
+	 * ne correspond pas au nombre de séances — pattern aligné sur `protocoles`.
+	 *
+	 * NB i18n : le data-grid applique `headerLabel | translate`. Pour la 1re colonne,
+	 * `headerLabel` est une clé i18n classique. Pour les colonnes séances, l'en-tête
+	 * doit porter le numéro de séance (`Séance {{value}}`) ; `translate` du header
+	 * n'accepte pas de paramètres, on fournit donc une chaîne DÉJÀ traduite via
+	 * `translate.instant(..., {value})`. Le data-grid la repasse dans `translate` :
+	 * comme ce n'est pas une clé connue, `translate` la renvoie telle quelle.
+	 */
+	protected readonly columns = computed<readonly ColumnDef<ProgrammeGridRow>[]>(() => {
+		const orderCell = this.exerciceOrderCell();
+		const seanceCells = this.seanceCells();
+		const trainingNumbers = this.trainingNumbers();
+		if (!orderCell || seanceCells.length !== trainingNumbers.length) {
+			return [];
+		}
+		const firstColumn: ColumnDef<ProgrammeGridRow> = {
+			key: 'exerciceOrder',
+			headerLabel: 'programmes.detail.grid.exerciceOrderHeader',
+			hideable: false,
+			align: 'start',
+			cellTemplate: orderCell
+		};
+		const seanceColumns: ColumnDef<ProgrammeGridRow>[] = trainingNumbers.map((trainingNumber, index) => ({
+			key: `training-${trainingNumber}`,
+			// Chaîne déjà traduite (cf. NB i18n ci-dessus).
+			headerLabel: this.translate.instant('programmes.detail.grid.trainingHeader', {value: trainingNumber}),
+			hideable: false,
+			align: 'start',
+			cellClass: 'cursor-pointer',
+			cellTemplate: seanceCells[index]
+		}));
+		return [firstColumn, ...seanceColumns];
+	});
 
   constructor() {
     // Charge le détail à chaque ouverture avec un identifiant valide.
@@ -188,6 +270,11 @@ export class ProgrammeDetailDialogComponent {
     return this.translate.instant(key);
   }
 
+  /** Cellule d'une ligne pour une séance donnée (template séance). */
+  protected cellFor(row: ProgrammeGridRow, trainingNumber: number): ProgrammeGridCell | null {
+    return row.exercices.find((c) => c.trainingNumber === trainingNumber) ?? null;
+  }
+
   /** Formate une date selon la langue active (sélecteur de semaines). */
   protected formatDate(value: string): string {
     return this.localizedDate.transform(value) ?? value;
@@ -202,23 +289,32 @@ export class ProgrammeDetailDialogComponent {
   }
 
   /**
-   * Clic sur une cellule : ouvre la popup locale d'édition (et émet aussi
-   * {@link editCell} pour un éventuel usage parent).
+   * Clic sur une cellule de la grille. La 1re colonne (position d'exercice) n'est
+   * pas éditable. Pour une colonne séance, on résout le `trainingNumber` depuis la
+   * clé de colonne (`training-<n>`), on récupère la cellule correspondante de la
+   * ligne, puis on émet {@link EditCellEvent} et on ouvre la popup d'édition locale.
    */
-  protected onCellClick(cell: GridCell): void {
-    const event: EditCellEvent = {
+  protected onCellClick(event: CellClickEvent<ProgrammeGridRow>): void {
+    if (event.column.key === 'exerciceOrder') {
+      return;
+    }
+    const trainingNumber = Number(event.column.key.replace('training-', ''));
+    if (Number.isNaN(trainingNumber)) {
+      return;
+    }
+    const cell = event.row.exercices.find((c) => c.trainingNumber === trainingNumber);
+    const editEvent: EditCellEvent = {
       weekNumber: this.selectedWeekNumber(),
-      trainingNumber: cell.trainingNumber,
-      exerciceOrder: cell.exerciceOrder,
-      trainings: cell.trainings
+      trainingNumber,
+      exerciceOrder: event.row.exerciceOrder,
+      exercices: cell?.exercices ?? []
     };
-    this.editCell.emit(event);
-    this.editingCell.set(event);
+    this.editingCell.set(editEvent);
+    this.editCell.emit(editEvent);
     this.cellDialogOpen.set(true);
   }
 
   /**
-   * Validation de la popup d'édition de cellule : persiste la mise à jour en bloc,
    * met à jour le détail avec la réponse (en conservant la semaine sélectionnée) et
    * ferme la popup. En cas d'échec : toast d'erreur, popup conservée.
    */

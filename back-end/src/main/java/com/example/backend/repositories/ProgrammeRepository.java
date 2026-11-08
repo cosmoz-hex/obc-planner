@@ -49,10 +49,10 @@ public interface ProgrammeRepository extends JpaRepository<Programme, Integer> {
      *
      * <p>Une seule collection {@code List} est chargée via {@link EntityGraph}
      * (plus de double collection imbriquée, qui provoquait un
-     * {@code MultipleBagFetchException} / produit cartésien). Les exercices
-     * planifiés ({@code programmeWeeks.programmeTrainings}) sont chargés en lot
-     * grâce au {@code @BatchSize} porté par la collection côté entité
-     * {@code ProgrammeWeek}, ce qui évite le N+1 ligne par ligne.</p>
+     * {@code MultipleBagFetchException} / produit cartésien). Les niveaux
+     * inférieurs (séances {@code programmeTrainings} → exercices → séries) sont
+     * chargés en lot grâce aux {@code @BatchSize} portés par chaque collection,
+     * ce qui évite le N+1 ligne par ligne.</p>
      */
     @EntityGraph(attributePaths = {"programmeWeeks"})
     Optional<Programme> findWithWeeksByProgrammeId(Integer programmeId);

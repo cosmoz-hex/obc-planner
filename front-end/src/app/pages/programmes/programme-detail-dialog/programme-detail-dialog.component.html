@@ -4,10 +4,10 @@
 
 	@if (detail(); as d) {
 
-	<div class="flex flex-col gap-4">
-
+	<div class="flex flex-col gap-1">
 		<!-- Sélecteur de semaines -->
-		<wa-select size="s" [value]="selectedWeekNumber().toString()"
+		<wa-select [value]="selectedWeekNumber().toString()"
+		           class="w-md"
 		           [attr.label]="'programmes.detail.weekSelector.title' | translate"
 		           (change)="onWeekChange($any($event.target).value)">
 			@for (option of weekOptions(); track option.weekNumber) {
@@ -16,122 +16,103 @@
 				total: d.weeks,
 				start: formatDate(option.startDate),
 				end: formatDate(option.endDate)
-			} }}</wa-option>
+				} }}
+			</wa-option>
 			}
 		</wa-select>
-
 		@if (selectedWeek(); as week) {
 
 		<!-- En-tête de semaine (type / base % / 6 objectifs) -->
-		<dl class="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.type' | translate }} :</dt>
-				<dd class="inline">{{ 'programmes.enums.weekType.' + week.weekType | translate }}</dd>
+		<dl class="grid grid-cols-7">
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.type' | translate }}</dt>
+				<dd class="inline">{{ 'programmes.enums.weekType.' + week.weekType | translate }} ({{ week.basePercent }}%)</dd>
 			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.base' | translate }} :</dt>
-				<dd class="inline">{{ week.basePercent }}%</dd>
-			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.snatch' | translate }} :</dt>
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.snatch' | translate }}</dt>
 				<dd class="inline">{{ week.snatchGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
 			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.cj' | translate }} :</dt>
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.cj' | translate }}</dt>
 				<dd class="inline">{{ week.cjGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
 			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.backSquat' | translate }} :</dt>
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.backSquat' | translate }}</dt>
 				<dd class="inline">{{ week.backSquatGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
 			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.frontSquat' | translate }} :</dt>
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.frontSquat' | translate }}</dt>
 				<dd class="inline">{{ week.frontSquatGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
 			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.snatchPull' | translate }} :</dt>
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.snatchPull' | translate }}</dt>
 				<dd class="inline">{{ week.snatchPullGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
 			</div>
-			<div>
-				<dt class="inline font-semibold">{{ 'programmes.detail.header.cjPull' | translate }} :</dt>
+			<div class="grid grid-rows-2">
+				<dt class="inline font-semibold">{{ 'programmes.detail.header.cjPull' | translate }}</dt>
 				<dd class="inline">{{ week.cjPullGoal }} {{ 'programmes.detail.header.kg' | translate }}</dd>
 			</div>
 		</dl>
 
-		<!-- Grille pivot : colonnes = séances, lignes = positions d'exercice -->
-		<div class="min-h-0 overflow-auto">
-			<table class="w-full border-collapse">
-				<caption class="sr-only">{{ 'programmes.detail.grid.caption' | translate }}</caption>
-				<thead>
-					<tr>
-						<th scope="col" class="border px-3 py-2 text-left align-top">
-							{{ 'programmes.detail.grid.exerciceOrderHeader' | translate }}
-						</th>
-						@for (training of grid().trainingNumbers; track training) {
-						<th scope="col" class="border px-3 py-2 text-left align-top">
-							{{ 'programmes.detail.grid.trainingHeader' | translate: { value: training } }}
-						</th>
-						}
-					</tr>
-				</thead>
-				<tbody>
-					@for (row of grid().rows; track row.exerciceOrder) {
-					<tr>
-						<th scope="row" class="border px-3 py-2 text-left align-top whitespace-nowrap">
-							{{ 'programmes.detail.grid.exerciceRow' | translate: { value: row.exerciceOrder } }}
-						</th>
-						@for (cell of row.cells; track cell.trainingNumber) {
-						<td class="border p-0 align-top">
-							@if (cell.trainings.length > 0) {
-							<button type="button"
-							        class="flex w-full flex-col gap-2 px-3 py-2 text-left hover:bg-neutral-100 focus-visible:bg-neutral-100"
-							        [attr.aria-label]="'programmes.detail.grid.cellLabel' | translate: { exercice: cell.exerciceOrder, training: cell.trainingNumber }"
-							        (click)="onCellClick(cell)">
-								@for (training of cell.trainings; track training.programmeTrainingId; let last = $last) {
-								<span class="flex flex-col">
-									<span class="font-medium">{{ training.exerciceName }}</span>
-									<span class="text-sm text-neutral-600">
-										@if (training.repLabel || training.repNumber !== null) {
-										@if (training.minWeight !== null && training.maxWeight !== null) {
-										{{ 'programmes.detail.cell.setsWithWeight' | translate: {
-											sets: training.setNumber,
-											reps: (training.repLabel ?? training.repNumber),
-											min: training.minWeight,
-											max: training.maxWeight
-										} }}
-										} @else {
-										{{ 'programmes.detail.cell.sets' | translate: {
-											sets: training.setNumber,
-											reps: (training.repLabel ?? training.repNumber)
-										} }}
-										}
-										} @else {
-										@if (training.minWeight !== null && training.maxWeight !== null) {
-										{{ 'programmes.detail.cell.setsNoRepsWithWeight' | translate: {
-											sets: training.setNumber,
-											min: training.minWeight,
-											max: training.maxWeight
-										} }}
-										} @else {
-										{{ 'programmes.detail.cell.setsNoReps' | translate: { sets: training.setNumber } }}
-										}
-										}
-									</span>
-									@if (!last) {
-									<span class="mt-1 text-xs italic text-neutral-500" aria-hidden="true">{{ 'programmes.detail.cell.or' | translate }}</span>
-									}
-								</span>
-								}
-							</button>
-							}
-						</td>
-						}
-					</tr>
-					}
-				</tbody>
-			</table>
-		</div>
+		}
 
+		<app-data-grid
+			[rows]="rows()"
+			[columns]="columns()"
+			[caption]="'programmes.detail.grid.caption'"
+			[pageable]="false"
+			(cellClick)="onCellClick($event)">
+		</app-data-grid>
+
+		<!-- Templates de cellule -->
+
+		<!-- 1re colonne : libellé « Exercice N » de la ligne (position d'exercice). -->
+		<ng-template #exerciceOrderCell let-row>
+			<span class="font-semibold whitespace-nowrap">{{ 'programmes.detail.grid.exerciceRow' | translate: {value: row.exerciceOrder} }}</span>
+		</ng-template>
+
+		<!-- Une colonne séance = un template dédié capturant son trainingNumber (tn)
+		     par closure. Chaque cellule affiche les exercices alternatifs (séparés
+		     par « ou », RG3) de CETTE séance à la position de la ligne ; sous chaque
+		     exercice, le nom une seule fois puis ses séries empilées sans « ou » (RG4). -->
+		@for (tn of trainingNumbers(); track tn) {
+		<ng-template #seanceCell let-row>
+			@let cell = cellFor(row, tn);
+			@for (exercice of cell?.exercices ?? []; track exercice.programmeExerciceId; let idx = $index, last = $last) {
+			<div>
+				@if (idx > 0) {
+				<span>{{ 'programmes.detail.cell.or' | translate }}</span>
+				}
+				<span class="font-medium break-words">{{ exercice.exerciceName }}</span>
+				@if (exercice.series.length > 0) {
+				<ul class="list-none">
+					@for (serie of exercice.series; track serie.programmeSeriesId) {
+					<li class="m-0 p-0 whitespace-nowrap">
+						@if (serie.repNumber) {
+						@if (serie.minWeight != null && serie.maxWeight != null) {
+						{{ 'programmes.detail.cell.setsWithWeight' | translate: {sets: serie.setNumber, reps: serie.repNumber, min:
+						serie.minWeight, max: serie.maxWeight} }}
+						} @else {
+						{{ 'programmes.detail.cell.sets' | translate: {sets: serie.setNumber, reps: serie.repNumber} }}
+						}
+						} @else {
+						@if (serie.minWeight != null && serie.maxWeight != null) {
+						{{ 'programmes.detail.cell.setsNoRepsWithWeight' | translate: {sets: serie.setNumber, min: serie.minWeight,
+						max: serie.maxWeight} }}
+						} @else {
+						{{ 'programmes.detail.cell.setsNoReps' | translate: {sets: serie.setNumber} }}
+						}
+						}
+					</li>
+					}
+				</ul>
+				}
+				@if (!last) {
+				<span></span>
+				}
+			</div>
+			}
+		</ng-template>
 		}
 	</div>
 
@@ -144,7 +125,7 @@
 	</div>
 </wa-dialog>
 
-<!-- Popup d'édition de cellule (Lot 10) -->
+<!-- Popup d'édition de cellule -->
 <app-programme-cell-dialog
 	[open]="cellDialogOpen()"
 	[cell]="editingCell()"

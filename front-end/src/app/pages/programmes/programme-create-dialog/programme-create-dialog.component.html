@@ -4,7 +4,7 @@
            style="--width: 40vw;"
 >
 
-	<form class="flex flex-col gap-2" (submit)="$event.preventDefault(); onSubmit()">
+	<form class="grid grid-cols-2 gap-1" (submit)="$event.preventDefault(); onSubmit()">
 
 		<!-- Athlète -->
 		<wa-select [formField]="createForm.athleteId"
@@ -18,7 +18,8 @@
 		<wa-select [formField]="createForm.evaluationId"
 		           [attr.label]="'programmes.create.fields.evaluation' | translate">
 			@for (evaluation of evaluationsForAthlete(); track evaluation.evaluationId) {
-			<wa-option [attr.value]="evaluation.evaluationId.toString()">{{ evaluation.evaluationDate | localizedDate }}</wa-option>
+			<wa-option [attr.value]="evaluation.evaluationId.toString()">{{ evaluation.evaluationDate | localizedDate }}
+			</wa-option>
 			}
 		</wa-select>
 
@@ -39,18 +40,16 @@
 		</wa-select>
 
 		<!-- Dates : début (saisie) + fin (calculée, lecture seule) côte à côte -->
-		<div class="flex flex-row gap-2">
-			<wa-input type="date"
-			          class="flex-1"
-			          [formField]="createForm.startDate"
-			          [attr.label]="'programmes.create.fields.startDate' | translate"></wa-input>
+		<wa-input type="date"
+		          class="flex-1"
+		          [formField]="createForm.startDate"
+		          [attr.label]="'programmes.create.fields.startDate' | translate"></wa-input>
 
-			<wa-input type="date"
-			          class="flex-1"
-			          readonly
-			          [attr.value]="endDate()"
-			          [attr.label]="'programmes.create.fields.endDate' | translate"></wa-input>
-		</div>
+		<wa-input type="date"
+		          class="flex-1"
+		          readonly
+		          [attr.value]="endDate()"
+		          [attr.label]="'programmes.create.fields.endDate' | translate"></wa-input>
 
 		<!-- Durée d'une séance (optionnelle) -->
 		<wa-select [formField]="createForm.duration"
@@ -74,7 +73,7 @@
 			<span slot="end">kg</span>
 		</wa-input>
 
-		<div slot="footer" class="flex justify-end gap-1">
+		<div slot="footer" class="flex justify-end gap-1 col-span-2">
 			<wa-button appearance="plain" type="button" (click)="onClose()">
 				{{ 'programmes.create.actions.cancel' | translate }}
 			</wa-button>

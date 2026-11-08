@@ -1,24 +1,17 @@
 package com.example.backend.dto;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 /**
- * Représentation d'un exercice planifié (une ligne de la grille) renvoyée au
+ * Représentation d'une séance planifiée d'une semaine de programme renvoyée au
  * frontend.
  *
- * <p>{@code setNumber}, {@code repNumber} (texte libre), {@code repLabel},
- * {@code minWeight} et {@code maxWeight} sont nullables (renfo, pliométrie,
- * case « à définir » ou volume sans charge).</p>
+ * <p>Identifiée par son {@code trainingNumber} (1 à 5), elle porte la liste
+ * imbriquée de ses exercices planifiés.</p>
  */
 public record ProgrammeTrainingResponse(
         Integer programmeTrainingId,
         Integer trainingNumber,
-        Integer exerciceOrder,
-        String exerciceName,
-        Integer setNumber,
-        String repNumber,
-        String repLabel,
-        BigDecimal minWeight,
-        BigDecimal maxWeight
+        List<ProgrammeExerciceResponse> exercices
 ) {
 }

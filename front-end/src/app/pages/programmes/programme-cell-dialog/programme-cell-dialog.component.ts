@@ -14,7 +14,7 @@ import {applyEach, form, FormField, required, validate} from '@angular/forms/sig
 import {WaInputControlDirective} from '../../../directives/wa-forms/wa-input-control.directive';
 import {WaNumberInputControlDirective} from '../../../directives/wa-forms/wa-number-input-control.directive';
 import {WaFieldErrorDirective} from '../../../directives/wa-forms/wa-field-error.directive';
-import {CellLine, ProgrammeCellUpdateRequest} from '../../../models/programme.model';
+import {CellExercice, CellSeries, ProgrammeCellUpdateRequest} from '../../../models/programme.model';
 import {EditCellEvent} from '../programme-detail-dialog/programme-detail-dialog.component';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
@@ -24,49 +24,48 @@ import '@awesome.me/webawesome/dist/components/button/button.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 
 /**
- * Ligne éditable d'une cellule (séance × position) du programme.
+ * Série éditable d'un exercice d'une cellule.
  *
  * Les champs numériques (`setNumber`, `minWeight`, `maxWeight`) sont typés
  * `number | null` pour s'interfacer avec {@link WaNumberInputControlDirective} ;
- * `repNumber` est un **champ texte** (RG11 : formats libres `6`, `30s`, `(1 + 1)`).
- *
- * `programmeTrainingId` et `repLabel` ne sont pas édités dans le formulaire : ils
- * sont conservés tels quels pour être renvoyés au backend (voir note sur le choix
- * d'édition des répétitions dans la javadoc du composant).
+ * `repNumber` est un **champ texte** (formats libres `6`, `30s`, `(1 + 1)`).
  */
-interface CellLineFormRow {
-  programmeTrainingId: number | null;
-  exerciceName: string;
+interface SeriesFormRow {
+  programmeSeriesId: number | null;
   setNumber: number | null;
   repNumber: string;
-  repLabel: string | null;
   minWeight: number | null;
   maxWeight: number | null;
 }
 
-/** Modèle interne du formulaire : la liste des lignes de la cellule. */
+/** Exercice éditable d'une cellule : un nom + sa liste de séries. */
+interface ExerciceFormRow {
+  programmeExerciceId: number | null;
+  exerciceName: string;
+  series: SeriesFormRow[];
+}
+
+/** Modèle interne du formulaire : la liste des exercices de la cellule. */
 interface CellFormModel {
-  lines: CellLineFormRow[];
+  exercices: ExerciceFormRow[];
 }
 
 /**
  * Modale d'**édition d'une cellule** (séance × position d'exercice) d'un programme.
  *
- * Elle présente un **bloc de lignes dynamique** (pattern du bloc « séries » de
- * l'écran Protocoles) : chaque ligne correspond à une alternative « au choix » ou à
- * un set d'un même exercice. L'utilisateur peut ajouter une ligne (en fin de liste)
- * ou supprimer une ligne. La cellule peut même être entièrement vidée (le backend
- * remplace alors la case en bloc).
+ * Reflétant le modèle hiérarchique à 3 niveaux (séance → exercice → série), le
+ * formulaire présente **un bloc par exercice** (nom + bouton de suppression),
+ * contenant une **sous-liste de séries** éditables (nombre de séries, répétitions
+ * en texte libre, charges min/max). L'utilisateur peut ajouter/supprimer un exercice
+ * et, par exercice, ajouter/supprimer une série. Les ajouts se font **en fin de
+ * liste** pour ne pas déplacer le focus des champs situés avant (a11y).
  *
- * **Choix d'édition des répétitions** : le formulaire n'expose qu'**un seul** champ
- * « répétitions » éditable, mappé sur `repNumber` (texte libre). `repLabel`
- * (utilisé pour les exercices combinés épaulé-jeté, ex. `(4 + 4)`) est **conservé
- * inchangé** en arrière-plan et renvoyé tel quel au backend : on ne l'écrase pas.
- * L'affichage côté détail privilégie `repLabel` quand il existe, sinon `repNumber`.
+ * À la validation, la cellule est remplacée **en bloc** côté backend : les exercices
+ * et séries absents (par identifiant) sont supprimés, les présents mis à jour, les
+ * nouveaux (identifiant `null`) insérés.
  *
- * Chaque ligne exige au minimum un **nom d'exercice** ; les autres champs sont
- * optionnels (`number | null`, texte libre). Si `minWeight` et `maxWeight` sont tous
- * deux renseignés, `maxWeight >= minWeight` (validation légère, message i18n).
+ * Chaque exercice exige un **nom** ; les champs de série sont optionnels. Quand
+ * `minWeight` et `maxWeight` sont tous deux renseignés, `maxWeight >= minWeight`.
  */
 @Component({
   selector: 'app-programme-cell-dialog',
@@ -94,40 +93,43 @@ export class ProgrammeCellDialogComponent {
   readonly close = output<void>();
 
   /** Source de vérité du formulaire. */
-  protected readonly model = signal<CellFormModel>({lines: [this.emptyLine()]});
+  protected readonly model = signal<CellFormModel>({exercices: [this.emptyExercice()]});
 
   /**
-   * Formulaire Signal Forms : chaque ligne doit au moins porter un nom d'exercice.
+   * Formulaire Signal Forms : chaque exercice doit porter un nom ; pour chaque série,
    * `maxWeight >= minWeight` quand les deux charges sont renseignées.
    */
   protected readonly cellForm = form(this.model, (path) => {
-    applyEach(path.lines, (rowPath) => {
-      required(rowPath.exerciceName, {message: 'programmes.cell.errors.name'});
-      validate(rowPath.maxWeight, (ctx) => {
-        const max = ctx.value();
-        const min = ctx.valueOf(rowPath.minWeight);
-        if (max == null || min == null) {
-          return undefined;
-        }
-        return max < min
-          ? {kind: 'weightRange', message: 'programmes.cell.errors.weightRange'}
-          : undefined;
+    applyEach(path.exercices, (exercicePath) => {
+      required(exercicePath.exerciceName, {message: 'programmes.cell.errors.name'});
+      applyEach(exercicePath.series, (seriesPath) => {
+        validate(seriesPath.maxWeight, (ctx) => {
+          const max = ctx.value();
+          const min = ctx.valueOf(seriesPath.minWeight);
+          if (max == null || min == null) {
+            return undefined;
+          }
+          return max < min
+            ? {kind: 'weightRange', message: 'programmes.cell.errors.weightRange'}
+            : undefined;
+        });
       });
     });
   });
 
-  /** Lignes du formulaire (pour l'itération `@for` du template). */
-  protected readonly lines = computed<readonly CellLineFormRow[]>(() => this.model().lines);
+  /** Exercices du formulaire (pour l'itération `@for` du template). */
+  protected readonly exercices = computed<readonly ExerciceFormRow[]>(() => this.model().exercices);
 
   constructor() {
-    // Réinitialise le formulaire à chaque (ré)ouverture ou changement de cellule.
+    // Réinitialise le formulaire à chaque (ré)ouverture ou changement de cellule :
+    // mappe les exercices (et leurs séries) de la case sur le modèle hiérarchique.
     effect(() => {
       this.open();
       const source = this.cell();
-      const rows = source && source.trainings.length > 0
-        ? source.trainings.map((t) => this.toFormRow(t))
-        : [this.emptyLine()];
-      this.model.set({lines: rows});
+      const rows = source && source.exercices.length > 0
+        ? source.exercices.map((exercice) => this.toExerciceRow(exercice))
+        : [this.emptyExercice()];
+      this.model.set({exercices: rows});
     });
   }
 
@@ -136,14 +138,34 @@ export class ProgrammeCellDialogComponent {
     return this.translate.instant(key);
   }
 
-  /** Ajoute une ligne vide à la **fin** de la liste (ne déplace pas le focus courant). */
-  protected addLine(): void {
-    this.model.update((m) => ({lines: [...m.lines, this.emptyLine()]}));
+  /** Ajoute un exercice vide à la **fin** de la liste (ne déplace pas le focus courant). */
+  protected addExercice(): void {
+    this.model.update((m) => ({exercices: [...m.exercices, this.emptyExercice()]}));
   }
 
-  /** Supprime la ligne à l'index donné (la liste peut devenir vide). */
-  protected removeLine(index: number): void {
-    this.model.update((m) => ({lines: m.lines.filter((_, i) => i !== index)}));
+  /** Supprime l'exercice à l'index donné (la liste peut devenir vide). */
+  protected removeExercice(index: number): void {
+    this.model.update((m) => ({exercices: m.exercices.filter((_, i) => i !== index)}));
+  }
+
+  /** Ajoute une série vide à la **fin** des séries de l'exercice donné. */
+  protected addSeries(exerciceIndex: number): void {
+    this.model.update((m) => ({
+      exercices: m.exercices.map((exercice, i) =>
+        i === exerciceIndex
+          ? {...exercice, series: [...exercice.series, this.emptySeries()]}
+          : exercice)
+    }));
+  }
+
+  /** Supprime la série à l'index donné de l'exercice donné. */
+  protected removeSeries(exerciceIndex: number, seriesIndex: number): void {
+    this.model.update((m) => ({
+      exercices: m.exercices.map((exercice, i) =>
+        i === exerciceIndex
+          ? {...exercice, series: exercice.series.filter((_, j) => j !== seriesIndex)}
+          : exercice)
+    }));
   }
 
   protected onSubmit(): void {
@@ -159,7 +181,7 @@ export class ProgrammeCellDialogComponent {
       weekNumber: cell.weekNumber,
       trainingNumber: cell.trainingNumber,
       exerciceOrder: cell.exerciceOrder,
-      lines: this.model().lines.map((line) => this.toCellLine(line))
+      exercices: this.model().exercices.map((exercice) => this.toCellExercice(exercice))
     };
     this.save.emit(request);
   }
@@ -179,39 +201,55 @@ export class ProgrammeCellDialogComponent {
     }
   }
 
-  /** Normalise une ligne de formulaire en {@link CellLine} (champs vides → null). */
-  private toCellLine(line: CellLineFormRow): CellLine {
-    const repNumber = line.repNumber.trim();
+  /** Normalise un exercice de formulaire en {@link CellExercice} (champs vides → null). */
+  private toCellExercice(exercice: ExerciceFormRow): CellExercice {
     return {
-      programmeTrainingId: line.programmeTrainingId,
-      exerciceName: line.exerciceName.trim(),
-      setNumber: line.setNumber,
+      programmeExerciceId: exercice.programmeExerciceId,
+      exerciceName: exercice.exerciceName.trim(),
+      series: exercice.series.map((series) => this.toCellSeries(series))
+    };
+  }
+
+  /** Normalise une série de formulaire en {@link CellSeries} (répétitions vides → null). */
+  private toCellSeries(series: SeriesFormRow): CellSeries {
+    const repNumber = series.repNumber.trim();
+    return {
+      programmeSeriesId: series.programmeSeriesId,
+      setNumber: series.setNumber,
       repNumber: repNumber ? repNumber : null,
-      repLabel: line.repLabel,
-      minWeight: line.minWeight,
-      maxWeight: line.maxWeight
+      minWeight: series.minWeight,
+      maxWeight: series.maxWeight
     };
   }
 
-  private toFormRow(training: EditCellEvent['trainings'][number]): CellLineFormRow {
+  /** Mappe un exercice de la case sur une ligne de formulaire éditable. */
+  private toExerciceRow(exercice: EditCellEvent['exercices'][number]): ExerciceFormRow {
     return {
-      programmeTrainingId: training.programmeTrainingId,
-      exerciceName: training.exerciceName,
-      setNumber: training.setNumber,
-      repNumber: training.repNumber ?? '',
-      repLabel: training.repLabel,
-      minWeight: training.minWeight,
-      maxWeight: training.maxWeight
+      programmeExerciceId: exercice.programmeExerciceId,
+      exerciceName: exercice.exerciceName,
+      series: exercice.series.map((series) => ({
+        programmeSeriesId: series.programmeSeriesId,
+        setNumber: series.setNumber,
+        repNumber: series.repNumber ?? '',
+        minWeight: series.minWeight,
+        maxWeight: series.maxWeight
+      }))
     };
   }
 
-  private emptyLine(): CellLineFormRow {
+  private emptyExercice(): ExerciceFormRow {
     return {
-      programmeTrainingId: null,
+      programmeExerciceId: null,
       exerciceName: '',
+      series: [this.emptySeries()]
+    };
+  }
+
+  private emptySeries(): SeriesFormRow {
+    return {
+      programmeSeriesId: null,
       setNumber: null,
       repNumber: '',
-      repLabel: null,
       minWeight: null,
       maxWeight: null
     };
