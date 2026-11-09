@@ -65,7 +65,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
     // seule des référentiels). La persistance de l'arbre Programme — et donc la
     // transaction read-write — est assurée par le service CRUD appelant
     // (ProgrammeServiceImpl.create, @Transactional) via la cascade One-Many.
-    public Programme generate(ProgrammeCreateRequest request, EvalSummary eval) {
+    public Programme generate(ProgrammeCreateRequest request, EvalSummary eval, boolean preferJerkForComplex) {
         int weeks = request.weeks();
         int frequency = request.frequency();
         Archetype archetype = eval.getArchetype();
@@ -136,7 +136,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             for (RefPlanning row : planning) {
                 resolveCase(week, trainings, row, weekTypeRef, bp, finalGoals, archetype, counters,
                         weekNumber, goalSN, goalCL, goalJK, goalSQ, goalPL, musculationGroups,
-                        renfoSN, renfoCL, renfoJK, exerciceCache);
+                        renfoSN, renfoCL, renfoJK, exerciceCache, preferJerkForComplex);
             }
         }
         return programme;
@@ -152,7 +152,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
                              RefGoal goalSN, RefGoal goalCL, RefGoal goalJK, RefGoal goalSQ, RefGoal goalPL,
                              Deque<List<RefExercice>> musculationGroups,
                              List<RefExercice> renfoSN, List<RefExercice> renfoCL, List<RefExercice> renfoJK,
-                             Map<ExerciceCacheKey, List<RefExercice>> cache) {
+                             Map<ExerciceCacheKey, List<RefExercice>> cache, boolean preferJerkForComplex) {
         ExerciceType type = row.getExerciceType();
         switch (type) {
             case SN -> resolveSimple(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
@@ -162,7 +162,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             case PL -> resolveSimple(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
                     counters, ExerciceType.PL, goalPL, LABEL_PULL, cache);
             case CJ -> resolveCleanJerk(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
-                    counters, goalCL, goalJK, cache);
+                    counters, goalCL, goalJK, cache, preferJerkForComplex);
             case MS -> resolveMusculation(week, trainings, row, archetype, musculationGroups);
             case RF -> resolveRenfo(week, trainings, row, weekNumber, basePercent, finalGoals, archetype,
                     counters, renfoSN, renfoCL, renfoJK);
@@ -194,12 +194,15 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
 
     /**
      * Case Épaulé-Jeté (RG8) : appariement des mouvements CL et JK par index.
+     *
+     * @param preferJerkForComplex arbitrage des séries « complex » transmis à
+     *                             {@link #emitCombined} (true → Jeté, false → Épaulé)
      */
     private void resolveCleanJerk(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
                                   WeekTypeRef weekTypeRef, int basePercent,
                                   Map<RefReference, Double> finalGoals, Archetype archetype,
                                   Map<ExerciceType, Integer> counters, RefGoal goalCL, RefGoal goalJK,
-                                  Map<ExerciceCacheKey, List<RefExercice>> cache) {
+                                  Map<ExerciceCacheKey, List<RefExercice>> cache, boolean preferJerkForComplex) {
         int order = increment(counters, ExerciceType.CJ);
         if (goalCL == null || goalJK == null) {
             addPlaceholder(week, trainings, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
@@ -213,7 +216,8 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         }
         int pairs = Math.min(cleans.size(), jerks.size());
         for (int i = 0; i < pairs; i++) {
-            emitCombined(week, trainings, row, cleans.get(i), jerks.get(i), basePercent, finalGoals, archetype);
+            emitCombined(week, trainings, row, cleans.get(i), jerks.get(i), basePercent, finalGoals, archetype,
+                    preferJerkForComplex);
         }
     }
 
@@ -346,34 +350,63 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
     }
 
     /**
-     * Émet un exercice combiné Épaulé + Jeté (RG8 révisé) : <b>un</b>
-     * {@link ProgrammeExercice} (nom {@code "{Épaulé} + {Jeté}"}) et <b>une</b>
-     * {@link ProgrammeSeries} par couple de séries. Le CJ peut être
-     * <b>multi-séries</b>, comme l'Arraché. On boucle sur les séries de l'Épaulé
-     * (CL prévaut) et on apparie, par index, la série du Jeté correspondante.
+     * Émet un exercice Épaulé-Jeté (RG8 révisé). Le type de l'exercice est déterminé
+     * par ses séries (homogènes en pratique) :
      *
-     * <p>Les séries CL et JK sont normalement identiques en base. Si leurs
-     * nombres diffèrent, l'Épaulé fait foi : une série est émise par série CL ;
-     * la série JK absente ({@code i >= jerkSets.size()}) est traitée comme nulle.
-     * Le nombre de séries et la charge proviennent de la série CL courante
-     * (référence Épaulé-Jeté = CJ) ; le libellé combiné des répétitions des deux
-     * mouvements ({@code combinedRepLabel}) est désormais porté par
-     * {@code series.repNumber} (plus de {@code rep_label}).</p>
+     * <ul>
+     *   <li><b>Exercice « complex »</b> — séries sans {@code rep_number} ({@code set_number}
+     *       seul, détecté via {@link #isComplexSet(RefExerciceSet)} sur la première série
+     *       CL) : au lieu du combiné, on n'émet qu'<b>un seul</b> mouvement, le <b>point
+     *       faible</b> de l'athlète — le Jeté (JK) si {@code preferJerkForComplex}
+     *       (athlète plus fort à l'épaulé), sinon l'Épaulé (CL). Le <b>nom</b> de
+     *       l'exercice est celui du seul mouvement retenu (pas « {Épaulé} + {Jeté} »), et
+     *       chaque série est émise par {@link #emitComplexSeries} (un mouvement, pas de
+     *       label combiné). La charge utilise le poids de la série du mouvement retenu
+     *       (référence CJ pour les deux).</li>
+     *   <li><b>Exercice normal</b> — séries avec {@code rep_number} : comportement inchangé.
+     *       Nom composé {@code "{Épaulé} + {Jeté}"}, une {@link ProgrammeSeries} combinée
+     *       par série CL (label {@link #combinedRepLabel(String, String)}, charge sur la
+     *       série CL), appariée par index à la série JK correspondante.</li>
+     * </ul>
+     *
+     * <p>Le CJ peut être <b>multi-séries</b>, comme l'Arraché. Les séries CL et JK sont
+     * normalement identiques en base ; si leurs nombres diffèrent, l'Épaulé fait foi :
+     * une série est émise par série CL ; la série JK absente ({@code i >= jerkSets.size()})
+     * est traitée comme nulle.</p>
+     *
+     * @param preferJerkForComplex arbitrage d'un exercice complex : {@code true} → Jeté,
+     *                             {@code false} → Épaulé
      */
     private void emitCombined(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
                               RefExercice clean, RefExercice jerk,
-                              int basePercent, Map<RefReference, Double> finalGoals, Archetype archetype) {
+                              int basePercent, Map<RefReference, Double> finalGoals, Archetype archetype,
+                              boolean preferJerkForComplex) {
         List<RefExerciceSet> cleanSets = setsForArchetype(clean, archetype);
         List<RefExerciceSet> jerkSets = setsForArchetype(jerk, archetype);
         if (cleanSets.isEmpty() || jerkSets.isEmpty()) {
             addPlaceholder(week, trainings, row, LABEL_CLEAN_JERK + SUFFIX_TO_DEFINE);
             return;
         }
-        String combinedName = clean.getExerciceName() + " + " + jerk.getExerciceName();
-        ProgrammeExercice programmeExercice = addExercice(week, trainings, row, combinedName);
+        // Un exercice « complex » (séries sans rep_number) devient un mouvement unique :
+        // son nom est celui du seul mouvement retenu (point faible), pas le combiné.
+        // Un exercice normal (séries avec rep_number) garde le nom composé « Épaulé + Jeté ».
+        boolean useJerk = preferJerkForComplex && !jerkSets.isEmpty();
+        String exerciceName = isComplexSet(cleanSets.get(0))
+                ? (useJerk ? jerk.getExerciceName() : clean.getExerciceName())
+                : clean.getExerciceName() + " + " + jerk.getExerciceName();
+        ProgrammeExercice programmeExercice = addExercice(week, trainings, row, exerciceName);
         for (int i = 0; i < cleanSets.size(); i++) {
             RefExerciceSet cleanSet = cleanSets.get(i);
             RefExerciceSet jerkSet = i < jerkSets.size() ? jerkSets.get(i) : null;
+
+            if (isComplexSet(cleanSet)) {
+                // Série combinée « complex » : un seul mouvement (point faible privilégié).
+                emitComplexSeries(programmeExercice, cleanSet, jerkSet, clean, jerk,
+                        basePercent, finalGoals, preferJerkForComplex);
+                continue;
+            }
+
+            // Série normale : combiné CL + JK (label combiné, charge sur la série CL).
             String repsCL = cleanSet.getRepNumber();
             String repsJK = jerkSet == null ? null : jerkSet.getRepNumber();
 
@@ -384,6 +417,37 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             applyCharge(series, finalGoals, clean.getReference(), cleanSet.getWeight(), basePercent);
             programmeExercice.getProgrammeSeries().add(series);
         }
+    }
+
+    /**
+     * Détecte une série <b>combinée « complex »</b> de l'Épaulé-Jeté : {@code set_number}
+     * renseigné (non null) et {@code rep_number} NULL. Dans ce cas, un seul mouvement
+     * (CL ou JK) doit être émis au lieu du combiné.
+     */
+    private boolean isComplexSet(RefExerciceSet cleanSet) {
+        return cleanSet.getSetNumber() != null && cleanSet.getRepNumber() == null;
+    }
+
+    /**
+     * Émet une <b>unique</b> série pour un couple « complex » : le Jeté (JK) si
+     * {@code preferJerkForComplex} et que la série JK existe, sinon l'Épaulé (CL).
+     * Le {@code rep_number} d'une série complex est NULL par définition (aucun label
+     * combiné). La charge s'appuie sur le poids de la série retenue (référence CJ pour
+     * CL comme pour JK).
+     */
+    private void emitComplexSeries(ProgrammeExercice programmeExercice, RefExerciceSet cleanSet,
+                                   RefExerciceSet jerkSet, RefExercice clean, RefExercice jerk,
+                                   int basePercent, Map<RefReference, Double> finalGoals,
+                                   boolean preferJerkForComplex) {
+        boolean useJerk = preferJerkForComplex && jerkSet != null;
+        RefExerciceSet chosenSet = useJerk ? jerkSet : cleanSet;
+        RefExercice chosenExercice = useJerk ? jerk : clean;
+
+        ProgrammeSeries series = baseSeries(programmeExercice);
+        series.setSetNumber(chosenSet.getSetNumber());
+        series.setRepNumber(chosenSet.getRepNumber());
+        applyCharge(series, finalGoals, chosenExercice.getReference(), chosenSet.getWeight(), basePercent);
+        programmeExercice.getProgrammeSeries().add(series);
     }
 
     /**

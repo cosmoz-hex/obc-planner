@@ -19,9 +19,20 @@ public interface ProgrammeGenerationService {
      * Génère l'arbre d'un programme (non persisté) pour une demande et une
      * évaluation données.
      *
-     * @param request demande de génération (durée, fréquence, dates, objectifs)
-     * @param eval    évaluation source (archétype, profils, points techniques)
+     * <p>Le drapeau {@code preferJerkForComplex} arbitre, pour les
+     * <b>séries combinées « complex »</b> de l'Épaulé-Jeté (série dont
+     * {@code set_number} est renseigné et {@code rep_number} est NULL), quel
+     * mouvement unique émettre : {@code true} → le combiné de <b>Jeté</b> (JK),
+     * {@code false} → le combiné d'<b>Épaulé</b> (CL). La décision est prise en
+     * amont par le service appelant en comparant la force réalisée à l'épaulé et
+     * au jeté (une absence de mesure retombe sur {@code false} → Épaulé). Les
+     * séries normales (avec {@code rep_number}) restent combinées CL + JK.</p>
+     *
+     * @param request              demande de génération (durée, fréquence, dates, objectifs)
+     * @param eval                 évaluation source (archétype, profils, points techniques)
+     * @param preferJerkForComplex {@code true} pour émettre le Jeté sur les séries
+     *                             complex de l'Épaulé-Jeté, {@code false} pour l'Épaulé
      * @return le programme construit en mémoire, prêt à être persisté en cascade
      */
-    Programme generate(ProgrammeCreateRequest request, EvalSummary eval);
+    Programme generate(ProgrammeCreateRequest request, EvalSummary eval, boolean preferJerkForComplex);
 }

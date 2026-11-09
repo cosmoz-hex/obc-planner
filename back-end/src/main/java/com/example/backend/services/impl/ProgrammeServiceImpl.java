@@ -8,6 +8,7 @@ import com.example.backend.dto.ProgrammeCreateRequest;
 import com.example.backend.dto.ProgrammeDetailResponse;
 import com.example.backend.dto.ProgrammeResponse;
 import com.example.backend.entities.Athlete;
+import com.example.backend.entities.EvalDetail;
 import com.example.backend.entities.EvalSummary;
 import com.example.backend.entities.Programme;
 import com.example.backend.entities.ProgrammeExercice;
@@ -16,6 +17,7 @@ import com.example.backend.entities.ProgrammeTraining;
 import com.example.backend.entities.ProgrammeWeek;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.ValidationException;
+import com.example.backend.repositories.EvalDetailRepository;
 import com.example.backend.repositories.EvaluationRepository;
 import com.example.backend.repositories.ProgrammeRepository;
 import com.example.backend.services.apis.ProgrammeGenerationService;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +62,17 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     private static final Set<Integer> ALLOWED_FREQUENCY = Set.of(3, 4, 5);
     private static final Set<Integer> ALLOWED_DURATION = Set.of(90, 120, 150);
 
+    /**
+     * Codes des mesures d'évaluation (table {@code eval_details}) comparées pour
+     * arbitrer, sur les séries combinées « complex » de l'Épaulé-Jeté, l'émission du
+     * mouvement (Épaulé vs Jeté) : charge réalisée à l'épaulé et au jeté en technique.
+     */
+    private static final String EVAL_CODE_CLEAN = "exercice.clean.tech.simple";
+    private static final String EVAL_CODE_JERK = "exercice.jerk.tech.simple";
+
     private final ProgrammeRepository programmeRepository;
     private final EvaluationRepository evaluationRepository;
+    private final EvalDetailRepository evalDetailRepository;
     private final ProgrammeGenerationService programmeGenerationService;
     private final ProgrammeMapper programmeMapper;
 
@@ -87,7 +99,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Évaluation introuvable : " + request.evaluationId()));
 
-        Programme generated = programmeGenerationService.generate(request, eval);
+        boolean preferJerkForComplex = preferJerkForComplex(request.evaluationId());
+
+        Programme generated = programmeGenerationService.generate(request, eval, preferJerkForComplex);
         Programme saved = programmeRepository.save(generated);
 
         Athlete athlete = eval.getAthlete();
@@ -229,6 +243,37 @@ public class ProgrammeServiceImpl implements ProgrammeService {
         series.setProgrammeExercice(exercice);
         exercice.getProgrammeSeries().add(series);
         return series;
+    }
+
+    /**
+     * Détermine le mouvement à émettre pour les séries combinées « complex » de
+     * l'Épaulé-Jeté : {@code true} → Jeté (JK), {@code false} → Épaulé (CL).
+     *
+     * <p>Compare la charge réalisée à l'épaulé ({@code exercice.clean.tech.simple})
+     * et au jeté ({@code exercice.jerk.tech.simple}) dans {@code eval_details} : si
+     * l'épaulé est <b>strictement supérieur</b> au jeté, le jeté est le point faible
+     * → on privilégie le combiné de Jeté. Dans tous les autres cas (CL ≤ JK, ou l'une
+     * des deux mesures absente), fallback déterministe sur l'Épaulé ({@code false}).</p>
+     */
+    private boolean preferJerkForComplex(Integer evaluationId) {
+        List<EvalDetail> details =
+                evalDetailRepository.findByEvaluation_EvaluationIdOrderByEvaluationDetailIdAsc(evaluationId);
+        Optional<BigDecimal> clean = realValueOf(details, EVAL_CODE_CLEAN);
+        Optional<BigDecimal> jerk = realValueOf(details, EVAL_CODE_JERK);
+        return clean.isPresent() && jerk.isPresent()
+                && clean.get().compareTo(jerk.get()) > 0;
+    }
+
+    /**
+     * Première valeur réalisée non nulle associée à un code de mesure dans la liste
+     * de détails d'évaluation, le cas échéant.
+     */
+    private Optional<BigDecimal> realValueOf(List<EvalDetail> details, String exerciceCode) {
+        return details.stream()
+                .filter(detail -> exerciceCode.equals(detail.getExerciceCode()))
+                .map(EvalDetail::getRealValue)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
     /** Charge l'athlète via l'évaluation source du programme (le programme ne porte qu'une FK simple). */
