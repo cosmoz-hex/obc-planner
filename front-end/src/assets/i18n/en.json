@@ -251,7 +251,8 @@
         "JK": "Jerk",
         "SQ": "Squat",
         "PL": "Pull",
-        "MS": "Bodybuilding / Accessory"
+        "MS": "Bodybuilding / Accessory",
+        "RF": "Accessories movements"
       },
       "weekType": {
         "F": "Volume",
@@ -270,7 +271,16 @@
         "GEN": "General",
         "LEGS": "Legs",
         "POST": "Posterior chain",
-        "UPPER": "Upper body"
+        "UPPER": "Upper body",
+        "SN_EXT": "Snatch - Extension",
+        "SN_CATCH": "Snatch - Pull-under & Catch",
+        "SN_PATH": "Snatch - Bar path",
+        "CL_EXT": "Clean - Extension",
+        "CL_CATCH": "Clean - Pull-under & Catch",
+        "CL_PATH": "Clean - Bar path",
+        "JK_EXT": "Jerk - Extension",
+        "JK_CATCH": "Jerk - Placement & Recovery",
+        "JK_PATH": "Jerk - Drive & Bar path"
       },
       "archetype": {
         "MID": "Mixed",

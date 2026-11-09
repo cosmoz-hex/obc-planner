@@ -26,6 +26,7 @@ import {
 	ProtocoleRow,
 	Reference,
 	referenceForMovement,
+	referenceForRenfoGoal,
 	REFERENCE_OPTIONS,
 	RefExerciceRequest,
 	RefExerciceSet,
@@ -136,6 +137,14 @@ export class ProtocoleFormDialogComponent {
 	private lastMovement: Movement | '' = '';
 
 	/**
+	 * Dernier goal pour lequel la référence RF a été déduite. Comme `lastMovement`,
+	 * sert de garde-fou anti-boucle : on ne réécrit la référence déduite que sur un
+	 * vrai changement de goal en mouvement RF (l'écriture dans `model` est relue par
+	 * l'effet de déduction RF).
+	 */
+	private lastRenfoGoal: ProtocoleGoal | '' = '';
+
+	/**
 	 * Formulaire Signal Forms.
 	 * - Champs requis communs : mouvement, semaine, objectif, archétype, n° séance, libellé.
 	 * - En édition : tout est verrouillé sauf le libellé et les séries (US5).
@@ -158,7 +167,10 @@ export class ProtocoleFormDialogComponent {
 		disabled(path.goal, {when: isEdit});
 		disabled(path.archetype, {when: isEdit});
 		disabled(path.trainingOrder, {when: isEdit});
-		disabled(path.reference, {when: isEdit});
+		// Référence verrouillée en édition pour tous les mouvements, et dès la création
+		// pour RF : sa valeur est toujours déduite du préfixe du goal (RG4/RG5), jamais
+		// saisie à la main. Les 6 autres mouvements gardent une référence modifiable en création.
+		disabled(path.reference, {when: () => isEdit() || this.model().exerciceType === 'RF'});
 
 		applyEach(path.sets, (rowPath) => {
 			required(rowPath.setNumber, {message: 'protocoles.form.errors.setNumber'});
@@ -203,7 +215,11 @@ export class ProtocoleFormDialogComponent {
 			this.model.set(source ? this.toModel(source) : this.emptyModel());
 			// Mémorise le mouvement courant pour que l'effet de déduction ne réécrase
 			// pas une valeur fraîchement chargée (édition / ré-ouverture).
-			this.lastMovement = untracked(() => this.model().exerciceType) as Movement | '';
+			const loaded = untracked(() => this.model());
+			this.lastMovement = loaded.exerciceType as Movement | '';
+			// Idem pour le goal RF : on considère la référence déjà cohérente avec le
+			// goal chargé, pour ne pas la réécrire à l'ouverture d'une ligne RF existante.
+			this.lastRenfoGoal = loaded.exerciceType === 'RF' ? (loaded.goal as ProtocoleGoal | '') : '';
 		});
 
 		// Création : quand le MOUVEMENT change, réinitialise l'objectif s'il n'est plus
@@ -227,14 +243,47 @@ export class ProtocoleFormDialogComponent {
 			if (!movement) {
 				return;
 			}
+			// Changement de mouvement : la référence RF (déduite du goal) doit pouvoir se
+			// recalculer dès le prochain choix de goal → on réarme le garde-fou RF.
+			this.lastRenfoGoal = '';
 			const goals = goalsForMovement(movement);
+			untracked(() => {
+				this.model.update((m) => {
+					// Objectif conservé s'il reste valide pour le nouveau mouvement, sinon vidé.
+					const goal = goals.includes(m.goal as ProtocoleGoal) ? m.goal : '';
+					return {
+						...m,
+						goal,
+						// Référence par défaut déduite du mouvement (et du goal conservé pour RF).
+						// Pour les 6 autres mouvements le goal est ignoré (reste modifiable).
+						reference: this.referenceToString(
+							referenceForMovement(movement, goal as ProtocoleGoal | '')
+						)
+					};
+				});
+			});
+		});
+
+		// Création + mouvement RF : la référence se déduit du PRÉFIXE du goal (RG4),
+		// pas du mouvement seul. On recalcule donc la référence à chaque changement de
+		// goal. Même garde-fou anti-boucle que l'effet mouvement : on ne réécrit que sur
+		// un vrai changement de goal (`lastRenfoGoal`) et l'écriture passe par `untracked`.
+		effect(() => {
+			if (this.mode() === 'edit') {
+				return;
+			}
+			const {exerciceType, goal} = this.model();
+			if (exerciceType !== 'RF') {
+				return;
+			}
+			if (goal === this.lastRenfoGoal) {
+				return;
+			}
+			this.lastRenfoGoal = goal as ProtocoleGoal | '';
 			untracked(() => {
 				this.model.update((m) => ({
 					...m,
-					// Objectif conservé s'il reste valide pour le nouveau mouvement, sinon vidé.
-					goal: goals.includes(m.goal as ProtocoleGoal) ? m.goal : '',
-					// Référence : valeur par défaut déduite du mouvement (reste modifiable).
-					reference: this.referenceToString(referenceForMovement(movement))
+					reference: this.referenceToString(referenceForRenfoGoal(goal as ProtocoleGoal | ''))
 				}));
 			});
 		});

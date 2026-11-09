@@ -87,6 +87,17 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         RefGoal goalSQ = strengthSpeedGoal(eval.getSquat());
         RefGoal goalPL = strengthSpeedGoal(eval.getPull());
 
+        // --- ÉTAPE 4bis : files rotatives de renfo spécifique (RG6), une par mouvement ---
+        // Goals composés {mouvement}_{objectif technique} dérivés de l'évaluation ; liste
+        // vide si l'objectif technique du mouvement est absent. Appelées UNE SEULE FOIS
+        // (hors boucle des semaines) : la rotation hebdomadaire se fait ensuite par index.
+        RefGoal goalRenfoSN = composeRenfoGoal("SN", eval.getSnatch());
+        RefGoal goalRenfoCL = composeRenfoGoal("CL", eval.getClean());
+        RefGoal goalRenfoJK = composeRenfoGoal("JK", eval.getJerk());
+        List<RefExercice> renfoSN = findRenfoExercices(goalRenfoSN);
+        List<RefExercice> renfoCL = findRenfoExercices(goalRenfoCL);
+        List<RefExercice> renfoJK = findRenfoExercices(goalRenfoJK);
+
         // --- ÉTAPE 5 : objectifs de musculation (RG9), calculés une seule fois ---
         List<RefGoal> musculationGoals = musculationQueueBuilder.bitmaskToGoals(eval.getMusculation());
 
@@ -124,7 +135,8 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
 
             for (RefPlanning row : planning) {
                 resolveCase(week, trainings, row, weekTypeRef, bp, finalGoals, archetype, counters,
-                        goalSN, goalCL, goalJK, goalSQ, goalPL, musculationGroups, exerciceCache);
+                        weekNumber, goalSN, goalCL, goalJK, goalSQ, goalPL, musculationGroups,
+                        renfoSN, renfoCL, renfoJK, exerciceCache);
             }
         }
         return programme;
@@ -136,9 +148,10 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
     private void resolveCase(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
                              WeekTypeRef weekTypeRef, int basePercent,
                              Map<RefReference, Double> finalGoals, Archetype archetype,
-                             Map<ExerciceType, Integer> counters,
+                             Map<ExerciceType, Integer> counters, int weekNumber,
                              RefGoal goalSN, RefGoal goalCL, RefGoal goalJK, RefGoal goalSQ, RefGoal goalPL,
                              Deque<List<RefExercice>> musculationGroups,
+                             List<RefExercice> renfoSN, List<RefExercice> renfoCL, List<RefExercice> renfoJK,
                              Map<ExerciceCacheKey, List<RefExercice>> cache) {
         ExerciceType type = row.getExerciceType();
         switch (type) {
@@ -151,7 +164,8 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             case CJ -> resolveCleanJerk(week, trainings, row, weekTypeRef, basePercent, finalGoals, archetype,
                     counters, goalCL, goalJK, cache);
             case MS -> resolveMusculation(week, trainings, row, archetype, musculationGroups);
-            case RF -> addFixedLabel(week, trainings, row, LABEL_RENFO);
+            case RF -> resolveRenfo(week, trainings, row, weekNumber, basePercent, finalGoals, archetype,
+                    counters, renfoSN, renfoCL, renfoJK);
             case PC -> addFixedLabel(week, trainings, row, LABEL_PLYO_CARDIO);
             default -> addPlaceholder(week, trainings, row, toDefineLabel(type));
         }
@@ -225,6 +239,44 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         musculationGroups.offer(group);
         // Chaque exercice du groupe = une alternative « ou », volume sans charge (finalGoals null).
         group.forEach(exercice -> emitExercice(week, trainings, row, exercice, 0, null, archetype));
+    }
+
+    /**
+     * Case Renfo spécifique (RG5 / RG6) : émet <b>un seul</b> exercice de renfo (pas
+     * d'alternatives « ou », contrairement à {@link #resolveMusculation}), choisi par
+     * <b>rotation hebdomadaire</b> dans la file du mouvement associé à la case.
+     *
+     * <p>Les 3 cases RF d'une semaine sont associées, dans leur ordre d'apparition, aux
+     * mouvements Arraché / Épaulé / Jeté via le rang ordinal
+     * {@code increment(counters, RF)} (1 → {@code renfoSN}, 2 → {@code renfoCL},
+     * 3 → {@code renfoJK}) ; un rang au-delà de 3 (RG7 non tenue) retombe en « à définir »
+     * (robustesse). Le {@code counters} étant réinitialisé à chaque semaine, le rang
+     * repart de 1.</p>
+     *
+     * <p>Chaque mouvement a sa file et son curseur indépendants : l'exercice courant est
+     * {@code (weekNumber - 1) % taille_de_sa_liste} sur la liste triée par
+     * {@code refExerciceId}. Si la file est vide (objectif technique absent ou aucun
+     * protocole pour le goal composé), la case retombe en « à définir » (RG8). Les
+     * charges sont calculées par {@link #emitExercice} (référence {@code SN}/{@code CJ}
+     * + pourcentage), comme les autres mouvements chargés.</p>
+     */
+    private void resolveRenfo(ProgrammeWeek week, Map<Integer, ProgrammeTraining> trainings, RefPlanning row,
+                              int weekNumber, int basePercent, Map<RefReference, Double> finalGoals,
+                              Archetype archetype, Map<ExerciceType, Integer> counters,
+                              List<RefExercice> renfoSN, List<RefExercice> renfoCL, List<RefExercice> renfoJK) {
+        int rfRank = increment(counters, ExerciceType.RF);
+        List<RefExercice> list = switch (rfRank) {
+            case 1 -> renfoSN;
+            case 2 -> renfoCL;
+            case 3 -> renfoJK;
+            default -> List.of();
+        };
+        if (list.isEmpty()) {
+            addPlaceholder(week, trainings, row, toDefineLabel(ExerciceType.RF));
+            return;
+        }
+        int idx = (weekNumber - 1) % list.size();
+        emitExercice(week, trainings, row, list.get(idx), basePercent, finalGoals, archetype);
     }
 
     /**
@@ -503,6 +555,31 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
      */
     private RefGoal techniqueGoal(String value) {
         return value == null || value.isBlank() ? null : RefGoal.valueOf(value);
+    }
+
+    /**
+     * Compose le {@code goal} de renfo spécifique {@code {mouvement}_{objectif technique}}
+     * (RG2) : {@code null} si l'objectif technique de l'évaluation est absent, sinon la
+     * valeur d'enum {@code RefGoal} correspondante (ex. {@code SN} + {@code EXT} →
+     * {@link RefGoal#SN_EXT}). L'objectif technique provient de l'évaluation
+     * ({@code EXT}/{@code CATCH}/{@code PATH}) et l'enum est étendu (US3) → {@code valueOf}
+     * sûr.
+     */
+    private RefGoal composeRenfoGoal(String movementPrefix, String evalTechnique) {
+        return evalTechnique == null || evalTechnique.isBlank()
+                ? null
+                : RefGoal.valueOf(movementPrefix + "_" + evalTechnique);
+    }
+
+    /**
+     * File rotative de renfo (RG6) : exercices {@code RF} du goal composé, triés par
+     * {@code refExerciceId}, séries chargées via {@code @EntityGraph}. Liste vide (non
+     * nulle) si le goal est {@code null} (objectif technique absent).
+     */
+    private List<RefExercice> findRenfoExercices(RefGoal goal) {
+        return goal == null
+                ? List.of()
+                : refExerciceRepository.findByExerciceTypeAndGoalOrderByRefExerciceIdAsc(ExerciceType.RF, goal);
     }
 
     /**

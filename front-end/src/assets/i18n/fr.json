@@ -251,7 +251,8 @@
         "JK": "Jeté",
         "SQ": "Squat",
         "PL": "Tirage",
-        "MS": "Musculation"
+        "MS": "Musculation",
+        "RF": "Renfo spécifique"
       },
       "weekType": {
         "F": "Foncier",
@@ -270,7 +271,16 @@
         "GEN": "Général",
         "LEGS": "Jambes",
         "POST": "Chaîne postérieure",
-        "UPPER": "Haut du corps"
+        "UPPER": "Haut du corps",
+        "SN_EXT": "Arraché - Extension",
+        "SN_CATCH": "Arraché - Passage & Réception",
+        "SN_PATH": "Arraché - Trajectoire",
+        "CL_EXT": "Épaulé - Extension",
+        "CL_CATCH": "Épaulé - Passage & Réception",
+        "CL_PATH": "Épaulé - Trajectoire",
+        "JK_EXT": "Jeté - Extension",
+        "JK_CATCH": "Jeté - Placement & Réception",
+        "JK_PATH": "Jeté - Appel & Trajectoire"
       },
       "archetype": {
         "MID": "Mixte",

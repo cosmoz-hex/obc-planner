@@ -70,4 +70,18 @@ public interface RefExerciceRepository extends JpaRepository<RefExercice, Intege
     @EntityGraph(attributePaths = "sets")
     List<RefExercice> findByExerciceTypeAndWeekTypeAndGoalOrderByTrainingOrderAsc(
             ExerciceType exerciceType, WeekTypeRef weekType, RefGoal goal);
+
+    /**
+     * Tous les exercices de référence (avec leurs séries) d'un objectif donné pour
+     * un type d'exercice, <b>sans filtre sur {@code weekType}</b>, triés par
+     * {@code refExerciceId} croissant. Utilisé par le moteur pour construire la file
+     * rotative de renfo spécifique (RG6) : le renfo est indépendant du type de semaine
+     * (seedé avec {@code week_type='F'} par convention), on filtre donc uniquement sur
+     * {@code (exerciceType, goal)}. Le tri par identifiant garantit un ordre de rotation
+     * déterministe. La collection {@code sets} est chargée via {@link EntityGraph} pour
+     * éviter le N+1 lors de la lecture des séries.
+     */
+    @EntityGraph(attributePaths = "sets")
+    List<RefExercice> findByExerciceTypeAndGoalOrderByRefExerciceIdAsc(
+            ExerciceType exerciceType, RefGoal goal);
 }

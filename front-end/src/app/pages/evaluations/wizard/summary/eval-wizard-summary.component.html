@@ -67,31 +67,28 @@
 	<!-- Bloc 3 : Protocole Squat / Tirage / Musculation -->
 	<h3 class="col-span-4 font-medium mt-1 mb-0">{{ 'evaluations.wizard.summary.protocol.title' | translate }}</h3>
 
-	<wa-select size="s"
-	           [attr.label]="'evaluations.wizard.summary.protocol.squat' | translate"
+	<wa-select [attr.label]="'evaluations.wizard.summary.protocol.squat' | translate"
 	           [value]="squatValue() ?? ''" (change)="onSquat($event)">
 		@for (opt of protocolOptions; track opt) {
 		<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.protocolGoal.' + opt | translate }}</wa-option>
 		}
 	</wa-select>
 
-	<wa-select size="s"
-	           [attr.label]="'evaluations.wizard.summary.protocol.pull' | translate"
+	<wa-select [attr.label]="'evaluations.wizard.summary.protocol.pull' | translate"
 	           [value]="pullValue() ?? ''" (change)="onPull($event)">
 		@for (opt of protocolOptions; track opt) {
 		<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.protocolGoal.' + opt | translate }}</wa-option>
 		}
 	</wa-select>
 
-	<wa-select size="s" multiple
+	<wa-select multiple
+						 class="col-span-2"
 	           [attr.label]="'evaluations.wizard.summary.protocol.musculation' | translate"
 	           [value]="musculationSelected()" (change)="onMusculation($event)">
 		@for (opt of musculationOptions; track opt) {
 		<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.musculation.' + opt | translate }}</wa-option>
 		}
 	</wa-select>
-
-	<span></span>
 
 	<!-- Bloc 4 : Psychologique -->
 	<h3 class="col-span-4 font-medium mt-1 mb-0">{{ 'evaluations.wizard.summary.psycho.title' | translate }}</h3>

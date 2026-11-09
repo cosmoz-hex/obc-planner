@@ -2,22 +2,27 @@ import {Archetype, ARCHETYPES} from './archetype.model';
 
 /**
  * Mouvement saisissable à l'écran (sous-ensemble d'`exercice_type` exposé à l'UI).
- * `CJ` (Clean & Jerk), `RF` (Renfo spécifique) et `PC` ne sont pas des mouvements
- * saisissables : ils restent dans l'enum backend mais ne sont pas proposés ici.
+ * `RF` (Renfo spécifique) est désormais saisissable (goals composés par mouvement).
+ * `CJ` (Clean & Jerk) et `PC` restent exclus : ils demeurent dans l'enum backend
+ * mais ne sont pas proposés ici.
  */
-export type Movement = 'SN' | 'CL' | 'JK' | 'SQ' | 'PL' | 'MS';
+export type Movement = 'SN' | 'CL' | 'JK' | 'SQ' | 'PL' | 'MS' | 'RF';
 
 /** Type de semaine de référence : Foncier, Technique, Surcharge, Affûtage, Deload. */
 export type WeekTypeRef = 'F' | 'T' | 'S' | 'A' | 'D';
 
 /**
  * Objectif d'un exercice de référence. Domaine dépendant du mouvement (RG12) :
- * technique (EXT/CATCH/PATH), squat-tirage (KEEP/STR/SPD), musculation (GEN/LEGS/POST/UPPER).
+ * technique (EXT/CATCH/PATH), squat-tirage (KEEP/STR/SPD), musculation (GEN/LEGS/POST/UPPER),
+ * renfo spécifique (goals composés `{mouvement}_{objectif technique}` : SN_*, CL_*, JK_*).
  */
 export type ProtocoleGoal =
   | 'EXT' | 'CATCH' | 'PATH'
   | 'KEEP' | 'STR' | 'SPD'
-  | 'GEN' | 'LEGS' | 'POST' | 'UPPER';
+  | 'GEN' | 'LEGS' | 'POST' | 'UPPER'
+  | 'SN_EXT' | 'SN_CATCH' | 'SN_PATH'
+  | 'CL_EXT' | 'CL_CATCH' | 'CL_PATH'
+  | 'JK_EXT' | 'JK_CATCH' | 'JK_PATH';
 
 /**
  * Exercice de référence pour le calcul de charge (domaine distinct d'`exercice_type`).
@@ -86,8 +91,8 @@ export interface ProtocoleRow {
   readonly sets: RefExerciceSet[];
 }
 
-/** Mouvements proposés dans les listes déroulantes (ordre d'affichage). */
-export const MOVEMENTS: readonly Movement[] = ['SN', 'CL', 'JK', 'SQ', 'PL', 'MS'];
+/** Mouvements proposés dans les listes déroulantes (ordre d'affichage ; RF en dernier). */
+export const MOVEMENTS: readonly Movement[] = ['SN', 'CL', 'JK', 'SQ', 'PL', 'MS', 'RF'];
 
 /** Types de semaine proposés dans les listes déroulantes (ordre d'affichage). */
 export const WEEK_TYPES: readonly WeekTypeRef[] = ['F', 'T', 'S', 'A', 'D'];
@@ -101,6 +106,15 @@ const TECHNIQUE_GOALS: readonly ProtocoleGoal[] = ['EXT', 'CATCH', 'PATH'];
 const STRENGTH_GOALS: readonly ProtocoleGoal[] = ['KEEP', 'STR', 'SPD'];
 /** Objectifs musculation. */
 const MUSCULATION_GOALS: readonly ProtocoleGoal[] = ['GEN', 'LEGS', 'POST', 'UPPER'];
+/**
+ * Objectifs de renfo spécifique (goals composés `{mouvement}_{objectif technique}`),
+ * groupés par mouvement (Arraché SN, Épaulé CL, Jeté JK) puis EXT/CATCH/PATH (RG3).
+ */
+const RENFO_GOALS: readonly ProtocoleGoal[] = [
+  'SN_EXT', 'SN_CATCH', 'SN_PATH',
+  'CL_EXT', 'CL_CATCH', 'CL_PATH',
+  'JK_EXT', 'JK_CATCH', 'JK_PATH'
+];
 
 /**
  * Objectifs applicables par mouvement (RG12) : la liste Objectif (filtre et modale)
@@ -112,7 +126,8 @@ export const GOALS_BY_MOVEMENT: Readonly<Record<Movement, readonly ProtocoleGoal
   JK: TECHNIQUE_GOALS,
   SQ: STRENGTH_GOALS,
   PL: STRENGTH_GOALS,
-  MS: MUSCULATION_GOALS
+  MS: MUSCULATION_GOALS,
+  RF: RENFO_GOALS
 };
 
 /**
@@ -122,7 +137,10 @@ export const GOALS_BY_MOVEMENT: Readonly<Record<Movement, readonly ProtocoleGoal
  * Arraché (`SN`) → `SN` ; Épaulé (`CL`) → `CJ` ; Jeté (`JK`) → `CJ` ;
  * Squat (`SQ`) → `BS` (Flexion Nuque par défaut ; `FS` pour Flexion Clavicule) ;
  * Tirage (`PL`) → `SN` (Tirage Arraché par défaut ; `CJ` pour Tirage Épaulé) ;
- * Musculation (`MS`) → `null` (aucune référence de charge).
+ * Musculation (`MS`) → `null` (aucune référence de charge) ;
+ * Renfo spécifique (`RF`) → `null` **neutre** : la référence RF ne se déduit pas du
+ * mouvement (une seule valeur possible par clé) mais du PRÉFIXE du goal composé, via
+ * `referenceForRenfoGoal`. L'entrée `RF` n'existe que pour garder le `Record` total.
  */
 export const REFERENCE_BY_MOVEMENT: Readonly<Record<Movement, Reference>> = {
   SN: 'SN',
@@ -130,12 +148,33 @@ export const REFERENCE_BY_MOVEMENT: Readonly<Record<Movement, Reference>> = {
   JK: 'CJ',
   SQ: 'BS',
   PL: 'SN',
-  MS: null
+  MS: null,
+  RF: null
 };
 
-/** Déduit la référence de charge par défaut à partir du mouvement (RG4). */
-export function referenceForMovement(movement: Movement): Reference {
-  return REFERENCE_BY_MOVEMENT[movement];
+/**
+ * Référence de charge d'un goal de renfo, déduite de son PRÉFIXE mouvement (RG4) :
+ * `SN_*` → `'SN'` ; `CL_*` / `JK_*` → `'CJ'`. Un goal non-renfo (ou vide) renvoie
+ * `null` (aucune déduction renfo applicable — p. ex. tant qu'aucun goal n'est choisi).
+ */
+export function referenceForRenfoGoal(goal: ProtocoleGoal | ''): Reference {
+  if (goal.startsWith('SN_')) {
+    return 'SN';
+  }
+  if (goal.startsWith('CL_') || goal.startsWith('JK_')) {
+    return 'CJ';
+  }
+  return null;
+}
+
+/**
+ * Déduit la référence de charge par défaut (RG4). Pour les 6 mouvements chargés/non
+ * chargés classiques, elle dépend du seul mouvement (`REFERENCE_BY_MOVEMENT`). Pour
+ * `RF`, elle dépend du goal (préfixe) : le second paramètre `goal` n'est consommé que
+ * dans ce cas. Les appels mono-paramètre existants restent inchangés (param par défaut).
+ */
+export function referenceForMovement(movement: Movement, goal: ProtocoleGoal | '' = ''): Reference {
+  return movement === 'RF' ? referenceForRenfoGoal(goal) : REFERENCE_BY_MOVEMENT[movement];
 }
 
 /**
