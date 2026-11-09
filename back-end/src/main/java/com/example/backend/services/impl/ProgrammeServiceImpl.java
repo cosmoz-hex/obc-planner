@@ -95,6 +95,47 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     public ProgrammeResponse create(ProgrammeCreateRequest request) {
         validateDomain(request);
 
+        GeneratedProgramme generation = generateFor(request);
+        Programme saved = programmeRepository.save(generation.programme());
+
+        return toResponse(saved, generation.athlete());
+    }
+
+    @Override
+    @Transactional
+    public ProgrammeResponse refresh(Integer programmeId) {
+        Programme programme = getOrThrow(programmeId);
+        ProgrammeCreateRequest request = toCreateRequest(programme);
+        validateDomain(request);
+
+        // 1. Génération en mémoire AVANT toute mutation : une erreur ici laisse le programme intact.
+        GeneratedProgramme generation = generateFor(request);
+        Programme generated = generation.programme();
+
+        // 2. Purge de l'ancien contenu (orphanRemoval + cascade) puis flush explicite pour que
+        //    les DELETE partent avant les INSERT (unicité programme_id + week_number).
+        programme.getProgrammeWeeks().clear();
+        programmeRepository.flush();
+
+        // 3. Re-parentage des semaines générées sur le programme managé (le Programme généré
+        //    n'est jamais sauvegardé : pas de doublon).
+        generated.getProgrammeWeeks().forEach(week -> week.setProgramme(programme));
+        programme.getProgrammeWeeks().addAll(generated.getProgrammeWeeks());
+        programme.setEndDate(generated.getEndDate());
+
+        Programme saved = programmeRepository.save(programme);
+        return toResponse(saved, generation.athlete());
+    }
+
+    /** Résultat de la génération en mémoire : arbre généré (non persisté) + athlète de l'évaluation source. */
+    private record GeneratedProgramme(Programme programme, Athlete athlete) {
+    }
+
+    /**
+     * Étapes de génération partagées par {@code create} et {@code refresh} : chargement de
+     * l'évaluation source (404), arbitrage {@code preferJerkForComplex}, génération en mémoire.
+     */
+    private GeneratedProgramme generateFor(ProgrammeCreateRequest request) {
         EvalSummary eval = evaluationRepository.findById(request.evaluationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Évaluation introuvable : " + request.evaluationId()));
@@ -102,18 +143,36 @@ public class ProgrammeServiceImpl implements ProgrammeService {
         boolean preferJerkForComplex = preferJerkForComplex(request.evaluationId());
 
         Programme generated = programmeGenerationService.generate(request, eval, preferJerkForComplex);
-        Programme saved = programmeRepository.save(generated);
+        return new GeneratedProgramme(generated, eval.getAthlete());
+    }
 
-        Athlete athlete = eval.getAthlete();
+    /** Reconstruit la requête d'origine depuis les paramètres persistés (400 si un objectif est nul). */
+    private ProgrammeCreateRequest toCreateRequest(Programme programme) {
+        if (programme.getSnatchGoal() == null || programme.getCjGoal() == null) {
+            throw new ValidationException(
+                    "Objectifs Arraché / Épaulé-Jeté manquants : actualisation impossible pour le programme "
+                            + programme.getProgrammeId() + ".");
+        }
+        return new ProgrammeCreateRequest(
+                programme.getEvaluationId(),
+                programme.getWeeks(),
+                programme.getFrequency(),
+                programme.getDuration(),
+                programme.getStartDate(),
+                programme.getSnatchGoal(),
+                programme.getCjGoal());
+    }
+
+    private ProgrammeResponse toResponse(Programme programme, Athlete athlete) {
         return new ProgrammeResponse(
-                saved.getProgrammeId(),
+                programme.getProgrammeId(),
                 athlete.getFirstName(),
                 athlete.getLastName(),
-                saved.getStartDate(),
-                saved.getWeeks(),
-                saved.getFrequency(),
-                saved.getSnatchGoal(),
-                saved.getCjGoal());
+                programme.getStartDate(),
+                programme.getWeeks(),
+                programme.getFrequency(),
+                programme.getSnatchGoal(),
+                programme.getCjGoal());
     }
 
     @Override

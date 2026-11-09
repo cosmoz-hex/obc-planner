@@ -25,7 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * API REST de gestion des programmes d'entraînement. Pagination, filtre
  * (athlète) et tri sont gérés côté serveur via {@link Pageable}. La création
- * déclenche la génération du programme ; aucune logique métier n'est portée par
+ * déclenche la génération du programme et l'actualisation ({@code POST
+ * /{id}/refresh}) la régénère à identifiant constant ; aucune logique métier n'est portée par
  * le controller (délégation pure au service).
  */
 @RestController
@@ -61,6 +62,15 @@ public class ProgrammeController {
     @ResponseStatus(HttpStatus.CREATED)
     public ProgrammeResponse create(@Valid @RequestBody ProgrammeCreateRequest request) {
         return programmeService.create(request);
+    }
+
+    /**
+     * Actualise un programme : régénère son contenu à partir de son évaluation et
+     * de ses paramètres, en conservant son identifiant (200 + programme à jour).
+     */
+    @PostMapping("/{programmeId}/refresh")
+    public ProgrammeResponse refresh(@PathVariable Integer programmeId) {
+        return programmeService.refresh(programmeId);
     }
 
     @PutMapping("/{programmeId}/cell")

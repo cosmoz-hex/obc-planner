@@ -32,7 +32,8 @@
       "delete": "Delete",
       "confirm": "Confirm",
       "menu": "Actions",
-      "print": "Print"
+      "print": "Print",
+      "refresh": "Refresh"
     },
     "confirm": {
       "title": "Confirmation",
@@ -348,6 +349,7 @@
       },
       "actions": {
         "add": "Generate a program",
+        "refreshAriaLabel": "Refresh the programme (regenerate with the same parameters)",
         "printAriaLabel": "Print the programme (opens in a new tab)"
       },
       "columns": {
@@ -369,9 +371,17 @@
       "delete": {
         "title": "Delete program",
         "message": "This action is irreversible. Do you confirm the deletion of this program?"
+      },
+      "refresh": {
+        "title": "Refresh program",
+        "message": "The program will be regenerated with the same parameters. All manual changes will be lost. Do you confirm the refresh?"
       }
     },
+    "success": {
+      "refresh": "Program refreshed."
+    },
     "errors": {
+      "refresh": "Refreshing the program failed. Please try again.",
       "generate": "Program generation failed. Please try again.",
       "delete": "Deletion failed. Please try again."
     },

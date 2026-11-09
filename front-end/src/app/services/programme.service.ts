@@ -51,6 +51,11 @@ export class ProgrammeService {
     return firstValueFrom(this.http.get<ProgrammeDetail>(`${PROGRAMMES_URL}/${id}`));
   }
 
+  /** Régénère le contenu d'un programme avec ses paramètres d'origine (même identifiant). */
+  refresh(id: number): Promise<ProgrammeRow> {
+    return firstValueFrom(this.http.post<ProgrammeRow>(`${PROGRAMMES_URL}/${id}/refresh`, null));
+  }
+
   /** Crée un programme à partir d'une évaluation. */
   create(request: ProgrammeCreateRequest): Promise<ProgrammeRow> {
     return firstValueFrom(this.http.post<ProgrammeRow>(PROGRAMMES_URL, request));

@@ -32,7 +32,8 @@
       "delete": "Supprimer",
       "confirm": "Confirmer",
       "menu": "Actions",
-      "print": "Imprimer"
+      "print": "Imprimer",
+      "refresh": "Actualiser"
     },
     "confirm": {
       "title": "Confirmation",
@@ -348,6 +349,7 @@
       },
       "actions": {
         "add": "Générer un programme",
+        "refreshAriaLabel": "Actualiser le programme (régénération avec les mêmes paramètres)",
         "printAriaLabel": "Imprimer le programme (ouvre un nouvel onglet)"
       },
       "columns": {
@@ -369,9 +371,17 @@
       "delete": {
         "title": "Supprimer le programme",
         "message": "Cette action est irréversible. Confirmez-vous la suppression de ce programme ?"
+      },
+      "refresh": {
+        "title": "Actualiser le programme",
+        "message": "Le programme sera régénéré avec les mêmes paramètres. Toutes les modifications manuelles seront perdues. Confirmez-vous l'actualisation ?"
       }
     },
+    "success": {
+      "refresh": "Programme actualisé."
+    },
     "errors": {
+      "refresh": "L'actualisation du programme a échoué. Veuillez réessayer.",
       "generate": "La génération du programme a échoué. Veuillez réessayer.",
       "delete": "La suppression a échoué. Veuillez réessayer."
     },

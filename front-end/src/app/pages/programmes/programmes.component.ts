@@ -129,7 +129,7 @@ export class ProgrammesComponent {
 	protected readonly rowToDelete = signal<ProgrammeRow | null>(null);
 
 	// --- Toast d'erreur transitoire (learning.md 2026-10-17) ---
-	private readonly errorToast = viewChild<ElementRef<WaToast>>('errorToast');
+	private readonly toast = viewChild<ElementRef<WaToast>>('toast');
 
 	// Templates de cellule déclarés dans le HTML de la page.
 	private readonly athleteTpl = viewChild<TemplateRef<{ $implicit: ProgrammeRow }>>('athleteCell');
@@ -226,6 +226,8 @@ export class ProgrammesComponent {
 		const action = detail?.item?.getAttribute('value');
 		if (action === 'edit') {
 			this.openDetail(row);
+		} else if (action === 'refresh') {
+			this.askRefresh(row);
 		} else if (action === 'print') {
 			this.openPrint(row);
 		} else if (action === 'delete') {
@@ -236,6 +238,40 @@ export class ProgrammesComponent {
 	/** Ouvre la version imprimable du programme dans un nouvel onglet (RG3). */
 	protected openPrint(row: ProgrammeRow): void {
 		window.open('/programmes/' + row.programmeId + '/impression', '_blank', 'noopener');
+	}
+
+	// --- Actualisation (régénération) ---
+	protected readonly confirmRefreshOpen = signal(false);
+	protected readonly rowToRefresh = signal<ProgrammeRow | null>(null);
+	protected readonly refreshing = signal(false);
+
+	protected askRefresh(row: ProgrammeRow): void {
+		this.rowToRefresh.set(row);
+		this.confirmRefreshOpen.set(true);
+	}
+
+	protected cancelRefresh(): void {
+		this.confirmRefreshOpen.set(false);
+		this.rowToRefresh.set(null);
+	}
+
+	protected async confirmRefresh(): Promise<void> {
+		const row = this.rowToRefresh();
+		this.confirmRefreshOpen.set(false);
+		if (!row || this.refreshing()) {
+			return;
+		}
+		this.refreshing.set(true);
+		try {
+			await this.programmeService.refresh(row.programmeId);
+			this.programmesResource.reload();
+			this.showSuccess('programmes.success.refresh');
+		} catch {
+			this.showError('programmes.errors.refresh');
+		} finally {
+			this.refreshing.set(false);
+			this.rowToRefresh.set(null);
+		}
 	}
 
 	// --- Suppression ---
@@ -267,6 +303,11 @@ export class ProgrammesComponent {
 
 	/** Affiche une notification d'erreur transitoire (wa-toast, variant danger). */
 	private showError(key: string): void {
-		this.errorToast()?.nativeElement.create(this.t(key), {variant: 'danger', icon: 'triangle-exclamation'});
+		this.toast()?.nativeElement.create(this.t(key), {variant: 'danger', icon: 'triangle-exclamation'});
+	}
+
+	/** Affiche une notification de succès transitoire (wa-toast, variant success). */
+	private showSuccess(key: string): void {
+		this.toast()?.nativeElement.create(this.t(key), {variant: 'success', icon: 'circle-check'});
 	}
 }

@@ -28,6 +28,22 @@ public interface ProgrammeService {
      */
     ProgrammeResponse create(ProgrammeCreateRequest request);
 
+    /**
+     * Actualise un programme : régénère son contenu (semaines → séances → exercices → séries)
+     * avec ses paramètres d'entrée persistés, en conservant le même identifiant et le même
+     * en-tête. L'évaluation source est relue à son état courant.
+     *
+     * <p>La génération est exécutée en mémoire <b>avant</b> toute suppression ; l'ensemble
+     * est transactionnel (toute erreur laisse le programme intact). Les modifications
+     * manuelles sont écrasées.</p>
+     *
+     * <ul>
+     *   <li>Programme ou évaluation source introuvable → 404.</li>
+     *   <li>Paramètres persistés hors domaine (ou objectif nul) → 400.</li>
+     * </ul>
+     */
+    ProgrammeResponse refresh(Integer programmeId);
+
     /** Suppression d'un programme et de tout son arbre (semaines + exercices planifiés) en cascade. */
     void delete(Integer programmeId);
 

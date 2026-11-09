@@ -21,7 +21,7 @@
 	<app-data-grid
 		[rows]="rows()"
 		[columns]="columns()"
-		[loading]="loading()"
+		[loading]="loading() || refreshing()"
 		[caption]="'programmes.list.caption'"
 		[rowId]="rowId"
 		[pageable]="true"
@@ -70,6 +70,10 @@
 			<wa-icon slot="icon" name="pen" aria-hidden="true"></wa-icon>
 			{{ 'common.actions.edit' | translate }}
 		</wa-dropdown-item>
+		<wa-dropdown-item value="refresh" [attr.aria-label]="t('programmes.list.actions.refreshAriaLabel')">
+			<wa-icon slot="icon" name="rotate" aria-hidden="true"></wa-icon>
+			{{ 'common.actions.refresh' | translate }}
+		</wa-dropdown-item>
 		<wa-dropdown-item value="print" [attr.aria-label]="t('programmes.list.actions.printAriaLabel')">
 			<wa-icon slot="icon" name="print" aria-hidden="true"></wa-icon>
 			{{ 'common.actions.print' | translate }}
@@ -105,6 +109,16 @@
 	(cancelled)="cancelDelete()">
 </app-confirm-dialog>
 
-<!-- Notification d'erreur transitoire -->
-<wa-toast #errorToast></wa-toast>
+<!-- Confirmation d'actualisation -->
+<app-confirm-dialog
+	[open]="confirmRefreshOpen()"
+	titleKey="programmes.confirm.refresh.title"
+	messageKey="programmes.confirm.refresh.message"
+	confirmKey="common.actions.refresh"
+	(confirmed)="confirmRefresh()"
+	(cancelled)="cancelRefresh()">
+</app-confirm-dialog>
+
+<!-- Notification transitoire (succès / erreur) -->
+<wa-toast #toast></wa-toast>
 
