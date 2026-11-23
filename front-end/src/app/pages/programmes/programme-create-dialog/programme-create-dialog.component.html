@@ -1,86 +1,187 @@
 <wa-dialog [attr.open]="open() ? true : null"
-           [attr.label]="title() | translate"
+           [attr.label]="'programmes.create.title' | translate"
            (wa-after-hide)="onDialogHide($event)"
-           style="--width: 40vw;"
+           style="--width: 70vw;"
 >
 
-	<form class="grid grid-cols-2 gap-1" (submit)="$event.preventDefault(); onSubmit()">
+	<app-wizard [(currentStep)]="currentStep" (validate)="onSubmit()">
 
-		<!-- Athlète -->
-		<wa-select [formField]="createForm.athleteId"
-		           [attr.label]="'programmes.create.fields.athlete' | translate">
-			@for (athlete of athletes(); track athlete.athleteId) {
-			<wa-option [attr.value]="athlete.athleteId.toString()">{{ athlete.lastName }} {{ athlete.firstName }}</wa-option>
-			}
-		</wa-select>
+		<!-- Étape 1 : Profil + Évaluation -->
+		<app-wizard-step [step]="1" [valid]="!profileForm().invalid() && !loadingEvaluation()" label="programmes.create.steps.profile">
+			<section class="grid grid-cols-4 items-start gap-1 py-1">
 
-		<!-- Évaluation (restreinte à l'athlète sélectionné) -->
-		<wa-select [formField]="createForm.evaluationId"
-		           [attr.label]="'programmes.create.fields.evaluation' | translate">
-			@for (evaluation of evaluationsForAthlete(); track evaluation.evaluationId) {
-			<wa-option [attr.value]="evaluation.evaluationId.toString()">{{ evaluation.evaluationDate | localizedDate }}
-			</wa-option>
-			}
-		</wa-select>
+				<!-- Athlète (obligatoire) -->
+				<wa-select [formField]="profileForm.athleteId"
+				           [attr.label]="'programmes.create.fields.athlete' | translate"
+				           (change)="onAthleteChange($event)">
+					@for (athlete of athletes(); track athlete.athleteId) {
+					<wa-option [attr.value]="athlete.athleteId.toString()">{{ athlete.lastName }} {{ athlete.firstName }}</wa-option>
+					}
+				</wa-select>
 
-		<!-- Durée du programme (nombre de semaines) -->
-		<wa-select [formField]="createForm.weeks"
-		           [attr.label]="'programmes.create.fields.weeks' | translate">
-			@for (value of weeksOptions; track value) {
-			<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
-			}
-		</wa-select>
+				<!-- Évaluation (optionnelle, effaçable, restreinte à l'athlète) -->
+				<wa-select with-clear
+				           [formField]="profileForm.evaluationId"
+				           [attr.label]="'programmes.create.fields.evaluation' | translate"
+				           [attr.hint]="'programmes.create.evaluationHint' | translate"
+				           (change)="onEvaluationChange($event)"
+				           (wa-clear)="onEvaluationChange($event)">
+					@for (evaluation of evaluationsForAthlete(); track evaluation.evaluationId) {
+					<wa-option [attr.value]="evaluation.evaluationId.toString()">{{ evaluation.evaluationDate | localizedDate }}</wa-option>
+					}
+				</wa-select>
 
-		<!-- Fréquence hebdomadaire -->
-		<wa-select [formField]="createForm.frequency"
-		           [attr.label]="'programmes.create.fields.frequency' | translate">
-			@for (value of frequencyOptions; track value) {
-			<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
-			}
-		</wa-select>
+				<!-- Bloc 1 : Profil & Archétype -->
+				<h3 class="col-span-4 text-lg m-0">{{ 'evaluations.wizard.summary.profile.title' | translate }}</h3>
 
-		<!-- Dates : début (saisie) + fin (calculée, lecture seule) côte à côte -->
-		<wa-input type="date"
-		          class="flex-1"
-		          [formField]="createForm.startDate"
-		          [attr.label]="'programmes.create.fields.startDate' | translate"></wa-input>
+				<wa-select size="s"
+				           [formField]="profileForm.strengthSpeed"
+				           [attr.label]="'evaluations.wizard.summary.profile.strengthSpeed' | translate"
+				           (change)="onAxisChange('strengthSpeed', $event)">
+					@for (opt of strengthSpeedOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.strengthSpeed.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
 
-		<wa-input type="date"
-		          class="flex-1"
-		          readonly
-		          [attr.value]="endDate()"
-		          [attr.label]="'programmes.create.fields.endDate' | translate"></wa-input>
+				<wa-select size="s"
+				           [formField]="profileForm.technique"
+				           [attr.label]="'evaluations.wizard.summary.profile.technique' | translate"
+				           (change)="onAxisChange('technique', $event)">
+					@for (opt of techniqueOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.technique.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
 
-		<!-- Durée d'une séance (optionnelle) -->
-		<wa-select [formField]="createForm.duration"
-		           with-clear
-		           [attr.label]="'programmes.create.fields.duration' | translate">
-			@for (value of durationOptions; track value) {
-			<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
-			}
-		</wa-select>
+				<wa-select size="s"
+				           [formField]="profileForm.endurance"
+				           [attr.label]="'evaluations.wizard.summary.profile.endurance' | translate"
+				           (change)="onAxisChange('endurance', $event)">
+					@for (opt of enduranceOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.endurance.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
 
-		<!-- Objectifs -->
-		<wa-input type="number"
-		          [formField]="createForm.snatchGoal"
-		          [attr.label]="'programmes.create.fields.snatchGoal' | translate">
-			<span slot="end">kg</span>
-		</wa-input>
+				<wa-select size="s"
+				           [formField]="profileForm.archetype"
+				           [attr.label]="'evaluations.wizard.summary.profile.archetype' | translate">
+					@for (opt of archetypeOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.archetype.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
 
-		<wa-input type="number"
-		          [formField]="createForm.cjGoal"
-		          [attr.label]="'programmes.create.fields.cjGoal' | translate">
-			<span slot="end">kg</span>
-		</wa-input>
+				<!-- Bloc 2 : Technique (point faible par mouvement) -->
+				<h3 class="col-span-4 text-lg m-0">{{ 'evaluations.wizard.summary.technicalFocus.title' | translate }}</h3>
 
-		<div slot="footer" class="flex justify-end gap-1 col-span-2">
-			<wa-button appearance="plain" type="button" (click)="onClose()">
-				{{ 'programmes.create.actions.cancel' | translate }}
-			</wa-button>
+				<wa-select size="s" with-clear
+				           [formField]="profileForm.snatch"
+				           [attr.label]="'evaluations.wizard.summary.weakness.label.snatch' | translate">
+					@for (code of weaknessOptions; track code) {
+					<wa-option [attr.value]="code">{{ 'evaluations.wizard.summary.weakness.snatch.' + code | translate }}</wa-option>
+					}
+				</wa-select>
 
-			<wa-button variant="brand" type="submit" [attr.disabled]="createForm().invalid() ? true : null">
-				{{ 'programmes.create.actions.generate' | translate }}
-			</wa-button>
-		</div>
-	</form>
+				<wa-select size="s" with-clear
+				           [formField]="profileForm.clean"
+				           [attr.label]="'evaluations.wizard.summary.weakness.label.clean' | translate">
+					@for (code of weaknessOptions; track code) {
+					<wa-option [attr.value]="code">{{ 'evaluations.wizard.summary.weakness.clean.' + code | translate }}</wa-option>
+					}
+				</wa-select>
+
+				<wa-select size="s" with-clear
+				           [formField]="profileForm.jerk"
+				           [attr.label]="'evaluations.wizard.summary.weakness.label.jerk' | translate">
+					@for (code of weaknessOptions; track code) {
+					<wa-option [attr.value]="code">{{ 'evaluations.wizard.summary.weakness.jerk.' + code | translate }}</wa-option>
+					}
+				</wa-select>
+
+				<span></span>
+
+				<!-- Bloc 3 : Protocole Squat / Tirage / Musculation -->
+				<h3 class="col-span-4 text-lg m-0">{{ 'evaluations.wizard.summary.protocol.title' | translate }}</h3>
+
+				<wa-select [formField]="profileForm.squat"
+				           [attr.label]="'evaluations.wizard.summary.protocol.squat' | translate">
+					@for (opt of protocolOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.protocolGoal.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
+
+				<wa-select [formField]="profileForm.pull"
+				           [attr.label]="'evaluations.wizard.summary.protocol.pull' | translate">
+					@for (opt of protocolOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.protocolGoal.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
+
+				<wa-select multiple
+				           class="col-span-2"
+				           [attr.label]="'evaluations.wizard.summary.protocol.musculation' | translate"
+				           [value]="musculationSelected()" (change)="onMusculation($event)">
+					@for (opt of musculationOptions; track opt) {
+					<wa-option [attr.value]="opt">{{ 'evaluations.wizard.summary.musculation.' + opt | translate }}</wa-option>
+					}
+				</wa-select>
+			</section>
+		</app-wizard-step>
+
+		<!-- Étape 2 : Format + objectifs -->
+		<app-wizard-step [step]="2" [valid]="!formatForm().invalid() && !loadingEvaluation()" label="programmes.create.steps.format">
+			<section class="grid grid-cols-4 items-start gap-1 py-1">
+				<h3 class="col-span-4 font-medium mb-0">{{ 'programmes.create.blocks.format' | translate }}</h3>
+
+				<wa-select [formField]="formatForm.weeks"
+				           [attr.label]="'programmes.create.fields.weeks' | translate">
+					@for (value of weeksOptions; track value) {
+					<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
+					}
+				</wa-select>
+
+				<wa-select [formField]="formatForm.frequency"
+				           [attr.label]="'programmes.create.fields.frequency' | translate">
+					@for (value of frequencyOptions; track value) {
+					<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
+					}
+				</wa-select>
+
+				<wa-input type="date"
+				          [formField]="formatForm.startDate"
+				          [attr.label]="'programmes.create.fields.startDate' | translate"></wa-input>
+
+				<wa-input type="date"
+				          readonly
+				          [attr.value]="endDate()"
+				          [attr.label]="'programmes.create.fields.endDate' | translate"></wa-input>
+
+				<!-- Durée d'une séance (optionnelle, champ masqué conservé) -->
+				<wa-select [formField]="formatForm.duration"
+				           class="hidden"
+				           with-clear
+				           [attr.label]="'programmes.create.fields.duration' | translate">
+					@for (value of durationOptions; track value) {
+					<wa-option [attr.value]="value.toString()">{{ value }}</wa-option>
+					}
+				</wa-select>
+
+				<h3 class="col-span-4 font-medium m-0">{{ 'programmes.create.blocks.goals' | translate }}</h3>
+
+				<wa-input type="number"
+				          [formField]="formatForm.snatchGoal"
+				          [attr.label]="'programmes.create.fields.snatchGoal' | translate">
+					<span slot="end">kg</span>
+				</wa-input>
+
+				<wa-input type="number"
+				          [formField]="formatForm.cjGoal"
+				          [attr.label]="'programmes.create.fields.cjGoal' | translate">
+					<span slot="end">kg</span>
+				</wa-input>
+			</section>
+		</app-wizard-step>
+
+	</app-wizard>
 </wa-dialog>
+
+<!-- Notification d'erreur transitoire (chargement de l'évaluation) -->
+<wa-toast #errorToast></wa-toast>

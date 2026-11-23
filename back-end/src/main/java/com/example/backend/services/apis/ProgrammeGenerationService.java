@@ -1,6 +1,6 @@
 package com.example.backend.services.apis;
 
-import com.example.backend.dto.ProgrammeCreateRequest;
+import com.example.backend.dto.ProgrammeGenerationRequest;
 import com.example.backend.entities.EvalSummary;
 import com.example.backend.entities.Programme;
 
@@ -34,5 +34,5 @@ public interface ProgrammeGenerationService {
      *                             complex de l'Épaulé-Jeté, {@code false} pour l'Épaulé
      * @return le programme construit en mémoire, prêt à être persisté en cascade
      */
-    Programme generate(ProgrammeCreateRequest request, EvalSummary eval, boolean preferJerkForComplex);
+    Programme generate(ProgrammeGenerationRequest request, EvalSummary eval, boolean preferJerkForComplex);
 }

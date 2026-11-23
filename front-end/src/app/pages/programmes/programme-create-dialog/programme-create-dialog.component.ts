@@ -4,10 +4,13 @@ import {
   computed,
   CUSTOM_ELEMENTS_SCHEMA,
   effect,
+  ElementRef,
   inject,
   input,
   output,
-  signal
+  signal,
+  untracked,
+  viewChild
 } from '@angular/core';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {form, FormField, min, required} from '@angular/forms/signals';
@@ -15,7 +18,10 @@ import {WaSelectControlDirective} from '../../../directives/wa-forms/wa-select-c
 import {WaInputControlDirective} from '../../../directives/wa-forms/wa-input-control.directive';
 import {WaNumberInputControlDirective} from '../../../directives/wa-forms/wa-number-input-control.directive';
 import {WaFieldErrorDirective} from '../../../directives/wa-forms/wa-field-error.directive';
+import {waEventValue} from '../../../directives/wa-forms/wa-event-value';
 import {LocalizedDatePipe} from '../../../pipes/localized-date.pipe';
+import {WizardComponent} from '../../../components/wizard/wizard.component';
+import {WizardStepComponent} from '../../../components/wizard/wizard-step.component';
 import {
   DURATION_OPTIONS,
   FREQUENCY_OPTIONS,
@@ -24,28 +30,44 @@ import {
 } from '../../../models/programme.model';
 import {Athlete, AthleteFilter} from '../../../models/athlete.model';
 import {Evaluation} from '../../../models/evaluation.model';
+import {EvaluationDetail} from '../../../models/evaluation-detail.model';
+import {Archetype, Endurance, StrengthSpeed, Technique} from '../../../models/archetype.model';
+import {MUSCULATION_FLAGS, MusculationKey, ProtocolGoal} from '../../../models/eval-summary.model';
 import {GridFilter} from '../../../models/data-grid.model';
 import {AthleteService} from '../../../services/athlete.service';
 import {EvaluationService} from '../../../services/evaluation.service';
+import {resolveArchetype} from '../../evaluations/wizard/summary/archetype-combinations';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
 import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/option/option.js';
 import '@awesome.me/webawesome/dist/components/input/input.js';
-import '@awesome.me/webawesome/dist/components/button/button.js';
+import '@awesome.me/webawesome/dist/components/toast/toast.js';
+import type WaToast from '@awesome.me/webawesome/dist/components/toast/toast.js';
 
 /**
- * Modèle interne du formulaire de création. Les valeurs de listes déroulantes et la
- * date sont des chaînes pour s'interfacer directement avec les value accessors
- * WebAwesome (`<wa-select>` / `<wa-input type="date">`). Les objectifs numériques
- * (`snatchGoal` / `cjGoal`) sont typés `number | null` pour permettre la validation
- * `min` et s'interfacer avec {@link WaNumberInputControlDirective}. La conversion
- * finale (string → number) des listes déroulantes est faite à l'émission.
+ * Modèle de l'étape 1 (Profil + Évaluation). Toutes les listes sont des chaînes
+ * (leçon 2026-11-07 : `wa-select` compare ses valeurs en string) ; `''` = non renseigné.
+ * Le bitmask de musculation est porté à part (`musculation`), le multiselect n'étant
+ * pas géré par {@link WaSelectControlDirective}.
  */
-interface CreateFormModel {
+interface ProfileFormModel {
   athleteId: string;
   evaluationId: string;
+  strengthSpeed: string;
+  technique: string;
+  endurance: string;
+  archetype: string;
+  snatch: string;
+  clean: string;
+  jerk: string;
+  squat: string;
+  pull: string;
+}
+
+/** Modèle de l'étape 2 (Format + objectifs). */
+interface FormatFormModel {
   weeks: string;
   frequency: string;
   duration: string;
@@ -55,17 +77,16 @@ interface CreateFormModel {
 }
 
 /**
- * Modale de création (= génération) d'un programme d'entraînement.
+ * Modale de génération d'un programme, en wizard à 2 étapes.
  *
- * L'utilisateur choisit un athlète, l'une de ses évaluations, puis les paramètres
- * du programme (durée en semaines, fréquence, date de début, durée de séance
- * optionnelle, objectifs arraché / épaulé-jeté). La **date de fin** est calculée
- * automatiquement (`startDate + weeks*7 - 1`) et présentée en lecture seule : elle
- * n'est pas soumise (le backend la recalcule).
+ * - Étape 1 « Profil » : athlète (obligatoire), évaluation (optionnelle, effaçable),
+ *   puis la synthèse (profil, points faibles techniques, protocole). Sélectionner une
+ *   évaluation pré-remplit la synthèse (handler explicite) ; vider la sélection ne
+ *   modifie rien ; changer d'athlète ne vide que l'évaluation si elle ne lui appartient pas.
+ * - Étape 2 « Format » : semaines, fréquence, début, durée, objectifs.
  *
- * Dépendance Athlète → Évaluation : la liste des évaluations est filtrée côté
- * client par l'athlète courant ; changer d'athlète réinitialise l'évaluation
- * sélectionnée pour éviter de soumettre une évaluation d'un autre athlète.
+ * La psychologie n'est pas saisie. Le back résout l'évaluation (création, réutilisation
+ * ou duplication) à partir de `evaluationId` + `profile`.
  */
 @Component({
   selector: 'app-programme-create-dialog',
@@ -77,7 +98,9 @@ interface CreateFormModel {
     WaSelectControlDirective,
     WaInputControlDirective,
     WaNumberInputControlDirective,
-    WaFieldErrorDirective
+    WaFieldErrorDirective,
+    WizardComponent,
+    WizardStepComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,13 +117,20 @@ export class ProgrammeCreateDialogComponent {
   readonly save = output<ProgrammeCreateRequest>();
   readonly close = output<void>();
 
+  // --- Options (mêmes valeurs que EvalWizardSummaryComponent) ---
   protected readonly weeksOptions = WEEKS_OPTIONS;
   protected readonly frequencyOptions = FREQUENCY_OPTIONS;
   protected readonly durationOptions = DURATION_OPTIONS;
+  protected readonly strengthSpeedOptions: readonly StrengthSpeed[] = ['STRENGTH', 'MID', 'SPEED'];
+  protected readonly techniqueOptions: readonly Technique[] = ['LOW', 'MID', 'HIGH'];
+  protected readonly enduranceOptions: readonly Endurance[] = ['LOW', 'MID', 'HIGH'];
+  protected readonly archetypeOptions: readonly Archetype[] = ['MID', 'ROUGH', 'TECH', 'CYCLE', 'LEARN'];
+  protected readonly protocolOptions: readonly ProtocolGoal[] = ['STRENGTH', 'MID', 'SPEED'];
+  protected readonly weaknessOptions: readonly string[] = ['EXT', 'CATCH', 'PATH'];
+  protected readonly musculationOptions: readonly MusculationKey[] =
+    ['GENERAL', 'LEGS', 'POSTERIOR_CHAIN', 'UPPER_BODY'];
 
   // --- Listes déroulantes (chargées une fois, size=0) ---
-
-  /** Charge TOUS les athlètes pour le select Athlète. */
   private readonly athletesQuery = computed<AthleteFilter & GridFilter>(() => ({
     sexe: null,
     ageCategorie: null,
@@ -108,30 +138,55 @@ export class ProgrammeCreateDialogComponent {
     size: 0,
     sort: 'lastName,asc'
   }));
-
   private readonly athletesResource = this.athleteService.getAll(this.athletesQuery);
   protected readonly athletes = computed<readonly Athlete[]>(() => this.athletesResource.value()?.content ?? []);
 
-  /** Charge TOUTES les évaluations (filtrage par athlète effectué côté client). */
+  /** Toutes les évaluations (tri date décroissante), filtrées par athlète côté client. */
   private readonly evaluationsQuery = computed<GridFilter>(() => ({
     page: 0,
     size: 0,
     sort: 'evaluationDate,desc'
   }));
-
   private readonly evaluationsResource = this.evaluationService.getAll(this.evaluationsQuery);
   protected readonly evaluations = computed<readonly Evaluation[]>(() => this.evaluationsResource.value()?.content ?? []);
 
-  /** Source de vérité du formulaire. */
-  protected readonly model = signal<CreateFormModel>(this.emptyModel());
+  // --- Wizard ---
+  protected readonly currentStep = signal(1);
 
-  /**
-   * Formulaire Signal Forms. Tous les champs sont requis sauf la durée de séance.
-   * Les objectifs arraché / épaulé-jeté doivent être strictement positifs.
-   */
-  protected readonly createForm = form(this.model, (path) => {
+  // --- Étape 1 : profil ---
+  protected readonly profileModel = signal<ProfileFormModel>(this.emptyProfile());
+  /** Bitmask de musculation (0..15). */
+  protected readonly musculation = signal(0);
+
+  protected readonly profileForm = form(this.profileModel, (path) => {
     required(path.athleteId, {message: 'programmes.create.errors.athlete'});
-    required(path.evaluationId, {message: 'programmes.create.errors.evaluation'});
+    required(path.strengthSpeed, {message: 'programmes.create.errors.strengthSpeed'});
+    required(path.technique, {message: 'programmes.create.errors.technique'});
+    required(path.endurance, {message: 'programmes.create.errors.endurance'});
+    required(path.archetype, {message: 'programmes.create.errors.archetype'});
+    required(path.squat, {message: 'programmes.create.errors.squat'});
+    required(path.pull, {message: 'programmes.create.errors.pull'});
+  });
+
+  /** Évaluations de l'athlète sélectionné. */
+  protected readonly evaluationsForAthlete = computed<readonly Evaluation[]>(() => {
+    const athleteId = this.profileModel().athleteId;
+    if (!athleteId) {
+      return [];
+    }
+    const id = Number(athleteId);
+    return this.evaluations().filter((e) => e.athleteId === id);
+  });
+
+  /** Clés de musculation cochées (dérivées du bitmask). */
+  protected readonly musculationSelected = computed<string[]>(() =>
+    this.musculationOptions.filter((key) => (this.musculation() & MUSCULATION_FLAGS[key]) !== 0)
+  );
+
+  // --- Étape 2 : format ---
+  protected readonly formatModel = signal<FormatFormModel>(this.emptyFormat());
+
+  protected readonly formatForm = form(this.formatModel, (path) => {
     required(path.weeks, {message: 'programmes.create.errors.weeks'});
     required(path.frequency, {message: 'programmes.create.errors.frequency'});
     required(path.startDate, {message: 'programmes.create.errors.startDate'});
@@ -141,24 +196,9 @@ export class ProgrammeCreateDialogComponent {
     min(path.cjGoal, 1, {message: 'programmes.create.errors.cjGoalMin'});
   });
 
-  protected readonly title = computed(() => 'programmes.create.title');
-
-  /** Évaluations de l'athlète sélectionné (filtrage client, volumes faibles). */
-  protected readonly evaluationsForAthlete = computed<readonly Evaluation[]>(() => {
-    const athleteId = this.model().athleteId;
-    if (!athleteId) {
-      return [];
-    }
-    const id = Number(athleteId);
-    return this.evaluations().filter((e) => e.athleteId === id);
-  });
-
-  /**
-   * Date de fin calculée en lecture seule : `startDate + weeks*7 - 1 jour`.
-   * Chaîne vide si la date de début ou le nombre de semaines n'est pas renseigné.
-   */
+  /** Date de fin calculée en lecture seule : `startDate + weeks*7 - 1 jour`. */
   protected readonly endDate = computed<string>(() => {
-    const {startDate, weeks} = this.model();
+    const {startDate, weeks} = this.formatModel();
     if (!startDate || !weeks) {
       return '';
     }
@@ -171,77 +211,206 @@ export class ProgrammeCreateDialogComponent {
     return this.formatIsoDate(end);
   });
 
-  constructor() {
-    // Réinitialise le formulaire à chaque (ré)ouverture de la modale.
-    effect(() => {
-      this.open();
-      this.model.set(this.emptyModel());
-    });
+  // --- Divers ---
+  private readonly toast = viewChild<ElementRef<WaToast>>('errorToast');
 
-    // Dépendance Athlète → Évaluation : si l'athlète change et que l'évaluation
-    // sélectionnée n'appartient plus à cet athlète, on réinitialise l'évaluation.
+  /** Numéro de requête de pré-remplissage : écarte les réponses obsolètes. */
+  private loadSeq = 0;
+
+  /** Vrai pendant le chargement d'une évaluation : bloque Suivant / Valider. */
+  protected readonly loadingEvaluation = signal(false);
+
+  /** Élément ayant déclenché l'ouverture (focus rendu à la fermeture). */
+  private opener: HTMLElement | null = null;
+
+  constructor() {
+    // Réinitialise le wizard à chaque (ré)ouverture et mémorise le déclencheur.
     effect(() => {
-      const current = this.model();
-      if (!current.evaluationId) {
-        return;
-      }
-      const stillValid = this.evaluationsForAthlete().some(
-        (e) => String(e.evaluationId) === current.evaluationId
-      );
-      if (!stillValid) {
-        this.model.update((m) => ({...m, evaluationId: ''}));
-      }
+      const isOpen = this.open();
+      untracked(() => {
+        this.loadSeq++;
+        this.loadingEvaluation.set(false);
+        this.profileModel.set(this.emptyProfile());
+        this.musculation.set(0);
+        this.formatModel.set(this.emptyFormat());
+        this.currentStep.set(1);
+        if (isOpen) {
+          const active = document.activeElement;
+          this.opener = active instanceof HTMLElement ? active : null;
+        }
+      });
     });
   }
 
-  /** Traduit une clé i18n de manière impérative (pour aria-label). */
+  /** Traduit une clé i18n de manière impérative. */
   protected t(key: string): string {
     return this.translate.instant(key);
   }
 
-  protected onSubmit(): void {
-    if (this.createForm().invalid()) {
-      this.createForm().markAsTouched();
+  /**
+   * Changement d'athlète : ne vide que l'évaluation si elle n'appartient pas au
+   * nouvel athlète. La synthèse n'est jamais touchée.
+   */
+  protected onAthleteChange(event: Event): void {
+    const athleteId = Number(waEventValue(event));
+    const evaluationId = this.profileModel().evaluationId;
+    if (!evaluationId) {
+      // Aucune évaluation sélectionnée : invalide malgré tout un chargement en cours.
+      this.loadSeq++;
+      this.loadingEvaluation.set(false);
       return;
     }
-    const m = this.model();
-    this.save.emit({
-      evaluationId: Number(m.evaluationId),
-      weeks: Number(m.weeks),
-      frequency: Number(m.frequency),
-      duration: m.duration ? Number(m.duration) : null,
-      startDate: m.startDate,
-      snatchGoal: Number(m.snatchGoal),
-      cjGoal: Number(m.cjGoal)
-    });
-  }
-
-  protected onClose(): void {
-    this.close.emit();
+    const owned = this.evaluations().some(
+      (e) => String(e.evaluationId) === evaluationId && e.athleteId === athleteId
+    );
+    if (!owned) {
+      // Évaluation vidée : toute réponse de getById encore en vol devient obsolète.
+      this.loadSeq++;
+      this.loadingEvaluation.set(false);
+      this.profileModel.update((m) => ({...m, evaluationId: ''}));
+    }
   }
 
   /**
-   * Ferme la modale uniquement si l'événement provient bien du dialog lui-même.
-   * Les composants `<wa-select>` internes émettent aussi `wa-after-hide` (bubbling)
-   * lors de leur propre fermeture : on ignore ces événements enfants.
+   * Changement d'évaluation : valeur vide → aucune autre modification (la directive
+   * a déjà vidé le champ) ; sinon pré-remplit la synthèse depuis l'évaluation.
    */
-  protected onDialogHide(event: Event): void {
-    if (event.target === event.currentTarget) {
-      this.onClose();
+  protected async onEvaluationChange(event: Event): Promise<void> {
+    const evaluationId = waEventValue(event);
+    const seq = ++this.loadSeq;
+    if (!evaluationId) {
+      this.loadingEvaluation.set(false);
+      return;
+    }
+    this.loadingEvaluation.set(true);
+    try {
+      const evaluation = await this.evaluationService.getById(Number(evaluationId));
+      if (seq !== this.loadSeq) {
+        return;
+      }
+      this.applyEvaluation(evaluation);
+    } catch {
+      if (seq !== this.loadSeq) {
+        return;
+      }
+      this.profileModel.update((m) => ({...m, evaluationId: ''}));
+      this.toast()?.nativeElement.create(this.t('programmes.create.errors.evaluationLoad'), {
+        variant: 'danger',
+        icon: 'triangle-exclamation'
+      });
+    } finally {
+      // Seule la requête courante lève le verrou (une réponse obsolète ne doit pas le faire).
+      if (seq === this.loadSeq) {
+        this.loadingEvaluation.set(false);
+      }
     }
   }
 
-  private emptyModel(): CreateFormModel {
+  /**
+   * Modification utilisateur d'un axe force-vitesse / technique / endurance :
+   * recalcule l'archétype (conservé si la combinaison n'est pas référencée).
+   */
+  protected onAxisChange(axis: 'strengthSpeed' | 'technique' | 'endurance', event: Event): void {
+    const current = {...this.profileModel(), [axis]: waEventValue(event)};
+    const archetype = resolveArchetype(
+      (current.strengthSpeed || null) as StrengthSpeed | null,
+      (current.technique || null) as Technique | null,
+      (current.endurance || null) as Endurance | null
+    );
+    if (archetype) {
+      this.profileModel.update((m) => ({...m, archetype}));
+    }
+  }
+
+  /** Sélection multiple musculation : recompose le bitmask depuis les clés cochées. */
+  protected onMusculation(event: Event): void {
+    const raw = (event.target as { value?: string | string[] }).value;
+    const keys = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    this.musculation.set(keys.reduce((acc, key) => acc | (MUSCULATION_FLAGS[key as MusculationKey] ?? 0), 0));
+  }
+
+  protected onSubmit(): void {
+    if (this.loadingEvaluation()) {
+      return;
+    }
+    if (this.profileForm().invalid() || this.formatForm().invalid()) {
+      this.profileForm().markAsTouched();
+      this.formatForm().markAsTouched();
+      return;
+    }
+    const p = this.profileModel();
+    const f = this.formatModel();
+    this.save.emit({
+      athleteId: Number(p.athleteId),
+      evaluationId: p.evaluationId ? Number(p.evaluationId) : null,
+      profile: {
+        archetype: p.archetype as Archetype,
+        strengthSpeed: p.strengthSpeed as StrengthSpeed,
+        technique: p.technique as Technique,
+        endurance: p.endurance as Endurance,
+        squat: p.squat as ProtocolGoal,
+        pull: p.pull as ProtocolGoal,
+        musculation: this.musculation(),
+        snatch: p.snatch || null,
+        clean: p.clean || null,
+        jerk: p.jerk || null
+      },
+      weeks: Number(f.weeks),
+      frequency: Number(f.frequency),
+      duration: f.duration ? Number(f.duration) : null,
+      startDate: f.startDate,
+      snatchGoal: Number(f.snatchGoal),
+      cjGoal: Number(f.cjGoal)
+    });
+  }
+
+  /**
+   * Ferme la modale uniquement si l'événement provient du dialog lui-même (les
+   * `wa-select` internes émettent aussi `wa-after-hide`), puis rend le focus au déclencheur.
+   */
+  protected onDialogHide(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.close.emit();
+      this.opener?.focus();
+      this.opener = null;
+    }
+  }
+
+  /** Écrase les champs de la synthèse avec ceux de l'évaluation (archétype stocké, non recalculé). */
+  private applyEvaluation(evaluation: EvaluationDetail): void {
+    this.profileModel.update((m) => ({
+      ...m,
+      strengthSpeed: evaluation.strengthSpeed ?? '',
+      technique: evaluation.technique ?? '',
+      endurance: evaluation.endurance ?? '',
+      archetype: evaluation.archetype ?? '',
+      squat: evaluation.squat ?? '',
+      pull: evaluation.pull ?? '',
+      snatch: evaluation.snatch ?? '',
+      clean: evaluation.clean ?? '',
+      jerk: evaluation.jerk ?? ''
+    }));
+    this.musculation.set(evaluation.musculation ?? 0);
+  }
+
+  private emptyProfile(): ProfileFormModel {
     return {
       athleteId: '',
       evaluationId: '',
-      weeks: '',
-      frequency: '',
-      duration: '',
-      startDate: '',
-      snatchGoal: null,
-      cjGoal: null
+      strengthSpeed: '',
+      technique: '',
+      endurance: '',
+      archetype: '',
+      snatch: '',
+      clean: '',
+      jerk: '',
+      squat: '',
+      pull: ''
     };
+  }
+
+  private emptyFormat(): FormatFormModel {
+    return {weeks: '', frequency: '', duration: '', startDate: '', snatchGoal: null, cjGoal: null};
   }
 
   /** Parse une date ISO `yyyy-MM-dd` en Date locale (évite le décalage UTC). */

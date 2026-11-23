@@ -5,10 +5,12 @@ import com.example.backend.dto.EvaluationDetailResponse;
 import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
+import com.example.backend.dto.ProgrammeProfileRequest;
 import com.example.backend.entities.Athlete;
 import com.example.backend.entities.EvalDetail;
 import com.example.backend.entities.EvalSummary;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.ValidationException;
 import com.example.backend.repositories.AthleteRepository;
 import com.example.backend.repositories.EvalDetailRepository;
 import com.example.backend.repositories.EvaluationRepository;
@@ -22,8 +24,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -98,6 +102,42 @@ public class EvaluationServiceImpl implements EvaluationService {
         evalDetailRepository.deleteByEvaluation_EvaluationId(evaluationId);
         evalDetailRepository.flush();
         saveDetails(request, summary);
+    }
+
+    @Override
+    @Transactional
+    public EvalSummary resolveForProgramme(Integer athleteId, Integer evaluationId,
+                                           ProgrammeProfileRequest profile) {
+        Athlete athlete = athleteRepository.findById(athleteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Athlète introuvable : " + athleteId));
+
+        // Cas (a) : aucune évaluation sélectionnée → nouvelle évaluation, sans mesure.
+        if (evaluationId == null) {
+            return evaluationRepository.save(
+                    evaluationMapper.toNewSummary(profile, athlete, LocalDate.now()));
+        }
+
+        EvalSummary source = evaluationRepository.findById(evaluationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Évaluation introuvable : " + evaluationId));
+        if (!Objects.equals(source.getAthlete().getAthleteId(), athleteId)) {
+            throw new ValidationException(
+                    "L'évaluation " + evaluationId + " n'appartient pas à l'athlète " + athleteId + ".");
+        }
+
+        // Cas (b) : synthèse identique → réutilisation, aucune écriture.
+        if (evaluationMapper.matches(source, profile)) {
+            return source;
+        }
+
+        // Cas (c) : duplication ; la source et ses eval_details ne sont que lus.
+        EvalSummary duplicated = evaluationRepository.save(
+                evaluationMapper.toDuplicatedSummary(source, profile, LocalDate.now()));
+        List<EvalDetail> copies = evalDetailRepository
+                .findByEvaluation_EvaluationIdOrderByEvaluationDetailIdAsc(evaluationId).stream()
+                .map(detail -> evaluationMapper.copyDetail(detail, duplicated))
+                .toList();
+        evalDetailRepository.saveAll(copies);
+        return duplicated;
     }
 
     /** Persiste les lignes de détail de la requête rattachées au bilan. */

@@ -1,0 +1,1 @@
+UPDATE ref_exercices SET reference = 'SP' WHERE exercice_name = 'Soulevé de Terre Roumain';

@@ -398,13 +398,25 @@
         "snatchGoal": "Objectif Arraché",
         "cjGoal": "Objectif Épaulé-Jeté"
       },
-      "actions": {
-        "generate": "Générer",
-        "cancel": "Annuler"
+      "steps": {
+        "profile": "Profil",
+        "format": "Format"
       },
+      "blocks": {
+        "source": "Athlète et évaluation",
+        "format": "Format du programme",
+        "goals": "Objectifs"
+      },
+      "evaluationHint": "L'évaluation est optionnelle : sélectionnez-en une pour pré-remplir la synthèse ci-dessous, ou saisissez la synthèse manuellement.",
       "errors": {
         "athlete": "L'athlète est obligatoire.",
-        "evaluation": "L'évaluation est obligatoire.",
+        "strengthSpeed": "Le profil force / vitesse est obligatoire.",
+        "technique": "Le profil technique est obligatoire.",
+        "endurance": "Le profil endurance est obligatoire.",
+        "archetype": "L'archétype est obligatoire.",
+        "squat": "Le profil squat est obligatoire.",
+        "pull": "Le profil tirage est obligatoire.",
+        "evaluationLoad": "Le chargement de l'évaluation a échoué. Veuillez réessayer.",
         "weeks": "La durée est obligatoire.",
         "frequency": "La fréquence est obligatoire.",
         "startDate": "La date de début est obligatoire.",

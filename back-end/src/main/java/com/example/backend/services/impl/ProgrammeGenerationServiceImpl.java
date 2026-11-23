@@ -1,6 +1,6 @@
 package com.example.backend.services.impl;
 
-import com.example.backend.dto.ProgrammeCreateRequest;
+import com.example.backend.dto.ProgrammeGenerationRequest;
 import com.example.backend.entities.*;
 import com.example.backend.enums.*;
 import com.example.backend.exception.BusinessRuleException;
@@ -65,7 +65,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
     // seule des référentiels). La persistance de l'arbre Programme — et donc la
     // transaction read-write — est assurée par le service CRUD appelant
     // (ProgrammeServiceImpl.create, @Transactional) via la cascade One-Many.
-    public Programme generate(ProgrammeCreateRequest request, EvalSummary eval, boolean preferJerkForComplex) {
+    public Programme generate(ProgrammeGenerationRequest request, EvalSummary eval, boolean preferJerkForComplex) {
         int weeks = request.weeks();
         int frequency = request.frequency();
         Archetype archetype = eval.getArchetype();
@@ -552,7 +552,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return series;
     }
 
-    private Programme buildProgramme(ProgrammeCreateRequest request, int weeks) {
+    private Programme buildProgramme(ProgrammeGenerationRequest request, int weeks) {
         Programme programme = new Programme();
         programme.setEvaluationId(request.evaluationId());
         programme.setWeeks(weeks);

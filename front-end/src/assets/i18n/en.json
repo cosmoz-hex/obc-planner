@@ -398,13 +398,25 @@
         "snatchGoal": "Snatch goal",
         "cjGoal": "Clean & Jerk goal"
       },
-      "actions": {
-        "generate": "Generate",
-        "cancel": "Cancel"
+      "steps": {
+        "profile": "Profile",
+        "format": "Format"
       },
+      "blocks": {
+        "source": "Athlete and evaluation",
+        "format": "Program format",
+        "goals": "Goals"
+      },
+      "evaluationHint": "The evaluation is optional: select one to pre-fill the summary below, or enter the summary manually.",
       "errors": {
         "athlete": "Athlete is required.",
-        "evaluation": "Evaluation is required.",
+        "strengthSpeed": "The strength / speed profile is required.",
+        "technique": "The technique profile is required.",
+        "endurance": "The endurance profile is required.",
+        "archetype": "The archetype is required.",
+        "squat": "The squat profile is required.",
+        "pull": "The pull profile is required.",
+        "evaluationLoad": "Loading the evaluation failed. Please try again.",
         "weeks": "Duration is required.",
         "frequency": "Frequency is required.",
         "startDate": "Start date is required.",

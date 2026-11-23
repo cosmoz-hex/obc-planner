@@ -6,6 +6,7 @@ import com.example.backend.dto.PageResponse;
 import com.example.backend.dto.ProgrammeCellUpdateRequest;
 import com.example.backend.dto.ProgrammeCreateRequest;
 import com.example.backend.dto.ProgrammeDetailResponse;
+import com.example.backend.dto.ProgrammeGenerationRequest;
 import com.example.backend.dto.ProgrammeResponse;
 import com.example.backend.entities.Athlete;
 import com.example.backend.entities.EvalDetail;
@@ -20,6 +21,7 @@ import com.example.backend.exception.ValidationException;
 import com.example.backend.repositories.EvalDetailRepository;
 import com.example.backend.repositories.EvaluationRepository;
 import com.example.backend.repositories.ProgrammeRepository;
+import com.example.backend.services.apis.EvaluationService;
 import com.example.backend.services.apis.ProgrammeGenerationService;
 import com.example.backend.services.apis.ProgrammeService;
 import com.example.backend.services.mapper.ProgrammeMapper;
@@ -73,6 +75,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     private final ProgrammeRepository programmeRepository;
     private final EvaluationRepository evaluationRepository;
     private final EvalDetailRepository evalDetailRepository;
+    private final EvaluationService evaluationService;
     private final ProgrammeGenerationService programmeGenerationService;
     private final ProgrammeMapper programmeMapper;
 
@@ -93,9 +96,16 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     @Override
     @Transactional
     public ProgrammeResponse create(ProgrammeCreateRequest request) {
-        validateDomain(request);
+        // Une seule transaction : toute exception d'exécution annule aussi l'évaluation
+        // et les eval_details créés par la résolution (cas a / c).
+        ProgrammeGenerationRequest domainCheck = request.toGenerationRequest(request.evaluationId());
+        validateDomain(domainCheck);
 
-        GeneratedProgramme generation = generateFor(request);
+        EvalSummary evaluation = evaluationService.resolveForProgramme(
+                request.athleteId(), request.evaluationId(), request.profile());
+        ProgrammeGenerationRequest generationRequest = request.toGenerationRequest(evaluation.getEvaluationId());
+
+        GeneratedProgramme generation = generateFor(generationRequest);
         Programme saved = programmeRepository.save(generation.programme());
 
         return toResponse(saved, generation.athlete());
@@ -105,7 +115,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     @Transactional
     public ProgrammeResponse refresh(Integer programmeId) {
         Programme programme = getOrThrow(programmeId);
-        ProgrammeCreateRequest request = toCreateRequest(programme);
+        ProgrammeGenerationRequest request = toCreateRequest(programme);
         validateDomain(request);
 
         // 1. Génération en mémoire AVANT toute mutation : une erreur ici laisse le programme intact.
@@ -135,7 +145,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
      * Étapes de génération partagées par {@code create} et {@code refresh} : chargement de
      * l'évaluation source (404), arbitrage {@code preferJerkForComplex}, génération en mémoire.
      */
-    private GeneratedProgramme generateFor(ProgrammeCreateRequest request) {
+    private GeneratedProgramme generateFor(ProgrammeGenerationRequest request) {
         EvalSummary eval = evaluationRepository.findById(request.evaluationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Évaluation introuvable : " + request.evaluationId()));
@@ -147,13 +157,13 @@ public class ProgrammeServiceImpl implements ProgrammeService {
     }
 
     /** Reconstruit la requête d'origine depuis les paramètres persistés (400 si un objectif est nul). */
-    private ProgrammeCreateRequest toCreateRequest(Programme programme) {
+    private ProgrammeGenerationRequest toCreateRequest(Programme programme) {
         if (programme.getSnatchGoal() == null || programme.getCjGoal() == null) {
             throw new ValidationException(
                     "Objectifs Arraché / Épaulé-Jeté manquants : actualisation impossible pour le programme "
                             + programme.getProgrammeId() + ".");
         }
-        return new ProgrammeCreateRequest(
+        return new ProgrammeGenerationRequest(
                 programme.getEvaluationId(),
                 programme.getWeeks(),
                 programme.getFrequency(),
@@ -313,6 +323,9 @@ public class ProgrammeServiceImpl implements ProgrammeService {
      * l'épaulé est <b>strictement supérieur</b> au jeté, le jeté est le point faible
      * → on privilégie le combiné de Jeté. Dans tous les autres cas (CL ≤ JK, ou l'une
      * des deux mesures absente), fallback déterministe sur l'Épaulé ({@code false}).</p>
+     *
+     * <p>Génération sans évaluation (cas a, aucun {@code eval_details}) : repli Épaulé.
+     * Réutilisation (b) ou duplication (c) : arbitrage issu des mesures (copiées à l'identique en c).</p>
      */
     private boolean preferJerkForComplex(Integer evaluationId) {
         List<EvalDetail> details =
@@ -349,7 +362,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
      * (ex. weeks=10) qui échoueraient plus loin. On rejette ici en <b>400</b>
      * toute valeur hors domaine, plutôt que de laisser remonter une 409 tardive.
      */
-    private void validateDomain(ProgrammeCreateRequest request) {
+    private void validateDomain(ProgrammeGenerationRequest request) {
         if (!ALLOWED_WEEKS.contains(request.weeks())) {
             throw new ValidationException(
                     "Nombre de semaines invalide : " + request.weeks() + " (attendu : 8, 12 ou 16).");

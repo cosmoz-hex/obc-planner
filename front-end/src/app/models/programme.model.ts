@@ -1,3 +1,6 @@
+import {Archetype, Endurance, StrengthSpeed, Technique} from './archetype.model';
+import {ProtocolGoal} from './eval-summary.model';
+
 /** Nombre de séances par semaine (aligné sur l'enum / contrainte BD). */
 export type Frequency = 3 | 4 | 5;
 /** Durée d'un programme en nombre de semaines. */
@@ -82,9 +85,28 @@ export interface ProgrammeDetail {
   readonly programmeWeeks: ProgrammeWeek[];
 }
 
+/** Synthèse saisie ou pré-remplie à la génération (ProgrammeProfileRequest). Sans psychologie. */
+export interface ProgrammeProfile {
+  archetype: Archetype;
+  strengthSpeed: StrengthSpeed;
+  technique: Technique;
+  endurance: Endurance;
+  squat: ProtocolGoal;
+  pull: ProtocolGoal;
+  /** Bitmask des orientations de musculation (0..15). */
+  musculation: number;
+  /** Points faibles techniques (EXT / CATCH / PATH) ou null. */
+  snatch: string | null;
+  clean: string | null;
+  jerk: string | null;
+}
+
 /** Payload de création d'un programme (ProgrammeCreateRequest). */
 export interface ProgrammeCreateRequest {
-  evaluationId: number;
+  athleteId: number;
+  /** Évaluation de départ (optionnelle) ; null = synthèse saisie à la volée. */
+  evaluationId: number | null;
+  profile: ProgrammeProfile;
   weeks: number;
   frequency: number;
   duration: number | null;

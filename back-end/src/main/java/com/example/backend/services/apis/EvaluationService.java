@@ -5,6 +5,8 @@ import com.example.backend.dto.EvaluationDetailResponse;
 import com.example.backend.dto.EvaluationRequest;
 import com.example.backend.dto.EvaluationResponse;
 import com.example.backend.dto.PageResponse;
+import com.example.backend.dto.ProgrammeProfileRequest;
+import com.example.backend.entities.EvalSummary;
 import org.springframework.data.domain.Pageable;
 
 /** Opérations sur les évaluations. */
@@ -38,4 +40,15 @@ public interface EvaluationService {
      * {@code eval_details}).
      */
     void delete(Integer evaluationId);
+
+    /**
+     * Résout l'évaluation support d'un programme (rejoint la transaction appelante) :
+     * (a) {@code evaluationId} nul → création depuis la synthèse ; (b) synthèse identique →
+     * réutilisation ; (c) synthèse modifiée → duplication (synthèse modifiée, copie des
+     * {@code eval_details} et de la psychologie). L'évaluation d'origine n'est jamais modifiée.
+     *
+     * @throws com.example.backend.exception.ResourceNotFoundException athlète ou évaluation introuvable
+     * @throws com.example.backend.exception.ValidationException       évaluation d'un autre athlète
+     */
+    EvalSummary resolveForProgramme(Integer athleteId, Integer evaluationId, ProgrammeProfileRequest profile);
 }
