@@ -11,8 +11,7 @@ import {
 	viewChild,
 	viewChildren
 } from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
-import {WizardComponent} from '../../../../components/wizard/wizard.component';
+import {WizardDialogComponent} from '../../../../components/wizard/wizard-dialog.component';
 import {WizardStepComponent} from '../../../../components/wizard/wizard-step.component';
 import {EvalWizardStep} from '../eval-wizard-step';
 import {EvalWizardAthleteComponent} from '../athlete/eval-wizard-athlete.component';
@@ -30,11 +29,8 @@ import {EvalDetail} from '../../../../models/eval-detail.model';
 import {EvaluationDetail} from '../../../../models/evaluation-detail.model';
 import {EvalDetailRequest, EvaluationRequest} from '../../../../models/evaluation-request.model';
 
-// Composants WebAwesome utilisés (enregistrement ciblé).
-import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
-
 /**
- * Modale d'ajout d'une évaluation : héberge le {@link WizardComponent} et ses
+ * Modale d'ajout d'une évaluation : héberge le {@link WizardDialogComponent} et ses
  * étapes métier — 8 volets physiques (Vitesse, Force, Arraché, Épaulé, Jeté,
  * Squat, Réussite en compétition, Endurance) puis 7 volets du profil
  * psychologique (Gestion émotionnelle, Confiance en soi, Motivation,
@@ -53,8 +49,7 @@ import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
   selector: 'app-evaluation-wizard-dialog',
   standalone: true,
   imports: [
-    TranslatePipe,
-    WizardComponent,
+    WizardDialogComponent,
     WizardStepComponent,
     EvalWizardAthleteComponent,
     EvalWizardSpeedComponent,
@@ -117,6 +112,16 @@ export class EvaluationWizardDialogComponent {
   readonly validated = output<EvaluationRequest>();
 
   constructor() {
+    // Mémorise le déclencheur à l'ouverture pour lui rendre le focus à la fermeture.
+    effect(() => {
+      if (this.open()) {
+        untracked(() => {
+          const active = document.activeElement;
+          this.opener = active instanceof HTMLElement ? active : null;
+        });
+      }
+    });
+
     // Pré-remplissage : à l'ouverture en édition, charger athlète + mesures.
     // On ne dépend QUE de (open, mode, evaluation) ; les étapes (viewChildren)
     // sont lues en untracked pour ne pas relancer l'effect quand leurs modèles
@@ -146,8 +151,8 @@ export class EvaluationWizardDialogComponent {
   /** Identifiant de l'évaluation déjà chargée dans le wizard (anti-rechargement). */
   private loadedEvaluationId: number | null = null;
 
-  /** Référence au wizard projeté, pour réinitialiser l'étape à la fermeture. */
-  private readonly wizard = viewChild.required(WizardComponent);
+  /** Élément ayant ouvert la modale, pour lui rendre le focus à la fermeture. */
+  private opener: HTMLElement | null = null;
 
   /** Étape 1 : sélection de l'athlète et de la date. */
   private readonly athleteStep = viewChild.required(EvalWizardAthleteComponent);
@@ -159,17 +164,16 @@ export class EvaluationWizardDialogComponent {
   private readonly steps = viewChildren(EvalWizardStep);
 
   /**
-   * Ferme la modale uniquement si l'événement provient du dialog lui-même.
-   * Les composants WebAwesome internes émettent aussi `wa-after-hide` (bubbling)
-   * lors de leur propre fermeture : on ignore ces événements enfants.
+   * Fermeture effective du dialogue (garde wa-after-hide et retour à l'étape 1
+   * portés par `app-wizard-dialog`) : notifie le parent, réinitialise les étapes
+   * métier et rend le focus au déclencheur.
    */
-  protected onDialogHide(event: Event): void {
-    if (event.target === event.currentTarget) {
-      this.close.emit();
-      this.wizard().currentStep.set(1);
-      this.athleteStep().reset();
-      this.steps().forEach((step) => step.reset());
-    }
+  protected onDialogHide(): void {
+    this.close.emit();
+    this.athleteStep().reset();
+    this.steps().forEach((step) => step.reset());
+    this.opener?.focus();
+    this.opener = null;
   }
 
   /**
@@ -178,6 +182,10 @@ export class EvaluationWizardDialogComponent {
    */
   protected onValidate(): void {
     const athlete = this.athleteStep();
+    const athleteId = athlete.athleteId();
+    if (athleteId == null) {
+      return;
+    }
     const summary = this.summaryComponent().summary();
     const details: EvalDetailRequest[] = this.steps().flatMap((step) =>
       step.value().map((row) => ({
@@ -189,7 +197,7 @@ export class EvaluationWizardDialogComponent {
     );
 
     this.validated.emit({
-      athleteId: athlete.athleteId()!,
+      athleteId,
       evaluationDate: athlete.evaluationDate(),
       archetype: summary.archetype,
       strengthSpeed: summary.strengthSpeed,

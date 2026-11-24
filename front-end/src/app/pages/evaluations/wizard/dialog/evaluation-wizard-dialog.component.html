@@ -1,10 +1,8 @@
-<wa-dialog
-	style="--width: 70vw;"
-  [attr.open]="open() ? true : null"
-  [attr.label]="(mode() === 'edit' ? 'evaluations.wizard.titleEdit' : 'evaluations.wizard.title') | translate"
-  (wa-after-hide)="onDialogHide($event)">
-
-  <app-wizard (validate)="onValidate()">
+<app-wizard-dialog
+  [open]="open()"
+  [titleKey]="mode() === 'edit' ? 'evaluations.wizard.titleEdit' : 'evaluations.wizard.title'"
+  (validate)="onValidate()"
+  (close)="onDialogHide()">
 
     <app-wizard-step [step]="1" [valid]="athlete.valid()" label="evaluations.wizard.athlete.title">
       <app-eval-wizard-athlete #athlete />
@@ -66,6 +64,4 @@
       }
     </app-wizard-step>
 
-  </app-wizard>
-
-</wa-dialog>
+</app-wizard-dialog>

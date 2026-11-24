@@ -20,7 +20,7 @@ import {WaNumberInputControlDirective} from '../../../directives/wa-forms/wa-num
 import {WaFieldErrorDirective} from '../../../directives/wa-forms/wa-field-error.directive';
 import {waEventValue} from '../../../directives/wa-forms/wa-event-value';
 import {LocalizedDatePipe} from '../../../pipes/localized-date.pipe';
-import {WizardComponent} from '../../../components/wizard/wizard.component';
+import {WizardDialogComponent} from '../../../components/wizard/wizard-dialog.component';
 import {WizardStepComponent} from '../../../components/wizard/wizard-step.component';
 import {
   DURATION_OPTIONS,
@@ -39,7 +39,6 @@ import {EvaluationService} from '../../../services/evaluation.service';
 import {resolveArchetype} from '../../evaluations/wizard/summary/archetype-combinations';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
-import '@awesome.me/webawesome/dist/components/dialog/dialog.js';
 import '@awesome.me/webawesome/dist/components/select/select.js';
 import '@awesome.me/webawesome/dist/components/option/option.js';
 import '@awesome.me/webawesome/dist/components/input/input.js';
@@ -99,7 +98,7 @@ interface FormatFormModel {
     WaInputControlDirective,
     WaNumberInputControlDirective,
     WaFieldErrorDirective,
-    WizardComponent,
+    WizardDialogComponent,
     WizardStepComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -365,15 +364,13 @@ export class ProgrammeCreateDialogComponent {
   }
 
   /**
-   * Ferme la modale uniquement si l'événement provient du dialog lui-même (les
-   * `wa-select` internes émettent aussi `wa-after-hide`), puis rend le focus au déclencheur.
+   * Fermeture effective du dialogue (garde `wa-after-hide` portée par `app-wizard-dialog`) :
+   * rend le focus au déclencheur.
    */
-  protected onDialogHide(event: Event): void {
-    if (event.target === event.currentTarget) {
-      this.close.emit();
-      this.opener?.focus();
-      this.opener = null;
-    }
+  protected onDialogHide(): void {
+    this.close.emit();
+    this.opener?.focus();
+    this.opener = null;
   }
 
   /** Écrase les champs de la synthèse avec ceux de l'évaluation (archétype stocké, non recalculé). */

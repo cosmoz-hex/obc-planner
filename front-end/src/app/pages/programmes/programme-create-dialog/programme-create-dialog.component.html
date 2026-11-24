@@ -1,10 +1,8 @@
-<wa-dialog [attr.open]="open() ? true : null"
-           [attr.label]="'programmes.create.title' | translate"
-           (wa-after-hide)="onDialogHide($event)"
-           style="--width: 70vw;"
->
-
-	<app-wizard [(currentStep)]="currentStep" (validate)="onSubmit()">
+<app-wizard-dialog [open]="open()"
+						 titleKey="programmes.create.title"
+						 [(currentStep)]="currentStep"
+						 (validate)="onSubmit()"
+						 (close)="onDialogHide()">
 
 		<!-- Étape 1 : Profil + Évaluation -->
 		<app-wizard-step [step]="1" [valid]="!profileForm().invalid() && !loadingEvaluation()" label="programmes.create.steps.profile">
@@ -180,8 +178,7 @@
 			</section>
 		</app-wizard-step>
 
-	</app-wizard>
-</wa-dialog>
+</app-wizard-dialog>
 
 <!-- Notification d'erreur transitoire (chargement de l'évaluation) -->
 <wa-toast #errorToast></wa-toast>

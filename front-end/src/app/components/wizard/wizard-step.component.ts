@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angu
 import {WizardHost} from './wizard.types';
 
 /**
- * Étape d'un {@link WizardComponent}. Wrapper générique et fin : il ne porte
+ * Étape d'un {@link WizardDialogComponent}. Wrapper générique et fin : il ne porte
  * aucune logique métier, il ne fait que projeter son contenu et se masquer
  * lorsqu'il n'est pas l'étape courante.
  *
@@ -22,11 +22,7 @@ import {WizardHost} from './wizard.types';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div
-      class="flex flex-col min-w-0 col-start-1 row-start-1"
-      [class.invisible]="!active()"
-      [class.pointer-events-none]="!active()"
-      [attr.aria-hidden]="!active() ? true : null">
+    <div class="min-w-0" [hidden]="!active()" [class.hidden]="!active()">
       <ng-content />
     </div>
   `,

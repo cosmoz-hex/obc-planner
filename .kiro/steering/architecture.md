@@ -58,14 +58,20 @@ src/app/
 │   ├── layout/         # Shell principal : header, sidebar (wa-page), footer, sélecteur de langue
 │   ├── data-grid/      # Grille générique (pagination/tri côté serveur, colonnes projetables)
 │   ├── confirm-dialog/ # Modale de confirmation générique
-│   └── wizard/         # Wizard à étapes générique : contenu projeté (app-wizard-step),
-│                       # avancement (barre + compteur), navigation précédent/suivant/valider
+│   └── wizard/         # Modale de wizard à étapes générique : app-wizard-dialog possède le
+│                       # wa-dialog (largeur 70vw, hauteur adaptée au contenu, max 90vh) ;
+│                       # header fixe (libellé, compteur, app-wizard-stepper : fragments
+│                       # cliquables avec tooltip, saut libre entre étapes) et footer fixe
+│                       # (précédent/suivant/valider) ; contenu projeté (app-wizard-step,
+│                       # masqué par [hidden] mais monté). Garde wa-after-hide, retour à
+│                       # l'étape 1 et événement close centralisés. Ancien app-wizard et
+│                       # barre de progression supprimés
 ├── pages/              # Pages principales
 │   ├── athletes/       # Gestion des athlètes (liste + modale CRUD)
-│   ├── evaluations/    # Consultation des évaluations + wizard de saisie
+│   ├── evaluations/    # Consultation des évaluations + wizard de saisie (modale basée sur app-wizard-dialog)
 │   ├── programmes/     # Programmes d'entraînement générés : liste + 3 popups
 │   │                   #   (programme-create-dialog : création/génération, wizard à 2 étapes
-│   │                   #    (1 Profil + Évaluation, 2 Format) basé sur components/wizard ;
+│   │                   #    (1 Profil + Évaluation, 2 Format) basé sur app-wizard-dialog (components/wizard) ;
 │   │                   #    programme-detail-dialog : consultation/édition, grille
 │   │                   #    hebdomadaire (CSS display:grid, role table/row/cell ;
 │   │                   #    exercices alternatifs séparés par « ou », séries empilées,
@@ -95,7 +101,7 @@ src/app/
 | `/` | redirect → `/athletes` | Redirection par défaut |
 | `/athletes` | `AthletesComponent` | Liste et gestion des athlètes |
 | `/evaluations` | `EvaluationsComponent` | Consultation des évaluations |
-| `/programmes` | `ProgrammesComponent` | Liste des programmes générés (grille serveur, filtre athlète, tri) + popups de création/génération (wizard à 2 étapes : **1 Profil + Évaluation** — Athlète obligatoire, Évaluation optionnelle effaçable, synthèse (archétype, force-vitesse, technique, endurance, squat, tirage, musculation, points faibles techniques) dupliquée dans le template sans composant partagé avec le wizard d'évaluation, pré-remplie par un handler explicite à la sélection d'une évaluation (vider la sélection ou changer d'athlète ne réinitialise pas la synthèse ; changer d'athlète ne vide que l'évaluation qui ne lui appartient pas) ; **2 Format** — semaines, fréquence, durée, début, objectifs ; émet `ProgrammeCreateRequest` avec `athleteId`, `evaluationId` nul ou numérique et `profile`), de consultation/édition (grille hebdomadaire calquée sur l'écran Planning, sélecteur de semaines) et d'édition de cellule. Le menu d'actions de ligne propose **Modifier / Actualiser / Imprimer / Supprimer** : « Actualiser » (`POST /programmes/{id}/refresh`, `ProgrammeService.refresh` côté front) ouvre une confirmation (`app-confirm-dialog`) avertissant que les modifications manuelles seront perdues, puis recharge la grille et affiche un toast de succès (`wa-toast` unique partagé succès/erreur) ; garde anti double soumission, grille en `loading` pendant l'opération |
+| `/programmes` | `ProgrammesComponent` | Liste des programmes générés (grille serveur, filtre athlète, tri) + popups de création/génération (wizard à 2 étapes dans `app-wizard-dialog`, navigation libre par fragments cliquables : **1 Profil + Évaluation** — Athlète obligatoire, Évaluation optionnelle effaçable, synthèse (archétype, force-vitesse, technique, endurance, squat, tirage, musculation, points faibles techniques) dupliquée dans le template sans composant partagé avec le wizard d'évaluation, pré-remplie par un handler explicite à la sélection d'une évaluation (vider la sélection ou changer d'athlète ne réinitialise pas la synthèse ; changer d'athlète ne vide que l'évaluation qui ne lui appartient pas) ; **2 Format** — semaines, fréquence, durée, début, objectifs ; émet `ProgrammeCreateRequest` avec `athleteId`, `evaluationId` nul ou numérique et `profile`), de consultation/édition (grille hebdomadaire calquée sur l'écran Planning, sélecteur de semaines) et d'édition de cellule. Le menu d'actions de ligne propose **Modifier / Actualiser / Imprimer / Supprimer** : « Actualiser » (`POST /programmes/{id}/refresh`, `ProgrammeService.refresh` côté front) ouvre une confirmation (`app-confirm-dialog`) avertissant que les modifications manuelles seront perdues, puis recharge la grille et affiche un toast de succès (`wa-toast` unique partagé succès/erreur) ; garde anti double soumission, grille en `loading` pendant l'opération |
 | `/programmes/:id/impression` | `ProgrammeImpressionComponent` | Vue imprimable d'un programme (toutes les semaines, lecture seule, **hors du conteneur `LayoutComponent`** — page nue, ouverte dans un nouvel onglet ; impression via le navigateur, rupture de page par semaine) |
 | `/referentiel` | `ReferentielComponent` | Conteneur onglets référentiel (Archétypes, Planning, Protocoles) |
 | `/referentiel/archetypes` | `ArchetypesComponent` | Profils archétypes |

@@ -1,0 +1,22 @@
+<nav [attr.aria-label]="'wizard.stepper.label' | translate">
+	<ol class="m-0 flex w-full list-none gap-[5px] p-0">
+		@for (item of items(); track item.step) {
+			<li class="m-0 block min-w-0 flex-1 p-0 max-w-3xs">
+				<button type="button"
+						[id]="uid + '-' + item.step"
+						class="h-[20px] w-full cursor-pointer appearance-none rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--wa-color-brand-border-loud)]"
+						[class]="segmentClass(item.state)"
+						[attr.aria-current]="item.state === 'current' ? 'step' : null"
+						[attr.aria-label]="'wizard.stepper.stepAria' | translate: {
+							index: $index + 1,
+							total: items().length,
+							label: item.label | translate,
+							state: ('wizard.stepper.state.' + item.state) | translate
+						}"
+						(click)="select.emit(item.step)"></button>
+				<!-- [attr.for] et non [for] : Angular mappe [for] vers la propriété DOM htmlFor, que wa-tooltip ignore -->
+				<wa-tooltip [attr.for]="uid + '-' + item.step">{{ item.label | translate }}</wa-tooltip>
+			</li>
+		}
+	</ol>
+</nav>

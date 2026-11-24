@@ -1,0 +1,61 @@
+<wa-dialog
+	class="[--width:70vw] [&::part(dialog)]:max-h-[90vh]"
+	[attr.open]="open() ? true : null"
+	[attr.label]="titleKey() | translate"
+	(wa-after-hide)="onDialogHide($event)">
+
+	<!-- Zone haute fixe : libellé, compteur et fragments -->
+	<div class="sticky top-0 z-10 flex flex-col gap-1 rounded-md bg-[color-mix(in_oklab,var(--wa-color-surface-raised),white_8%)] p-1">
+		<div class="flex items-center justify-between text-md" aria-live="polite">
+			@if (currentLabel()) {
+				<span class="font-medium">{{ currentLabel() | translate }}</span>
+			} @else {
+				<span></span>
+			}
+			<span class="opacity-70">
+				{{ 'wizard.stepCounter' | translate: {current: displayIndex(), total: totalSteps()} }}
+			</span>
+		</div>
+		<app-wizard-stepper [items]="stepperItems()" (select)="goTo($event)" />
+	</div>
+
+	<!-- Zone centrale : étapes projetées (seule l'étape courante est visible) -->
+	<ng-content />
+
+	<!-- Zone basse fixe -->
+	<div slot="footer" class="flex w-full items-center justify-between gap-2">
+		@if (!isFirst()) {
+			<wa-button appearance="plain" type="button" (click)="previous()">
+				{{ 'wizard.previous' | translate }}
+			</wa-button>
+		} @else {
+			<span></span>
+		}
+
+		@if (!isLast()) {
+			<wa-button
+				variant="brand"
+				type="button"
+				[disabled]="!currentValid()"
+				(click)="next()">
+				{{ 'wizard.next' | translate }}
+			</wa-button>
+		} @else {
+			<div class="flex items-center gap-2">
+				@if (firstInvalid(); as blocking) {
+					<span [id]="uid + '-blocked'" role="status" class="text-sm opacity-80">
+						{{ 'wizard.blockedBy' | translate: {label: blocking.label() | translate} }}
+					</span>
+				}
+				<wa-button
+					variant="brand"
+					type="button"
+					[disabled]="!allValid()"
+					[attr.aria-describedby]="firstInvalid() ? uid + '-blocked' : null"
+					(click)="onValidate()">
+					{{ 'wizard.validate' | translate }}
+				</wa-button>
+			</div>
+		}
+	</div>
+</wa-dialog>

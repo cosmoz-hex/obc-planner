@@ -4,7 +4,17 @@
     "next": "Next",
     "validate": "Submit",
     "stepCounter": "Step {{current}} / {{total}}",
-    "progress": "Form progress"
+    "stepper": {
+      "label": "Steps",
+      "stepAria": "Step {{index}} of {{total}}: {{label}} ({{state}})",
+      "state": {
+        "current": "current",
+        "unvisited": "upcoming",
+        "valid": "valid",
+        "incomplete": "incomplete"
+      }
+    },
+    "blockedBy": "Validate unavailable: complete step \"{{label}}\""
   },
   "layout": {
     "skip-to-content": "Skip to content",

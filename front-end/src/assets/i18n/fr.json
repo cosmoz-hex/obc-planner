@@ -4,7 +4,17 @@
     "next": "Suivant",
     "validate": "Valider",
     "stepCounter": "Étape {{current}} / {{total}}",
-    "progress": "Progression du formulaire"
+    "stepper": {
+      "label": "Étapes",
+      "stepAria": "Étape {{index}} sur {{total}} : {{label}} ({{state}})",
+      "state": {
+        "current": "en cours",
+        "unvisited": "à venir",
+        "valid": "validée",
+        "incomplete": "incomplète"
+      }
+    },
+    "blockedBy": "Valider indisponible : complétez l'étape « {{label}} »"
   },
   "layout": {
     "skip-to-content": "Aller au contenu principal",
