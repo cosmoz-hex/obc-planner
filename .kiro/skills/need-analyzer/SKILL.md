@@ -14,13 +14,13 @@ Le skill **pose des questions** tant que des zones d'ombre bloquantes subsistent
 - Quand plusieurs interprétations d'une demande sont possibles.
 - Pour cadrer un besoin avant de définir les axes de développement.
 
-## Références obligatoires
+## Références
 
-- `.kiro/steering/product.md` — vocabulaire métier (haltérophilie : archétypes, évaluations, programmation, référentiel), règles fonctionnelles existantes.
-- `.kiro/steering/architecture.md` — pour vérifier la faisabilité et la cohérence avec l'existant.
-- `docs/` — tout complément fonctionnel disponible.
+Charger uniquement la section utile (grep) :
 
-Le vocabulaire de la synthèse doit reprendre les termes métier de `product.md` (ex. `archétype`, `foncier`, `deload`, `épaulé-jeté`).
+- `product.md` : vocabulaire métier (archétypes, évaluations, programmation, référentiel) et règles existantes. La synthèse reprend ces termes (`archétype`, `foncier`, `deload`, `épaulé-jeté`).
+- `architecture.md` : seulement pour vérifier la faisabilité ; `architecture-api.md` / `architecture-db.md` si l'API ou la BD est concernée.
+- `docs/` : seulement si un complément fonctionnel est utile.
 
 ## Contrat d'entrée
 

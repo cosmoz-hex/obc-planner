@@ -71,12 +71,12 @@ Dans les deux modes, les commentaires de revue sont **retournés directement dan
 
 #### 📏 Respect des normes du projet
 
-> Se référer aux fichiers de référence dans le dossier `/.kiro/steering` pour connaître les normes du projet.
+> Ne lire que les conventions des axes réellement déclenchés par le diff, par lecture ciblée (grep) dans `.kiro/steering`.
 
 | Fichiers touchés | Référence à lire                                          |
 |---|-----------------------------------------------------------|
-| `*.java`, `pom.xml`, code backend | `spring-conventions.md`                    |
-| `*.ts`, `*.html`, `*.css`, `*.scss`, code Angular | `angular-convention.md`, `accessiblity-convention.md` |
+| `*.java`, `pom.xml`, code backend | `spring-convention.md`                    |
+| `*.ts`, `*.html`, `*.css`, `*.scss`, code Angular | `angular-convention.md`, `accessiblity-convention.md` (seulement si le front est touché) |
 | `*.java`, `*.sql`, `database/script/**`, requêtes SQL dans du Java ou scripts de montée de version | `postgre-convention.md`                         |
 
 > Ne charger que les références pertinentes pour la PR en cours. Si la PR ne touche que du TypeScript, inutile de lire les normes Java/SQL.
@@ -116,7 +116,7 @@ Dans les deux modes, les commentaires de revue sont **retournés directement dan
 - Documentation manquante sur le code complexe
 - Complexité cyclomatique et nombre de paramètres
 
-#### 📦 Architecture (cf `architecture.md`)
+#### 📦 Architecture (cf `architecture.md`, lecture ciblée ; `architecture-api.md` / `architecture-db.md` seulement si l'API ou la BD est touchée)
 - Respect du découpage pages / components / services
 - Pas de logique métier dans les composants (déléguer aux services)
 - Bonne utilisation des resolvers, guards et interceptors

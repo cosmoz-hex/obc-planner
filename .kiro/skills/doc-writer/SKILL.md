@@ -1,26 +1,27 @@
 ---
 name: doc-writer
-description: Créer ou mettre à jour la documentation d'OBC Planner (steering architecture.md, README, docs) en cohérence avec un changement de code. À utiliser après une évolution pour synchroniser la documentation avec l'état réel du projet.
+description: Créer ou mettre à jour la documentation d'OBC Planner (steering architecture*.md, README, docs) en cohérence avec un changement de code. À utiliser après une évolution pour synchroniser la documentation avec l'état réel du projet.
 ---
 
 # Mettre à jour la documentation
 
-Synchronise la documentation du projet avec l'état réel du code après un changement. Le skill met à jour **uniquement les fichiers de documentation** ; il ne modifie pas le code applicatif.
+Synchronise la documentation avec l'état réel du code après un changement. Ne modifie **que des fichiers de documentation**, jamais le code applicatif.
 
 ## Quand l'utiliser
 
-- Après une évolution qui touche la structure des packages, les APIs, le schéma des tables, les libs.
-- Quand la documentation existante diverge du code réel.
-- Pour documenter une nouvelle fonctionnalité ou un nouvel écran.
+- Après une évolution touchant packages, routes front, APIs, DTOs, schéma des tables, libs.
+- Quand la documentation diverge du code réel ou pour documenter une nouvelle fonctionnalité.
 
-## Références obligatoires
+## Table de routage (cible selon la nature du changement)
 
-- `.kiro/steering/*-convention.md` — **déclencheurs de mise à jour** : « mettre à jour `architecture.md` à chaque modification de l'architecture » (libs pom.xml/package.json, structure des packages, structure des tables, ajout/modif d'APIs).
-- `.kiro/steering/architecture.md` — **cible principale** : packages backend, modules frontend, tableau des APIs, schéma des tables. Format à respecter.
-- `.kiro/steering/product.md` — pour aligner la documentation fonctionnelle.
-- `README.md` (racine, `back-end/`, `front-end/`) — installation, stack, commandes.
-- `docs/` — documentation complémentaire (ex. `docs/mermaid.txt`).
-- Le changement de code à documenter (idéalement via la sortie du skill `git-diff`).
+| Changement | Fichier à mettre à jour |
+|---|---|
+| Package, entité/moteur (description), structure ou routes front, libs | `.kiro/steering/architecture.md` |
+| Endpoint REST, DTO, contrat d'API | `.kiro/steering/architecture-api.md` |
+| Table, colonne, contrainte, migration, risque/dette | `.kiro/steering/architecture-db.md` |
+| Journal des modifications | entrée courte (3-5 lignes) en tête de `.kiro/archive/architecture-changelog.md` (jamais en tête des fichiers chargés) |
+| Périmètre fonctionnel | `.kiro/steering/product.md` |
+| Installation, stack, commandes | `README.md` (racine, `back-end/`, `front-end/`), `docs/` |
 
 ## Contrat d'entrée
 
@@ -30,27 +31,22 @@ NATURE       : <structure packages / API / table / lib / fonctionnalité>
 INTENTION    : <ce que le changement apporte>
 ```
 
-## Procédure
+## Procédure (sobriété)
 
-1. **Comprendre le changement** : à partir du diff (ou via `git-diff`), identifier ce qui, dans le code réel, n'est plus reflété par la documentation.
-2. **Identifier les cibles doc** :
-   - Nouvelle/modif de package → section structure de `architecture.md`.
-   - Nouvel/modif endpoint → tableau des APIs de `architecture.md`.
-   - Nouvelle/modif table ou colonne → section schéma de `architecture.md` (colonnes, contraintes, relations).
-   - Nouvelle lib (`pom.xml`/`package.json`) → stack (`architecture.md`, README).
-   - Nouvelle fonctionnalité → `product.md` si le périmètre fonctionnel évolue.
-3. **Mettre à jour** en respectant le format existant (tableaux, titres, style) et en restant factuel (refléter le code réel, pas l'intention).
-4. **Vérifier la cohérence** : pas de contradiction résiduelle entre doc et code ; liens et chemins valides.
-5. **Rester minimal** : ne documenter que ce qui a changé ; ne pas réécrire des sections non impactées.
+1. **Comprendre le changement** à partir du diff fourni (ou `git-diff`).
+2. **Router** vers le(s) seul(s) fichier(s) concerné(s) via la table ci-dessus.
+3. **Cibler** : localiser la section impactée par `grep`/recherche (ex. nom de table, endpoint) et ne lire que cette section ; ne jamais relire ni réécrire un fichier entier.
+4. **Produire un delta** (`str_replace` ciblé) en respectant le format existant (tableaux, titres) et en restant factuel (état réel du code, pas l'intention).
+5. **Vérifier** la cohérence locale (pas de contradiction avec le code, chemins valides) et l'absence de caractères corrompus (UTF-8 sans BOM).
+6. Ne pas lire toutes les conventions : se référer à `*-convention.md` uniquement si un doute sur un déclencheur subsiste.
 
 ## Livrables
 
-- Les sections de documentation mises à jour (principalement `architecture.md`, éventuellement README/`product.md`/`docs/`).
-- Un récapitulatif : quels fichiers/sections modifiés et pourquoi.
+- Sections mises à jour (delta) + entrée de changelog archivé.
+- Récapitulatif : fichiers/sections modifiés et pourquoi.
 
 ## Critères de qualité
 
-- La documentation reflète l'état réel du code (vérifié, pas supposé).
-- Le format existant des fichiers est respecté (tableaux APIs, schéma des tables, structure des packages).
-- Tous les déclencheurs de `*-convention.md` applicables au changement sont couverts.
+- Documentation = état réel du code (vérifié).
+- Format existant respecté ; seuls les fichiers impactés sont touchés.
 - Seuls des fichiers de documentation sont modifiés.

@@ -16,9 +16,9 @@ Le skill **rédige le message** ; il ne crée pas le commit (sauf demande explic
 - Avant de committer un changement, pour formuler un message conforme.
 - Pour normaliser un message existant non conforme.
 
-## Références obligatoires
+## Références
 
-- `.kiro/steering/git-convention.md` — **convention de commit** (section Git) :
+- `.kiro/steering/git-convention.md` : **convention de commit** :
   ```
   {type}({scope}): {reference} - {title}
 
@@ -27,7 +27,7 @@ Le skill **rédige le message** ; il ne crée pas le commit (sauf demande explic
   Ref: {reference}
   ```
   avec `type` ∈ `feat|fix|docs|style|refactor|perf|security`, `scope` = module/fonctionnalité impacté, `title` = phrase courte, `body` = description détaillée, `reference` = story/ticket (souvent le nom de branche).
-- `.kiro/steering/architecture.md` / `.kiro/steering/product.md` — pour nommer correctement le `scope` (module/fonctionnalité).
+- Pour nommer le `scope` : titres de `architecture.md` / `product.md`, lecture ciblée.
 - Le changement à décrire (idéalement via `git-diff`).
 
 ## Contrat d'entrée

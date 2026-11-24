@@ -13,13 +13,15 @@ description: Transformer un besoin fonctionnel validé en axes de développement
 - Pour cadrer une évolution avant que le développeur ne commence à coder.
 - Pour estimer les impacts et l'ordre des travaux.
 
-## Références obligatoires
+## Références
 
-- `.kiro/steering/architecture.md` — packages backend, modules frontend, schéma des tables, APIs existantes (point d'ancrage principal).
-- `.kiro/steering/*-convention.md` — conventions à respecter dans les axes proposés (couches, DTOs, Flyway, Signals, etc.).
-- `.kiro/steering/product.md` — cohérence fonctionnelle.
-- `.kiro/steering/learning.md` — pièges déjà rencontrés à ne pas reproduire.
-- Le code réel des zones impactées (via une analyse préalable ou le skill `code-explorer`).
+Charger uniquement la section utile (grep) :
+
+- `architecture.md` (packages, modules front, routes), `architecture-api.md` (APIs, DTOs) et `architecture-db.md` (tables) : point d'ancrage selon les couches impactées.
+- Convention de la couche impactée (`*-convention.md`) : couches, DTOs, Flyway, Signals, etc.
+- `product.md` : cohérence fonctionnelle, si utile.
+- `learning.md` : pièges à ne pas reproduire (lecture ciblée par thème).
+- Le code réel des zones impactées (analyse préalable ou `code-explorer`).
 
 ## Contrat d'entrée
 
@@ -33,7 +35,7 @@ CONTRAINTES           : <optionnel : techniques, délai, périmètre>
 
 ## Procédure
 
-1. **Ancrer dans l'architecture** : localiser dans `architecture.md` et le code les zones impactées (couches back, modules front, tables).
+1. **Ancrer dans l'architecture** : localiser dans les fichiers `architecture*.md` utiles et le code les zones impactées (couches back, modules front, tables).
 2. **Identifier les impacts par couche** :
    - Base de données : nouvelles tables/colonnes/contraintes → script Flyway (montée + rollback), respect du nommage.
    - Backend : entités, repositories, services (interface + impl), DTOs `*Request`/`*Response`, controllers, sécurité.
@@ -108,7 +110,7 @@ Les tâches sont **regroupées par lot cohérent** (= une unité de délégation
 - Dépendances : Lot 2
 
 ## Lot 4 — Vérification
-- [ ] 4.1 Compilation back + build front verts
+- [ ] 4.1 Build back + front verts (procédure Build de `feature-builder`)
 - Dépendances : Lot 3
 ```
 

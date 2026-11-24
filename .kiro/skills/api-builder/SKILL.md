@@ -17,11 +17,13 @@ Conçoit et implémente un endpoint REST backend complet et conforme, de la couc
 - Pour modifier le contrat d'une API existante (paramètres, réponse, pagination).
 - Quand le frontend a besoin d'un nouveau point d'accès aux données.
 
-## Références obligatoires
+## Références
 
-- `.kiro/steering/spring-convention.md` — section Java/Spring : 3 couches, interfaces+impl, Lombok, DTOs records `*Request`/`*Response`, `@RestControllerAdvice`, format d'erreur, sécurité JWT, `@Transactional`, pagination `Pageable`.
-- `.kiro/steering/architecture.md` — base URL `/api`, tableau des APIs (**à compléter**), packages `controllers/`, `services/`, `repositories/`, `dto/`, `entities/`.
-- `.kiro/steering/product.md` — sémantique métier de la ressource exposée.
+Charger uniquement la section utile (grep) :
+
+- `spring-convention.md` : 3 couches, DTOs records, `@RestControllerAdvice`, sécurité JWT, `@Transactional`, `Pageable`.
+- `architecture-api.md` : base URL `/api`, tableau des APIs (**à compléter**). `architecture.md` : packages.
+- `architecture-db.md` : seulement si le schéma est concerné. `product.md` : seulement si la sémantique métier est floue.
 
 ## Contrat d'entrée
 
@@ -40,13 +42,13 @@ CONTRAT E/S    : <optionnel : forme attendue des requêtes/réponses>
 4. **Service** : interface + implémentation (`impl/`), logique métier, `@Transactional` pour les opérations multiples/critiques, mapping entité ↔ DTO.
 5. **Controller** : délègue au service, aucune logique métier ; validation via `@Valid` ; retourne des DTOs et des statuts HTTP corrects.
 6. **Sécurité** : appliquer le contrôle d'accès au niveau adéquat (configuration/filter/interceptor/annotation) ; ne jamais exposer de stack trace ; erreurs structurées `[{timestamp}] {level} {class}.{method} - {message}`.
-7. **Vérifier** : `mvn -q -f back-end/pom.xml compile`. Corriger les erreurs.
-8. **Documenter** : ajouter la ligne dans le tableau des APIs de `architecture.md`.
+7. **Vérifier** : procédure Build de `feature-builder` (backend). Corriger les erreurs.
+8. **Documenter** : ajouter la ligne dans le tableau des APIs de `architecture-api.md`.
 
 ## Livrables
 
 - Repository, service (interface + impl), DTOs, controller.
-- Ligne(s) ajoutée(s) au tableau des APIs de `architecture.md`.
+- Ligne(s) ajoutée(s) au tableau des APIs de `architecture-api.md`.
 - Compte-rendu : contrat de l'endpoint (méthode, chemin, E/S, statuts), fichiers créés/modifiés, résultat de compilation.
 
 ## Critères de qualité
@@ -56,5 +58,5 @@ CONTRAT E/S    : <optionnel : forme attendue des requêtes/réponses>
 - DTOs records validés ; entités non exposées.
 - Requêtes paramétrées ; pagination sur les listes volumineuses.
 - Sécurité et gestion d'erreurs conformes ; aucune fuite de stack trace.
-- Le backend compile ; `architecture.md` est à jour.
+- Le backend compile ; `architecture-api.md` est à jour.
 - Respect des règles écrites dans `spring-convention.md`.

@@ -10,10 +10,10 @@ Un skill peut être invoqué de deux façons, avec le **même contrat d'entrée*
 
 ## Principes communs
 
-- **Ancrage documentaire** : chaque skill s'appuie systématiquement sur `.kiro/steering/*` (`product.md`, `architecture.md`, `*-convention.md`, `learning.md`) et sur `docs/` / `README.md` selon le besoin. Ces fichiers sont la source de vérité.
+- **Ancrage documentaire** : les skills chargent uniquement la section utile (grep) de `.kiro/steering/*` : `product.md`, `architecture.md` (vue d'ensemble), `architecture-api.md`, `architecture-db.md`, convention de la couche concernée. Ces fichiers sont la source de vérité.
 - **Format** : frontmatter YAML (`name`, `description`, `allowed-tools`) puis corps en français.
 - **Autonomie** : aucun skill ne dépend d'un autre pour fonctionner. Certains se **chaînent naturellement** (ex. `git-diff` → contrôles de revue), mais chacun accepte aussi une entrée fournie directement.
-- **Vérification** : les skills qui produisent du code vérifient la compilation (`mvn -q -f back-end/pom.xml compile` / `mvn test`) ou le build (`npm --prefix front-end run build`).
+- **Vérification** : la procédure Build (compilation back via `mvnw.cmd`, build front, lecture de `build-out.txt`, contrôle du JDK) est écrite une seule fois dans [`feature-builder`](feature-builder/SKILL.md) ; les autres skills y renvoient.
 
 ## Conventions de test figées (projet)
 
@@ -36,7 +36,7 @@ Un skill peut être invoqué de deux façons, avec le **même contrat d'entrée*
 ### Développement (Développeur)
 | Skill | Rôle |
 |---|---|
-| [`feature-builder`](feature-builder/SKILL.md) | Implémenter une évolution de bout en bout (back + front + migration). |
+| [`feature-builder`](feature-builder/SKILL.md) | Implémenter une évolution de bout en bout (back + front + migration), vérifier le build, ne jamais commiter. Porte la procédure Build. |
 | [`bug-fixer`](bug-fixer/SKILL.md) | Diagnostiquer et corriger un bug à la cause racine. |
 | [`api-builder`](api-builder/SKILL.md) | Créer/faire évoluer un endpoint REST (Controller → Service → Repository). |
 | [`ui-generator`](ui-generator/SKILL.md) | Créer un composant/page Angular (standalone, Signals, i18n, a11y). |
@@ -60,7 +60,7 @@ Un skill peut être invoqué de deux façons, avec le **même contrat d'entrée*
 ### Orchestration
 | Skill | Rôle |
 |---|---|
-| [`dev-pipeline`](dev-pipeline/SKILL.md) | Dérouler la pipeline complète (Analyste → Développeur → Reviewer → Documentaliste) à partir d'une demande fonctionnelle, avec traçabilité, validation humaine du plan et boucles de feedback. Appliqué par l'agent `orchestrator`. |
+| [`dev-pipeline`](dev-pipeline/SKILL.md) | Gabarits de prompts de subagents, parcours par nature de changement, seuils de parcimonie (parcours léger < 3 fichiers). Les règles de fond sont dans le prompt de l'agent `orchestrator`, seul à charger ce skill. |
 
 ## Enchaînements typiques (indicatifs, non obligatoires)
 
@@ -68,3 +68,5 @@ Un skill peut être invoqué de deux façons, avec le **même contrat d'entrée*
 - **Correction** : `code-explorer` → `bug-fixer` → `learning-logger` → `commit-message`.
 - **Revue** : `git-diff` → `code-review`.
 - **Pipeline complète** : voir [`dev-pipeline`](dev-pipeline/SKILL.md) (orchestration des 4 rôles).
+
+> `prompt-engineer` n'est rattaché à aucun agent : invocation manuelle uniquement.

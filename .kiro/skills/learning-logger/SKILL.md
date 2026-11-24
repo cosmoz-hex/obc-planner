@@ -5,49 +5,37 @@ description: Ajouter une leçon apprise dans .kiro/steering/learning.md quand un
 
 # Consigner un apprentissage
 
-Capitalise une connaissance acquise en l'ajoutant au journal `learning.md`, sous forme d'entrée courte, factuelle et actionnable. Le skill ne modifie que le fichier de learning.
+Ajoute une entrée **courte** à `.kiro/steering/learning.md`. Ce fichier est en `inclusion: manual` (chargé uniquement si référencé par le développeur/l'orchestrator) : il doit rester léger. Ne modifie que les fichiers de learning.
 
 ## Quand l'utiliser
 
-- Après une correction demandée par l'utilisateur sur un choix technique ou un pattern proposé.
-- Après une erreur de jugement ou un écart constaté par rapport aux bonnes pratiques du projet.
-- Quand une subtilité métier (données, calcul) a été mal interprétée puis clarifiée.
-
-## Références obligatoires
-
-- `.kiro/steering/learning.md` — **fichier cible** : format et entrées existantes à respecter (titre daté, Contexte / Erreur initiale / Bonne pratique).
-- `.kiro/steering/*-convention.md` — pour rattacher la leçon à une bonne pratique existante ou signaler un manque.
-- `.kiro/steering/product.md` — pour le vocabulaire métier si la leçon est fonctionnelle.
+- Après une correction demandée par l'utilisateur sur un choix technique ou un pattern.
+- Après une erreur de jugement ou un écart aux bonnes pratiques.
+- Quand une subtilité métier a été mal interprétée puis clarifiée.
 
 ## Contrat d'entrée
 
 ```
-CONTEXTE        : <situation, tâche, zone concernée>
-ERREUR / ÉCART  : <ce qui a été fait de mauvais ou de non conforme>
-CORRECTION      : <la bonne pratique / bonne interprétation retenue>
+CONTEXTE        : <situation, zone concernée>
+ERREUR / ÉCART  : <ce qui était non conforme>
+CORRECTION      : <bonne pratique retenue>
 DATE            : <optionnel : sinon date du jour>
 ```
 
 ## Procédure
 
-1. **Lire `learning.md`** pour respecter le format exact et éviter les doublons.
-2. **Vérifier la pertinence** : la leçon doit être généralisable et utile pour l'avenir (pas une note ponctuelle sans valeur).
-3. **Rédiger l'entrée** sous le format existant :
-   - Titre : `### {AAAA-MM-JJ} — {sujet court}`
-   - `**Contexte**` : le cas rencontré, factuel.
-   - `**Erreur initiale**` : ce qui avait été fait.
-   - `**Bonne pratique**` : la règle à appliquer désormais.
-4. **Ajouter** l'entrée à la suite des leçons existantes, sans réécrire les précédentes.
-5. **Vérifier** que le fichier reste bien structuré (Markdown valide, ordre chronologique cohérent).
+1. **Chercher** dans `learning.md` (grep sur des mots-clés) pour éviter un doublon ; n'en lire que la section thématique visée.
+2. **Vérifier la pertinence** : leçon généralisable, pas une note ponctuelle.
+3. **Rédiger** : `### AAAA-MM-JJ — sujet court`, puis **2 à 4 lignes max** : règle à retenir + cause en une phrase, avec commandes/identifiants essentiels en `code`. Pas de récit.
+4. **Ranger** l'entrée dans la bonne section : Process/Build, Backend/Java, Base de données/SQL, Frontend Angular/WebAwesome, Moteur de génération / Protocoles (créer une section seulement si aucune ne convient).
+5. **Détail éventuel** (contexte long, étapes de diagnostic) : l'ajouter dans `.kiro/archive/learning-full.md`, jamais dans `learning.md`.
+6. Ne pas réécrire les entrées existantes ; vérifier Markdown valide et UTF-8 sans caractères corrompus.
 
 ## Livrables
 
-- L'entrée ajoutée à `.kiro/steering/learning.md`.
-- Confirmation du titre et du contenu ajoutés.
+- Entrée ajoutée à `learning.md` (+ détail éventuel dans l'archive) ; confirmation du titre et de la section.
 
 ## Critères de qualité
 
-- Entrée courte, factuelle, actionnable ; format identique aux entrées existantes.
-- Pas de doublon avec une leçon déjà présente.
-- Les entrées antérieures sont préservées telles quelles.
-- Seul `learning.md` est modifié.
+- Entrée de 2 à 4 lignes, actionnable, sans doublon, dans la bonne section.
+- Seuls `learning.md` et `.kiro/archive/learning-full.md` sont modifiés.

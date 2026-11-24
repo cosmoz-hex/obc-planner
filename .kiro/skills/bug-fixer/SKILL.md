@@ -12,12 +12,14 @@ Traite un dysfonctionnement en remontant à la cause racine, avec une correction
 - Face à un comportement observé incorrect (erreur, résultat faux, régression, exception).
 - Quand il faut corriger sans introduire de nouvelle fonctionnalité.
 
-## Références obligatoires
+## Références
 
-- `.kiro/steering/*-convention.md` — conventions à respecter dans le correctif (couches, gestion d'erreurs, Flyway, Signals, etc.).
-- `.kiro/steering/architecture.md` — pour localiser la zone concernée.
-- `.kiro/steering/product.md` — pour distinguer bug (écart au comportement attendu) et évolution.
-- `.kiro/steering/learning.md` — pour vérifier si le bug relève d'un piège déjà documenté, et **y consigner** l'apprentissage si pertinent (voir skill `learning-logger`).
+Charger uniquement la section utile (grep) :
+
+- Convention de la couche concernée (`spring-convention.md`, `angular-convention.md`, `postgre-convention.md`).
+- `architecture.md` pour localiser la zone ; `architecture-api.md` / `architecture-db.md` seulement si l'API ou la BD est en cause.
+- `product.md` seulement pour distinguer bug et évolution en cas de doute.
+- `learning.md` : vérifier si le bug relève d'un piège documenté (en contexte pour le développeur) ; y consigner l'apprentissage via `learning-logger`.
 
 ## Contrat d'entrée
 
@@ -35,7 +37,7 @@ ZONE SUSPECTÉE : <optionnel : écran, endpoint, table>
 3. **Vérifier l'ampleur** : la même cause touche-t-elle d'autres endroits ? Ne corriger que ce qui relève du bug (pas de refactor opportuniste non demandé).
 4. **Corriger** de façon minimale et conforme aux conventions.
 5. **Prévenir la régression** : identifier le test qui aurait détecté le bug (à écrire via le skill de test approprié) et le signaler.
-6. **Vérifier** : compiler/builder la zone touchée. En cas de deux échecs consécutifs sur la même approche, changer de stratégie et expliquer pourquoi.
+6. **Vérifier** : compiler/builder la zone touchée (procédure Build de `feature-builder`). En cas de deux échecs consécutifs sur la même approche, changer de stratégie et expliquer pourquoi.
 7. **Capitaliser** : si le bug vient d'un écart de jugement ou d'une mauvaise pratique, consigner l'apprentissage dans `.kiro/steering/learning.md`.
 
 ## Livrables

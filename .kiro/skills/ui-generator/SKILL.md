@@ -1,7 +1,7 @@
 ---
 name: ui-generator
 description: "
-    Créer un composant ou une page Angular 20 dans OBC Planner (standalone, Signals, WebAwesome, Tailwind, i18n, accessibilité). 
+    Créer un composant ou une page Angular dans OBC Planner (standalone, Signals, WebAwesome, Tailwind, i18n, accessibilité). 
     À utiliser quand le besoin porte sur une interface : nouvel écran, composant réutilisable, formulaire, tableau, modale.
 "
 ---
@@ -15,12 +15,13 @@ Produit un composant ou une page Angular conforme aux conventions frontend du pr
 - Pour créer une nouvelle page, un composant réutilisable, un formulaire, un tableau ou une modale.
 - Pour intégrer une API existante côté interface.
 
-## Références obligatoires
+## Références
 
-- `.kiro/steering/angular-convention.md`, `.kiro/steering/accessibility-convention.md` — section Angular : standalone uniquement, Signals (`signal`/`computed`/`effect`/`input`/`output`/`toSignal`), `@if`/`@for`/`@switch`, `inject()`, typage strict, kebab-case, **pas de `*.spec.ts` à la création**, Signal Forms, services par domaine, i18n ngx-translate (fr **et** en), WebAwesome + `CUSTOM_ELEMENTS_SCHEMA`, Tailwind, accessibilité, pipes natifs pour le formatage.
-- `.kiro/steering/architecture.md` — arborescence `src/app/` (`components/`, `pages/`, `services/`, `models/`), routes.
-- `.kiro/steering/product.md` — vocabulaire et attentes fonctionnelles.
-- WebAwesome : `front-end/node_modules/@awesome.me/webawesome/dist/skills/webawesome/SKILL.md` et `webawesome-design/SKILL.md`.
+Charger uniquement la section utile (grep) :
+
+- `angular-convention.md` et `accessiblity-convention.md` (standalone, Signals, Signal Forms, i18n fr **et** en, WebAwesome + `CUSTOM_ELEMENTS_SCHEMA`, Tailwind, a11y, **pas de `*.spec.ts`**).
+- `architecture.md` : arborescence `src/app/`, routes. `architecture-api.md` : seulement pour le DTO consommé.
+- WebAwesome : `front-end/node_modules/@awesome.me/webawesome/dist/skills/webawesome/SKILL.md`, seulement pour le composant utilisé.
 - Composants existants (`front-end/src/app/pages/**`, `components/**`) pour calquer le style.
 
 ## Contrat d'entrée
@@ -40,7 +41,7 @@ EMPLACEMENT    : <optionnel : route ou dossier cible>
 4. **Formulaires** : Signals Forms, `Validators`, messages d'erreur clairs, bouton de soumission désactivé tant que le formulaire est invalide.
 5. **i18n** : aucune chaîne en dur ; ajouter les clés dans `public/assets/i18n/fr.json` **et** `en.json`, synchronisées.
 6. **Accessibilité** : labels associés (`for`/`id`/`aria-label`), rôles ARIA, ordre DOM, contrastes, `tabindex` 0 ou -1 uniquement, gestion du focus sur modales/dropdowns, `<wa-tooltip>` plutôt que `title`.
-7. **Vérifier** : `npm --prefix front-end run build`. Corriger les erreurs. **Ne pas créer de `*.spec.ts`.**
+7. **Vérifier** : procédure Build de `feature-builder` (frontend). Corriger les erreurs. **Ne pas créer de `*.spec.ts`.**
 
 ## Livrables
 
@@ -56,4 +57,4 @@ EMPLACEMENT    : <optionnel : route ou dossier cible>
 - Tailwind privilégié, WebAwesome utilisé correctement (`CUSTOM_ELEMENTS_SCHEMA`).
 - Accessibilité respectée (labels, ARIA, focus, contrastes, tabindex).
 - Aucun `*.spec.ts` créé ; le front builde sans erreur.
-- Respect des règles écrites dans `angular-convention.md` et `accessibility-convention.md`.
+- Respect des règles écrites dans `angular-convention.md` et `accessiblity-convention.md`.
