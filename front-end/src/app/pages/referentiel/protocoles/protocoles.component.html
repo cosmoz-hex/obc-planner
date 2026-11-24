@@ -91,7 +91,7 @@
 	<ul class="m-0 list-none p-0 leading-relaxed">
 		@for (set of row.sets; track set.refExerciceSetId) {
 		<li>
-			<span>{{ set.setNumber }}</span>@if (set.repNumber) {<span> x {{ set.repNumber }}</span>}@if (set.weight != null) {<span> &#64; {{ set.weight }}%</span>}
+			@if (set.repNumber) {<span>{{ set.setNumber }}</span><span> x {{ set.repNumber }}</span>} @else {<span>{{ (set.setNumber === 1 ? 'protocoles.series.countOne' : 'protocoles.series.count') | translate: { count: set.setNumber } }}</span>}@if (set.weight != null) {<span> &#64; {{ set.weight }}%</span>}
 		</li>
 		}
 	</ul>

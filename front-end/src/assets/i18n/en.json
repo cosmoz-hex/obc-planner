@@ -347,7 +347,9 @@
       "repNumberPlaceholder": "e.g. 6, 30s, 1 + 1",
       "weight": "Load",
       "add": "Add a row",
-      "remove": "Remove row"
+      "remove": "Remove row",
+      "count": "{{count}} sets",
+      "countOne": "{{count}} set"
     }
   },
   "programmes": {
