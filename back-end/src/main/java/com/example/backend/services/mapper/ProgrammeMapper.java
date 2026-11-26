@@ -48,6 +48,10 @@ public class ProgrammeMapper {
                 programme.getEndDate(),
                 programme.getSnatchGoal(),
                 programme.getCjGoal(),
+                programme.getFrontSquatGoal(),
+                programme.getBackSquatGoal(),
+                programme.getSnatchPullGoal(),
+                programme.getCjPullGoal(),
                 programme.getProgrammeWeeks().stream()
                         .sorted(Comparator.comparing(ProgrammeWeek::getWeekNumber))
                         .map(this::toWeekResponse)

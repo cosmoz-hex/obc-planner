@@ -56,6 +56,10 @@ classDiagram
         END_DATE
         SNATCH_GOAL
         CJ_GOAL
+        FRONT_SQUAT_GOAL
+        BACK_SQUAT_GOAL
+        SNATCH_PULL_GOAL
+        CJ_PULL_GOAL
     }
     class PROG_WEEK {
         # PROGRAMME_WEEK_ID

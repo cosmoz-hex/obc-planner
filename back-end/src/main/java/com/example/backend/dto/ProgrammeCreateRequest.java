@@ -25,7 +25,11 @@ public record ProgrammeCreateRequest(
         @Min(90) @Max(150) Integer duration,
         @NotNull LocalDate startDate,
         @NotNull @Min(1) Integer snatchGoal,
-        @NotNull @Min(1) Integer cjGoal
+        @NotNull @Min(1) Integer cjGoal,
+        @NotNull @Min(1) Integer frontSquatGoal,
+        @NotNull @Min(1) Integer backSquatGoal,
+        @NotNull @Min(1) Integer snatchPullGoal,
+        @NotNull @Min(1) Integer cjPullGoal
 ) {
 
     /**
@@ -35,6 +39,7 @@ public record ProgrammeCreateRequest(
      */
     public ProgrammeGenerationRequest toGenerationRequest(Integer resolvedEvaluationId) {
         return new ProgrammeGenerationRequest(
-                resolvedEvaluationId, weeks, frequency, duration, startDate, snatchGoal, cjGoal);
+                resolvedEvaluationId, weeks, frequency, duration, startDate, snatchGoal, cjGoal,
+                frontSquatGoal, backSquatGoal, snatchPullGoal, cjPullGoal);
     }
 }

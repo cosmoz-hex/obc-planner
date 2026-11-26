@@ -170,7 +170,11 @@ public class ProgrammeServiceImpl implements ProgrammeService {
                 programme.getDuration(),
                 programme.getStartDate(),
                 programme.getSnatchGoal(),
-                programme.getCjGoal());
+                programme.getCjGoal(),
+                programme.getFrontSquatGoal(),
+                programme.getBackSquatGoal(),
+                programme.getSnatchPullGoal(),
+                programme.getCjPullGoal());
     }
 
     private ProgrammeResponse toResponse(Programme programme, Athlete athlete) {

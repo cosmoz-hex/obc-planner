@@ -7,6 +7,7 @@ import {
   ElementRef,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
   untracked,
@@ -37,6 +38,7 @@ import {GridFilter} from '../../../models/data-grid.model';
 import {AthleteService} from '../../../services/athlete.service';
 import {EvaluationService} from '../../../services/evaluation.service';
 import {resolveArchetype} from '../../evaluations/wizard/summary/archetype-combinations';
+import {defaultSquatPullGoals} from './programme-goals.util';
 
 // Composants WebAwesome utilisés (enregistrement ciblé).
 import '@awesome.me/webawesome/dist/components/select/select.js';
@@ -73,6 +75,14 @@ interface FormatFormModel {
   startDate: string;
   snatchGoal: number | null;
   cjGoal: number | null;
+}
+
+/** Modèle des objectifs squat / tirage (préremplis depuis l'arraché et l'épaulé-jeté, modifiables). */
+interface GoalsFormModel {
+  frontSquatGoal: number | null;
+  backSquatGoal: number | null;
+  snatchPullGoal: number | null;
+  cjPullGoal: number | null;
 }
 
 /**
@@ -195,6 +205,30 @@ export class ProgrammeCreateDialogComponent {
     min(path.cjGoal, 1, {message: 'programmes.create.errors.cjGoalMin'});
   });
 
+  private readonly snatchGoalValue = computed<number | null>(() => this.formatModel().snatchGoal);
+  private readonly cjGoalValue = computed<number | null>(() => this.formatModel().cjGoal);
+
+  /**
+   * Objectifs squat / tirage : recalculés (écrasant toute saisie manuelle) quand l'arraché ou
+   * l'épaulé-jeté change, vidés si l'un des deux est vide ou invalide, modifiables par le coach.
+   * La source est composée de primitifs : semaines / fréquence / date ne déclenchent pas de recalcul.
+   */
+  protected readonly goalsModel = linkedSignal<{snatch: number | null; cj: number | null}, GoalsFormModel>({
+    source: () => ({snatch: this.snatchGoalValue(), cj: this.cjGoalValue()}),
+    computation: (src) => defaultSquatPullGoals(src.snatch, src.cj) ?? this.emptyGoals()
+  });
+
+  protected readonly goalsForm = form(this.goalsModel, (path) => {
+    required(path.frontSquatGoal, {message: 'programmes.create.errors.frontSquatGoal'});
+    min(path.frontSquatGoal, 1, {message: 'programmes.create.errors.frontSquatGoalMin'});
+    required(path.backSquatGoal, {message: 'programmes.create.errors.backSquatGoal'});
+    min(path.backSquatGoal, 1, {message: 'programmes.create.errors.backSquatGoalMin'});
+    required(path.snatchPullGoal, {message: 'programmes.create.errors.snatchPullGoal'});
+    min(path.snatchPullGoal, 1, {message: 'programmes.create.errors.snatchPullGoalMin'});
+    required(path.cjPullGoal, {message: 'programmes.create.errors.cjPullGoal'});
+    min(path.cjPullGoal, 1, {message: 'programmes.create.errors.cjPullGoalMin'});
+  });
+
   /** Date de fin calculée en lecture seule : `startDate + weeks*7 - 1 jour`. */
   protected readonly endDate = computed<string>(() => {
     const {startDate, weeks} = this.formatModel();
@@ -232,6 +266,7 @@ export class ProgrammeCreateDialogComponent {
         this.profileModel.set(this.emptyProfile());
         this.musculation.set(0);
         this.formatModel.set(this.emptyFormat());
+        this.goalsModel.set(this.emptyGoals());
         this.currentStep.set(1);
         if (isOpen) {
           const active = document.activeElement;
@@ -332,13 +367,15 @@ export class ProgrammeCreateDialogComponent {
     if (this.loadingEvaluation()) {
       return;
     }
-    if (this.profileForm().invalid() || this.formatForm().invalid()) {
+    if (this.profileForm().invalid() || this.formatForm().invalid() || this.goalsForm().invalid()) {
       this.profileForm().markAsTouched();
       this.formatForm().markAsTouched();
+      this.goalsForm().markAsTouched();
       return;
     }
     const p = this.profileModel();
     const f = this.formatModel();
+    const g = this.goalsModel();
     this.save.emit({
       athleteId: Number(p.athleteId),
       evaluationId: p.evaluationId ? Number(p.evaluationId) : null,
@@ -359,7 +396,11 @@ export class ProgrammeCreateDialogComponent {
       duration: f.duration ? Number(f.duration) : null,
       startDate: f.startDate,
       snatchGoal: Number(f.snatchGoal),
-      cjGoal: Number(f.cjGoal)
+      cjGoal: Number(f.cjGoal),
+      frontSquatGoal: Number(g.frontSquatGoal),
+      backSquatGoal: Number(g.backSquatGoal),
+      snatchPullGoal: Number(g.snatchPullGoal),
+      cjPullGoal: Number(g.cjPullGoal)
     });
   }
 
@@ -408,6 +449,10 @@ export class ProgrammeCreateDialogComponent {
 
   private emptyFormat(): FormatFormModel {
     return {weeks: '', frequency: '', duration: '', startDate: '', snatchGoal: null, cjGoal: null};
+  }
+
+  private emptyGoals(): GoalsFormModel {
+    return {frontSquatGoal: null, backSquatGoal: null, snatchPullGoal: null, cjPullGoal: null};
   }
 
   /** Parse une date ISO `yyyy-MM-dd` en Date locale (évite le décalage UTC). */

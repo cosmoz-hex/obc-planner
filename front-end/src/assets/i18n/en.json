@@ -408,7 +408,11 @@
         "endDate": "End date",
         "duration": "Session duration (min)",
         "snatchGoal": "Snatch goal",
-        "cjGoal": "Clean & Jerk goal"
+        "cjGoal": "Clean & Jerk goal",
+        "frontSquatGoal": "Front Squat",
+        "backSquatGoal": "Back Squat",
+        "snatchPullGoal": "Snatch Pull",
+        "cjPullGoal": "Clean Pull"
       },
       "steps": {
         "profile": "Profile",
@@ -435,7 +439,15 @@
         "snatchGoal": "Snatch goal is required.",
         "snatchGoalMin": "Snatch goal must be strictly positive.",
         "cjGoal": "Clean & Jerk goal is required.",
-        "cjGoalMin": "Clean & Jerk goal must be strictly positive."
+        "cjGoalMin": "Clean & Jerk goal must be strictly positive.",
+        "frontSquatGoal": "Front squat is required.",
+        "frontSquatGoalMin": "Front squat must be strictly positive.",
+        "backSquatGoal": "Back squat is required.",
+        "backSquatGoalMin": "Back squat must be strictly positive.",
+        "snatchPullGoal": "Snatch pull is required.",
+        "snatchPullGoalMin": "Snatch pull must be strictly positive.",
+        "cjPullGoal": "Clean pull is required.",
+        "cjPullGoalMin": "Clean pull must be strictly positive."
       }
     },
     "detail": {

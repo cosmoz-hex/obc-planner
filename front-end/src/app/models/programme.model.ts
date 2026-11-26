@@ -82,6 +82,10 @@ export interface ProgrammeDetail {
   readonly endDate: string;
   readonly snatchGoal: number;
   readonly cjGoal: number;
+  readonly frontSquatGoal: number;
+  readonly backSquatGoal: number;
+  readonly snatchPullGoal: number;
+  readonly cjPullGoal: number;
   readonly programmeWeeks: ProgrammeWeek[];
 }
 
@@ -113,6 +117,10 @@ export interface ProgrammeCreateRequest {
   startDate: string;
   snatchGoal: number;
   cjGoal: number;
+  frontSquatGoal: number;
+  backSquatGoal: number;
+  snatchPullGoal: number;
+  cjPullGoal: number;
 }
 
 /** Série éditée d'un exercice d'une cellule (CellSeriesRequest). */

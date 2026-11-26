@@ -23,6 +23,10 @@ public record ProgrammeDetailResponse(
         LocalDate endDate,
         Integer snatchGoal,
         Integer cjGoal,
+        Integer frontSquatGoal,
+        Integer backSquatGoal,
+        Integer snatchPullGoal,
+        Integer cjPullGoal,
         List<ProgrammeWeekResponse> programmeWeeks
 ) {
 }

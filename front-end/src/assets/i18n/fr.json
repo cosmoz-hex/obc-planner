@@ -408,7 +408,11 @@
         "endDate": "Date de fin",
         "duration": "Durée d'une séance (min)",
         "snatchGoal": "Objectif Arraché",
-        "cjGoal": "Objectif Épaulé-Jeté"
+        "cjGoal": "Objectif Épaulé-Jeté",
+        "frontSquatGoal": "Squat Clavicule",
+        "backSquatGoal": "Squat Nuque",
+        "snatchPullGoal": "Tirage Arraché",
+        "cjPullGoal": "Tirage Épaulé"
       },
       "steps": {
         "profile": "Profil",
@@ -435,7 +439,15 @@
         "snatchGoal": "L'objectif Arraché est obligatoire.",
         "snatchGoalMin": "L'objectif Arraché doit être strictement positif.",
         "cjGoal": "L'objectif Épaulé-Jeté est obligatoire.",
-        "cjGoalMin": "L'objectif Épaulé-Jeté doit être strictement positif."
+        "cjGoalMin": "L'objectif Épaulé-Jeté doit être strictement positif.",
+        "frontSquatGoal": "Le squat clavicule est obligatoire.",
+        "frontSquatGoalMin": "Le squat clavicule doit être strictement positif.",
+        "backSquatGoal": "Le squat nuque est obligatoire.",
+        "backSquatGoalMin": "Le squat nuque doit être strictement positif.",
+        "snatchPullGoal": "Le tirage arraché est obligatoire.",
+        "snatchPullGoalMin": "Le tirage arraché doit être strictement positif.",
+        "cjPullGoal": "Le tirage épaulé est obligatoire.",
+        "cjPullGoalMin": "Le tirage épaulé doit être strictement positif."
       }
     },
     "detail": {

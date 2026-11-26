@@ -24,11 +24,14 @@ import java.util.*;
  *
  * <p>Suit l'algorithme séquencé du design : timeline → base_percent → cibles
  * finales → mapping des objectifs → file de musculation → semaines (résolution
- * des cases par type d'exercice). Les cibles finales sont conservées <b>non
- * arrondies</b> (calcul en une seule passe, RG10) : l'objectif de semaine stocké
- * dans {@code programme_weeks} en est un <b>round unique</b>, et la base des
- * charges d'un set en est la valeur <b>non arrondie</b> (le {@code base_percent}
- * y est déjà intégré). Aucun arrondi intermédiaire sur la cible finale.</p>
+ * des cases par type d'exercice).</p>
+ *
+ * <p>Les 6 cibles finales (SN, CJ, FS, BS, SP, CP) sont des entiers saisis
+ * à la création (ou relus depuis {@code programmes}) et utilisés tels quels.
+ * L'objectif de semaine stocké dans {@code programme_weeks} vaut
+ * {@code cible × base_percent / 100} avec un <b>arrondi unique</b>. La base des
+ * charges d'un set est cette même valeur <b>non arrondie</b> (le
+ * {@code base_percent} y est déjà intégré).</p>
  *
  * <p>Performance : la trame {@code ref_plannings} est chargée une fois, et les
  * exercices de référence sont mis en cache local ({@code Map}) pour éviter le
@@ -76,9 +79,8 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         // --- ÉTAPE 2 : base_percent par semaine (RG2) ---
         int[] basePercent = computeBasePercents(weeks);
 
-        // --- ÉTAPE 3 : cibles finales par mouvement (RG3), non arrondies ---
-        Map<RefReference, Double> finalGoals =
-                chargeCalculator.finalGoals(request.snatchGoal(), request.cjGoal());
+        // --- ÉTAPE 3 : cibles finales par mouvement (RG3), entières (saisies ou relues) ---
+        Map<RefReference, Double> finalGoals = finalGoalsOf(request);
 
         // --- ÉTAPE 4 : mapping des objectifs depuis l'évaluation (RG5) ---
         RefGoal goalSN = techniqueGoal(eval.getSnatch());
@@ -456,7 +458,8 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
      *
      * <ul>
      *   <li>CL et JK nuls → {@code null} (aucun label).</li>
-     *   <li>reps égales (cas nominal) → {@code "reps (1 + 1)"}.</li>
+     *   <li>reps égales (cas nominal) → {@code "n (1 + 1) ou (n + n)"} (n séries de
+     *       « 1 épaulé + 1 jeté », ou n épaulés puis n jetés, même volume).</li>
      *   <li>sinon → {@code "(repsCL + repsJK)"}, chaque reps absent remplacé par
      *       une chaîne vide.</li>
      * </ul>
@@ -466,7 +469,7 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
             return null;
         }
         if (repsCL != null && repsCL.equals(repsJK)) {
-            return repsCL + " (1 + 1)";
+            return repsCL + " (1 + 1) ou (" + repsCL + " + " + repsCL + ")";
         }
         return "(" + nullToEmpty(repsCL) + " + " + nullToEmpty(repsJK) + ")";
     }
@@ -552,6 +555,22 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         return series;
     }
 
+    /**
+     * Cibles finales (kg) des 6 mouvements de référence, lues telles quelles dans la requête.
+     * Aucun calcul ni valeur de repli : les valeurs sont validées en amont (création) ou
+     * relues de {@code programmes} (actualisation).
+     */
+    private Map<RefReference, Double> finalGoalsOf(ProgrammeGenerationRequest request) {
+        Map<RefReference, Double> goals = new EnumMap<>(RefReference.class);
+        goals.put(RefReference.SN, request.snatchGoal().doubleValue());
+        goals.put(RefReference.CJ, request.cjGoal().doubleValue());
+        goals.put(RefReference.BS, request.backSquatGoal().doubleValue());
+        goals.put(RefReference.FS, request.frontSquatGoal().doubleValue());
+        goals.put(RefReference.SP, request.snatchPullGoal().doubleValue());
+        goals.put(RefReference.CP, request.cjPullGoal().doubleValue());
+        return goals;
+    }
+
     private Programme buildProgramme(ProgrammeGenerationRequest request, int weeks) {
         Programme programme = new Programme();
         programme.setEvaluationId(request.evaluationId());
@@ -562,6 +581,10 @@ public class ProgrammeGenerationServiceImpl implements ProgrammeGenerationServic
         programme.setEndDate(request.startDate().plusWeeks(weeks).minusDays(1));
         programme.setSnatchGoal(request.snatchGoal());
         programme.setCjGoal(request.cjGoal());
+        programme.setFrontSquatGoal(request.frontSquatGoal());
+        programme.setBackSquatGoal(request.backSquatGoal());
+        programme.setSnatchPullGoal(request.snatchPullGoal());
+        programme.setCjPullGoal(request.cjPullGoal());
         return programme;
     }
 

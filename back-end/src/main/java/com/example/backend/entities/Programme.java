@@ -68,6 +68,22 @@ public class Programme {
     @Column(name = "cj_goal")
     private Integer cjGoal;
 
+    @NotNull
+    @Column(name = "front_squat_goal", nullable = false)
+    private Integer frontSquatGoal;
+
+    @NotNull
+    @Column(name = "back_squat_goal", nullable = false)
+    private Integer backSquatGoal;
+
+    @NotNull
+    @Column(name = "snatch_pull_goal", nullable = false)
+    private Integer snatchPullGoal;
+
+    @NotNull
+    @Column(name = "cj_pull_goal", nullable = false)
+    private Integer cjPullGoal;
+
     // Exclu de equals/hashCode/toString : relation lazy, éviter chargement et récursion.
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

@@ -15,6 +15,10 @@ public record ProgrammeGenerationRequest(
         Integer duration,
         LocalDate startDate,
         Integer snatchGoal,
-        Integer cjGoal
+        Integer cjGoal,
+        Integer frontSquatGoal,
+        Integer backSquatGoal,
+        Integer snatchPullGoal,
+        Integer cjPullGoal
 ) {
 }

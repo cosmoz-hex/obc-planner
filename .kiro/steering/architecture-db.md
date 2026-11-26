@@ -95,6 +95,12 @@ Programme d'entraînement généré pour un athlète.
 | `end_date` | `DATE` | NOT NULL | Date de fin du programme |
 | `snatch_goal` | `INTEGER` | — | Objectif arraché en kg |
 | `cj_goal` | `INTEGER` | — | Objectif épaulé-jeté en kg |
+| `front_squat_goal` | `INTEGER` | NOT NULL | Objectif final de Flexion Avant (squat clavicule) en kg, saisi à la création |
+| `back_squat_goal` | `INTEGER` | NOT NULL | Objectif final de Flexion Nuque (squat nuque) en kg, saisi à la création |
+| `snatch_pull_goal` | `INTEGER` | NOT NULL | Objectif final de Tirage Arraché en kg, saisi à la création |
+| `cj_pull_goal` | `INTEGER` | NOT NULL | Objectif final de Tirage Épaulé en kg, saisi à la création |
+
+Les 4 objectifs squat/tirage sont fournis par la requête de création (valeurs par défaut calculées côté front, voir `architecture.md`) et relus tels quels par l'actualisation. Migration `V20261126_220533__programmes_squat_pull_goals.sql` (+ rollback de même nom dans `db/rollback/`, qui supprime les 4 colonnes et leurs valeurs) : `ADD COLUMN IF NOT EXISTS`, backfill des programmes existants limité aux lignes `NULL` depuis `snatch_goal` / `cj_goal` avec les anciens coefficients du moteur (`ROUND` sur `numeric` : BS ×1,35, FS ×1,14, SP ×1,20, CP ×1,30), puis `SET NOT NULL` (échoue explicitement si un programme n'a pas `snatch_goal` / `cj_goal`) et `COMMENT ON COLUMN`. Aucune modification de `programme_weeks`.
 
 ---
 

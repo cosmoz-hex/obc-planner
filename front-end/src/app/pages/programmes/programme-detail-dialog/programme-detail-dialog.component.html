@@ -87,7 +87,7 @@
 				@if (exercice.series.length > 0) {
 				<ul class="list-none">
 					@for (serie of exercice.series; track serie.programmeSeriesId) {
-					<li class="m-0 p-0 whitespace-nowrap">
+					<li class="m-0 p-0 break-words">
 						@if (serie.repNumber) {
 						@if (serie.minWeight != null && serie.maxWeight != null) {
 						{{ 'programmes.detail.cell.setsWithWeight' | translate: {sets: serie.setNumber, reps: serie.repNumber, min:

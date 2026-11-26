@@ -125,7 +125,7 @@
 		</app-wizard-step>
 
 		<!-- Étape 2 : Format + objectifs -->
-		<app-wizard-step [step]="2" [valid]="!formatForm().invalid() && !loadingEvaluation()" label="programmes.create.steps.format">
+		<app-wizard-step [step]="2" [valid]="!formatForm().invalid() && !goalsForm().invalid() && !loadingEvaluation()" label="programmes.create.steps.format">
 			<section class="grid grid-cols-4 items-start gap-1 py-1">
 				<h3 class="col-span-4 font-medium mb-0">{{ 'programmes.create.blocks.format' | translate }}</h3>
 
@@ -171,8 +171,33 @@
 				</wa-input>
 
 				<wa-input type="number"
+									[formField]="goalsForm.snatchPullGoal"
+									[attr.label]="'programmes.create.fields.snatchPullGoal' | translate">
+					<span slot="end">kg</span>
+				</wa-input>
+
+				<wa-input type="number"
 				          [formField]="formatForm.cjGoal"
 				          [attr.label]="'programmes.create.fields.cjGoal' | translate">
+					<span slot="end">kg</span>
+				</wa-input>
+
+				<wa-input type="number"
+									[formField]="goalsForm.cjPullGoal"
+									[attr.label]="'programmes.create.fields.cjPullGoal' | translate">
+					<span slot="end">kg</span>
+				</wa-input>
+
+				<wa-input type="number"
+				          class="col-start-1"
+				          [formField]="goalsForm.frontSquatGoal"
+				          [attr.label]="'programmes.create.fields.frontSquatGoal' | translate">
+					<span slot="end">kg</span>
+				</wa-input>
+
+				<wa-input type="number"
+				          [formField]="goalsForm.backSquatGoal"
+				          [attr.label]="'programmes.create.fields.backSquatGoal' | translate">
 					<span slot="end">kg</span>
 				</wa-input>
 			</section>
